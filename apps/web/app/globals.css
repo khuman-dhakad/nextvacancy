@@ -1,26 +1,145 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ==========================================================================
+     NEXTVACANCY Design Tokens — Semantic Color System
+     ========================================================================== */
+
+  /* Primary: Deep Navy (#0F2744) - Authority, Trust, Recruitment */
+  --primary: #0F2744;
+  --primary-hover: #183B66;
+  --primary-foreground: #FFFFFF;
+  --primary-subtle: #E7EEF6;
+
+  /* Secondary: Blue (#1D4ED8) - Interactive, Links, Actions */
+  --secondary: #1D4ED8;
+  --secondary-hover: #1E40AF;
+  --secondary-foreground: #FFFFFF;
+  --secondary-subtle: #DBEAFE;
+
+  /* Accent: Saffron / Gold (#D97706) - Highlighting, Urgent Updates */
+  --accent: #D97706;
+  --accent-hover: #B45309;
+  --accent-foreground: #FFFFFF;
+  --accent-subtle: #FEF3C7;
+
+  /* Semantic Feedback Tokens */
+  --success: #059669;
+  --success-foreground: #FFFFFF;
+  --success-subtle: #D1FAE5;
+
+  --warning: #D97706;
+  --warning-foreground: #FFFFFF;
+  --warning-subtle: #FEF3C7;
+
+  --danger: #DC2626;
+  --danger-foreground: #FFFFFF;
+  --danger-subtle: #FEE2E2;
+
+  --info: #0284C7;
+  --info-foreground: #FFFFFF;
+  --info-subtle: #E0F2FE;
+
+  /* Neutral Surface & Layout Tokens (Light Mode First) */
+  --background: #FFFFFF;
+  --foreground: #0F172A;
+
+  --surface: #F8FAFC;
+  --surface-raised: #FFFFFF;
+  --surface-subtle: #F1F5F9;
+
+  --border: #E2E8F0;
+  --border-strong: #CBD5E1;
+
+  --muted: #64748B;
+  --muted-foreground: #475569;
+
+  --ring: #0F2744;
+  --radius: 0.5rem;
 }
 
 @theme inline {
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-subtle: var(--primary-subtle);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-subtle: var(--secondary-subtle);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-subtle: var(--accent-subtle);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+
+  --color-danger: var(--danger);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-subtle: var(--danger-subtle);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   Base Styles & Reset
+   ========================================================================== */
+
+* {
+  border-color: var(--border);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
+   Accessibility & Reduced Motion
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
