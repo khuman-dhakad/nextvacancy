@@ -1,95 +1,123 @@
-import Link from "next/link";
-import { Container, Card, CardContent, Button, Badge } from "@/components/ui";
-import { ArrowRight, Building2, Briefcase, FileCheck, Award } from "lucide-react";
+import type { Metadata } from "next";
+import {
+  getLatestJobs,
+  getEndingSoonJobs,
+  getJobsByCategory,
+} from "@/services";
+import { ContentWithSidebar } from "@/components/layout";
+import {
+  HeroSearch,
+  CategoryGrid,
+  LatestJobsSection,
+  EndingSoonSection,
+  GovtAndPrivateSplitSection,
+  ExamCornerSection,
+  ScholarshipSection,
+  CommunitySidebarCard,
+  SidebarImportantLinks,
+  TrustSection,
+  SeoContentSection,
+} from "@/components/homepage";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "NEXTVACANCY — Latest Government Jobs, Private Jobs, Results & Admit Cards",
+  description:
+    "Fast, reliable, and verified recruitment alerts, government jobs (Sarkari Naukri), private vacancies, admit cards, exam dates, answer keys, and results across India.",
+  keywords: [
+    "Government Jobs",
+    "Sarkari Naukri",
+    "SSC CGL 2026",
+    "UPSC Civil Services",
+    "Railway RRB NTPC",
+    "Admit Cards",
+    "Exam Results",
+    "Scholarships in India",
+    "PM Internship Scheme",
+  ],
+  openGraph: {
+    title: "NEXTVACANCY — Latest Government Jobs, Private Jobs, Results & Admit Cards",
+    description:
+      "Authentic recruitment notifications, sarkari naukri alerts, private vacancies, admit cards, answer keys, exam dates, and results across India.",
+    siteName: "NEXTVACANCY",
+    locale: "en_IN",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NEXTVACANCY — Latest Government & Private Jobs Portal",
+    description:
+      "Direct official links to apply for latest government jobs, admit cards, and exam results in India.",
+  },
+};
+
+export default async function Home() {
+  // Fetch real-time / mock recruitment records via clean service boundary
+  const [
+    latestJobs,
+    endingSoonJobs,
+    govtJobs,
+    privateJobs,
+    admitCards,
+    results,
+    scholarships,
+    internships,
+  ] = await Promise.all([
+    getLatestJobs(6),
+    getEndingSoonJobs(4),
+    getJobsByCategory("government", 4),
+    getJobsByCategory("private", 4),
+    getJobsByCategory("admit-card", 4),
+    getJobsByCategory("result", 4),
+    getJobsByCategory("scholarship", 2),
+    getJobsByCategory("internship", 2),
+  ]);
+
+  const scholarshipAndInternships = [...scholarships, ...internships];
+
   return (
-    <div className="py-8 sm:py-12 space-y-8 bg-slate-50/50">
-      {/* Welcome Hero / Portal Intro */}
-      <section aria-labelledby="portal-heading">
-        <Container size="lg">
-          <div className="rounded-2xl bg-[var(--primary)] text-white p-6 sm:p-10 shadow-sm relative overflow-hidden">
-            <div className="max-w-2xl space-y-4 relative z-10">
-              <Badge variant="accent" size="md">
-                ⚡ Real-Time Recruitment Portal
-              </Badge>
-              <h1 id="portal-heading" className="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-                Find Latest Government Jobs, Admit Cards & Results
-              </h1>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-                Stay updated with genuine vacancy notifications, eligibility criteria, exam schedules, and direct official application links across India.
-              </p>
-              <div className="pt-2 flex flex-wrap gap-3">
-                <Link href="/category/government">
-                  <Button variant="accent" size="md" rightIcon={<ArrowRight className="h-4 w-4" />}>
-                    Explore Govt Jobs
-                  </Button>
-                </Link>
-                <Link href="/search">
-                  <Button variant="outline" size="md" className="bg-transparent text-white border-slate-600 hover:bg-slate-800">
-                    Search All Vacancies
-                  </Button>
-                </Link>
-              </div>
-            </div>
+    <div className="bg-slate-50/50">
+      {/* 1. Hero & Primary Search */}
+      <HeroSearch />
+
+      {/* 2. Quick Category Grid */}
+      <CategoryGrid />
+
+      {/* 3. Main 2-Column Content Shell */}
+      <ContentWithSidebar
+        sidebar={
+          <div className="space-y-6">
+            <CommunitySidebarCard />
+            <SidebarImportantLinks />
           </div>
-        </Container>
-      </section>
+        }
+      >
+        {/* Main Content Column */}
+        <div className="space-y-8">
+          {/* Latest Notifications Section */}
+          <LatestJobsSection jobs={latestJobs} />
 
-      {/* Quick Access Highlights */}
-      <section aria-label="Quick Highlights">
-        <Container size="lg">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card hoverable className="bg-white">
-              <CardContent className="p-5 flex items-start gap-3.5">
-                <div className="p-2.5 rounded-xl bg-amber-50 text-[#D97706] shrink-0">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <h2 className="text-sm font-bold text-slate-900">Government Jobs</h2>
-                  <p className="text-xs text-slate-500">UPSC, SSC, Railway, State PSC notifications</p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Ending Soon Urgent Section */}
+          <EndingSoonSection jobs={endingSoonJobs} />
 
-            <Card hoverable className="bg-white">
-              <CardContent className="p-5 flex items-start gap-3.5">
-                <div className="p-2.5 rounded-xl bg-blue-50 text-[#1D4ED8] shrink-0">
-                  <Briefcase className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <h2 className="text-sm font-bold text-slate-900">Private Careers</h2>
-                  <p className="text-xs text-slate-500">IT, Banking, Engineering & MNC vacancies</p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Govt & Private Comparative Split */}
+          <GovtAndPrivateSplitSection
+            govtJobs={govtJobs}
+            privateJobs={privateJobs}
+          />
 
-            <Card hoverable className="bg-white">
-              <CardContent className="p-5 flex items-start gap-3.5">
-                <div className="p-2.5 rounded-xl bg-emerald-50 text-[#059669] shrink-0">
-                  <FileCheck className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <h2 className="text-sm font-bold text-slate-900">Admit Cards</h2>
-                  <p className="text-xs text-slate-500">Direct hall ticket download links & dates</p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Exam Corner (Admit Cards & Results) */}
+          <ExamCornerSection admitCards={admitCards} results={results} />
 
-            <Card hoverable className="bg-white">
-              <CardContent className="p-5 flex items-start gap-3.5">
-                <div className="p-2.5 rounded-xl bg-red-50 text-[#DC2626] shrink-0">
-                  <Award className="h-5 w-5" />
-                </div>
-                <div className="space-y-1">
-                  <h2 className="text-sm font-bold text-slate-900">Exam Results</h2>
-                  <p className="text-xs text-slate-500">Merit lists, cut-off marks & scorecards</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </Container>
-      </section>
+          {/* Scholarships & Internships */}
+          <ScholarshipSection opportunities={scholarshipAndInternships} />
+        </div>
+      </ContentWithSidebar>
+
+      {/* 4. Trust & Official Source Verification Section */}
+      <TrustSection />
+
+      {/* 5. Semantic SEO Content Overview */}
+      <SeoContentSection />
     </div>
   );
 }
