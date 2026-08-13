@@ -1,23 +1,29 @@
 import React from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getJobBySlug, getLatestJobs } from "@/services";
-import { Container, Breadcrumb, Button, Badge, Card, CardHeader, CardTitle, CardContent } from "@/components/ui";
+import { getJobBySlug, getRelatedJobs } from "@/services";
+import { Container, Breadcrumb } from "@/components/ui";
 import { ContentWithSidebar } from "@/components/layout";
-import { CommunitySidebarCard, SidebarImportantLinks, TrustSection, JobCard } from "@/components/homepage";
 import {
-  Building2,
-  Calendar,
-  MapPin,
-  GraduationCap,
-  IndianRupee,
-  ExternalLink,
-  Clock,
-  ShieldCheck,
-  UserCheck,
-  ArrowLeft,
-} from "lucide-react";
+  CommunitySidebarCard,
+  SidebarImportantLinks,
+  TrustSection,
+} from "@/components/homepage";
+import {
+  JobHero,
+  OverviewCards,
+  DatesTable,
+  FeeTable,
+  AgeLimitCard,
+  VacancyTable,
+  QualificationSection,
+  SelectionTimeline,
+  HowToApply,
+  ImportantLinks,
+  FAQAccordion,
+  RelatedJobs,
+  StickyMobileApplyBar,
+} from "@/components/jobs";
 
 interface JobDetailPageProps {
   params: Promise<{
@@ -33,14 +39,46 @@ export async function generateMetadata({
 
   if (!job) {
     return {
-      title: "Job Details | NEXTVACANCY",
+      title: "Recruitment Notification | NEXTVACANCY",
+      description: "Recruitment notification and exam details on NEXTVACANCY.",
     };
   }
 
+  const categoryLabel =
+    job.category === "government"
+      ? "Sarkari Naukri"
+      : job.category === "private"
+      ? "Private Job"
+      : job.category === "admit-card"
+      ? "Admit Card"
+      : job.category === "result"
+      ? "Exam Result"
+      : "Recruitment";
+
   return {
-    title: `${job.title} — Notification, Eligibility & Apply Online | NEXTVACANCY`,
-    description: job.shortSummary,
+    title: `${job.title} — Notification, Eligibility, Fees & Apply Online | NEXTVACANCY`,
+    description: `${job.shortSummary} Check eligibility criteria, total vacancies, age limit, application fee structure, and direct official application portal links.`,
+    keywords: [
+      job.organization,
+      job.title,
+      categoryLabel,
+      "Recruitment 2026",
+      "Apply Online",
+      "Eligibility Criteria",
+      "Notification PDF",
+    ],
+    alternates: {
+      canonical: `/jobs/${job.slug}`,
+    },
     openGraph: {
+      title: `${job.title} | NEXTVACANCY`,
+      description: job.shortSummary,
+      url: `/jobs/${job.slug}`,
+      type: "article",
+      siteName: "NEXTVACANCY",
+    },
+    twitter: {
+      card: "summary_large_image",
       title: `${job.title} | NEXTVACANCY`,
       description: job.shortSummary,
     },
@@ -55,9 +93,9 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     notFound();
   }
 
-  const relatedJobs = (await getLatestJobs(4)).filter((j) => j.id !== job.id).slice(0, 3);
+  const relatedJobs = await getRelatedJobs(job.category, job.slug, 4);
 
-  const categoryLabel =
+  const categoryName =
     job.category === "government"
       ? "Government Jobs"
       : job.category === "private"
@@ -72,7 +110,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       ? "Internships"
       : "Recruitment";
 
-  const categoryHref =
+  const categoryPath =
     job.category === "government"
       ? "/government-jobs"
       : job.category === "private"
@@ -83,269 +121,194 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       ? "/results"
       : `/category/${job.category}`;
 
-  return (
-    <div className="bg-slate-50/50 min-h-screen">
-      {/* Breadcrumb Strip */}
-      <div className="bg-white border-b border-[var(--border)] py-3">
-        <Container size="lg">
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/" },
-              { label: categoryLabel, href: categoryHref },
-              { label: job.organization, active: true },
-            ]}
-          />
-        </Container>
-      </div>
+  const primaryApplyLink = job.importantLinks.find((l) => l.linkType === "apply_online")?.url;
 
-      {/* Main Content with Sidebar */}
-      <ContentWithSidebar
-        sidebar={
-          <div className="space-y-6">
-            {/* Direct Official Apply Card */}
-            {job.importantLinks.length > 0 && (
-              <Card className="bg-[var(--primary)] text-white border-none shadow-md">
-                <CardContent className="p-5 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                    <h3 className="text-sm font-bold">Official Application Links</h3>
-                  </div>
-                  <p className="text-xs text-slate-300">
-                    Apply directly on the official commission portal without intermediaries.
-                  </p>
-                  <div className="space-y-2">
-                    {job.importantLinks.map((link) => (
-                      <a
-                        key={link.url}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full"
-                      >
-                        <Button
-                          variant="accent"
-                          size="md"
-                          fullWidth
-                          className="font-bold shadow-xs text-xs"
-                          rightIcon={<ExternalLink className="h-3.5 w-3.5" />}
-                        >
-                          {link.label}
-                        </Button>
-                      </a>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+  // Structured JSON-LD Schemas
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://nextvacancy.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: categoryName,
+        item: `https://nextvacancy.com${categoryPath}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: job.title,
+        item: `https://nextvacancy.com/jobs/${job.slug}`,
+      },
+    ],
+  };
 
-            <CommunitySidebarCard />
-            <SidebarImportantLinks />
-          </div>
+  const jobPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    title: job.title,
+    description: job.shortSummary,
+    datePosted: job.createdAt,
+    validThrough: job.importantDates.applicationEndDate
+      ? `${job.importantDates.applicationEndDate}T23:59:59Z`
+      : undefined,
+    employmentType: job.jobType === "Contractual" ? "CONTRACTOR" : "FULL_TIME",
+    hiringOrganization: {
+      "@type": "Organization",
+      name: job.organization,
+      sameAs: job.importantLinks.find((l) => l.linkType === "official_website")?.url,
+    },
+    jobLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: job.location,
+        addressCountry: "IN",
+      },
+    },
+    baseSalary: {
+      "@type": "MonetaryAmount",
+      currency: "INR",
+      value: {
+        "@type": "QuantitativeValue",
+        value: job.salaryOrStipend,
+        unitText: "MONTH",
+      },
+    },
+  };
+
+  const faqSchema =
+    job.faqs && job.faqs.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: job.faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: faq.answer,
+            },
+          })),
         }
+      : null;
+
+  return (
+    <>
+      {/* Structured Data Scripts (SEO) */}
+      <script
+        type="application/ld+json"
+        id="breadcrumb-jsonld"
       >
-        <div className="space-y-6">
-          {/* Back Navigation */}
-          <Link
-            href={categoryHref}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-[var(--primary)] transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to {categoryLabel}</span>
-          </Link>
+        {JSON.stringify(breadcrumbSchema)}
+      </script>
+      <script
+        type="application/ld+json"
+        id="jobposting-jsonld"
+      >
+        {JSON.stringify(jobPostingSchema)}
+      </script>
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          id="faq-jsonld"
+        >
+          {JSON.stringify(faqSchema)}
+        </script>
+      )}
 
-          {/* Job Overview Card */}
-          <Card className="bg-white border-[var(--border)]">
-            <CardContent className="p-5 sm:p-7 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                  <Building2 className="h-4 w-4 text-[var(--primary)]" />
-                  <span>{job.organization}</span>
-                  {job.department && <span>• {job.department}</span>}
-                </div>
-
-                <Badge variant={job.status === "ENDING_SOON" ? "warning" : "success"} size="sm">
-                  {job.status === "ENDING_SOON" ? "Closing Soon" : "Active Notification"}
-                </Badge>
-              </div>
-
-              <h1 className="text-lg sm:text-2xl font-black text-slate-900 leading-snug">
-                {job.title}
-              </h1>
-
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                {job.shortSummary}
-              </p>
-
-              {/* Key Quick Facts Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-[var(--border)] text-xs">
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <UserCheck className="h-3.5 w-3.5" /> Total Vacancies
-                  </span>
-                  <p className="font-bold text-slate-900 text-sm">
-                    {typeof job.totalVacancies === "number"
-                      ? job.totalVacancies.toLocaleString("en-IN")
-                      : job.totalVacancies}
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <IndianRupee className="h-3.5 w-3.5" /> Pay Scale / Salary
-                  </span>
-                  <p className="font-bold text-slate-900 text-xs truncate" title={job.salaryOrStipend}>
-                    {job.salaryOrStipend}
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5" /> Location
-                  </span>
-                  <p className="font-bold text-slate-900 text-xs truncate">
-                    {job.location}
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                  <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <Clock className="h-3.5 w-3.5" /> Last Date
-                  </span>
-                  <p className="font-bold text-[#DC2626] text-xs">
-                    {job.importantDates.applicationEndDate || "Check Notice"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Important Dates & Application Fee Table */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Dates Card */}
-            <Card className="bg-white">
-              <CardHeader className="p-4 border-b border-[var(--border)] bg-slate-50/50">
-                <CardTitle as="h2" className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-[var(--primary)]" />
-                  <span>Important Dates</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 text-xs space-y-2.5">
-                {job.importantDates.notificationDate && (
-                  <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                    <span className="text-slate-500">Notification Released:</span>
-                    <strong className="text-slate-800">{job.importantDates.notificationDate}</strong>
-                  </div>
-                )}
-                {job.importantDates.applicationStartDate && (
-                  <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                    <span className="text-slate-500">Application Start:</span>
-                    <strong className="text-slate-800">{job.importantDates.applicationStartDate}</strong>
-                  </div>
-                )}
-                {job.importantDates.applicationEndDate && (
-                  <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                    <span className="text-slate-500">Application Deadline:</span>
-                    <strong className="text-red-600 font-bold">{job.importantDates.applicationEndDate}</strong>
-                  </div>
-                )}
-                {job.importantDates.examDate && (
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Exam Date:</span>
-                    <strong className="text-slate-800">{job.importantDates.examDate}</strong>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Fee Structure Card */}
-            {job.feeStructure && (
-              <Card className="bg-white">
-                <CardHeader className="p-4 border-b border-[var(--border)] bg-slate-50/50">
-                  <CardTitle as="h2" className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                    <IndianRupee className="h-4 w-4 text-[#059669]" />
-                    <span>Application Fee Structure</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 text-xs space-y-2.5">
-                  {job.feeStructure.general && (
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">General / OBC / EWS:</span>
-                      <strong className="text-slate-800">{job.feeStructure.general}</strong>
-                    </div>
-                  )}
-                  {job.feeStructure.scStPwd && (
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">SC / ST / PwD:</span>
-                      <strong className="text-emerald-700">{job.feeStructure.scStPwd}</strong>
-                    </div>
-                  )}
-                  {job.feeStructure.female && (
-                    <div className="flex justify-between border-b border-slate-100 pb-1.5">
-                      <span className="text-slate-500">Female Candidates:</span>
-                      <strong className="text-emerald-700">{job.feeStructure.female}</strong>
-                    </div>
-                  )}
-                  {job.feeStructure.paymentMode && (
-                    <div className="text-[11px] text-slate-400 pt-1">
-                      Payment Mode: {job.feeStructure.paymentMode}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Educational Qualification & Age Limit */}
-          <Card className="bg-white">
-            <CardHeader className="p-4 border-b border-[var(--border)] bg-slate-50/50">
-              <CardTitle as="h2" className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <GraduationCap className="h-4 w-4 text-[#D97706]" />
-                <span>Eligibility Criteria & Age Limit</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-5 space-y-4 text-xs">
-              <div className="space-y-1">
-                <h3 className="font-bold text-slate-800 text-xs">Educational Qualification:</h3>
-                <p className="text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200/80 leading-relaxed">
-                  {job.qualificationSummary}
-                </p>
-              </div>
-
-              {job.ageLimit && (
-                <div className="space-y-1">
-                  <h3 className="font-bold text-slate-800 text-xs">Age Limit Criteria:</h3>
-                  <div className="flex flex-wrap gap-4 text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-200/80">
-                    {job.ageLimit.minAge && <div>Minimum Age: <strong>{job.ageLimit.minAge} Years</strong></div>}
-                    {job.ageLimit.maxAge && <div>Maximum Age: <strong>{job.ageLimit.maxAge} Years</strong></div>}
-                    {job.ageLimit.asOnDate && <div>Calculated As On: <strong>{job.ageLimit.asOnDate}</strong></div>}
-                  </div>
-                  {job.ageLimit.relaxationNotes && (
-                    <p className="text-[11px] text-slate-500 pt-1">
-                      * {job.ageLimit.relaxationNotes}
-                    </p>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Related Opportunities */}
-          {relatedJobs.length > 0 && (
-            <div className="space-y-3 pt-4 border-t border-[var(--border)]">
-              <h2 className="text-sm font-bold text-slate-900">
-                Other Popular Opportunities
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {relatedJobs.map((item) => (
-                  <JobCard key={item.id} job={item} compact />
-                ))}
-              </div>
-            </div>
-          )}
+      <div className="bg-slate-50/50 min-h-screen pb-16 lg:pb-8">
+        {/* 1. Breadcrumbs */}
+        <div className="bg-white border-b border-[var(--border)] py-3">
+          <Container size="lg">
+            <Breadcrumb
+              items={[
+                { label: "Home", href: "/" },
+                { label: categoryName, href: categoryPath },
+                { label: job.organization, active: true },
+              ]}
+            />
+          </Container>
         </div>
-      </ContentWithSidebar>
 
-      <TrustSection />
-    </div>
+        {/* Main Content Area */}
+        <ContentWithSidebar
+          sidebar={
+            <div className="space-y-6">
+              {/* Quick Links in Sidebar */}
+              <ImportantLinks links={job.importantLinks} />
+              <CommunitySidebarCard />
+              <SidebarImportantLinks />
+            </div>
+          }
+        >
+          <div className="space-y-6">
+            {/* 2. Job Hero */}
+            <JobHero job={job} />
+
+            {/* 3. Quick Overview Cards */}
+            <OverviewCards job={job} />
+
+            {/* 4. Important Dates */}
+            <DatesTable dates={job.importantDates} />
+
+            {/* 5. Application Fee */}
+            <FeeTable fee={job.feeStructure} />
+
+            {/* 6. Age Limit */}
+            <AgeLimitCard ageLimit={job.ageLimit} />
+
+            {/* 7. Vacancy Details */}
+            <VacancyTable
+              vacancies={job.vacancyBreakdown}
+              totalVacancies={job.totalVacancies}
+            />
+
+            {/* 8. Educational Qualification */}
+            <QualificationSection
+              summary={job.qualificationSummary}
+              qualificationsList={job.qualificationsList}
+            />
+
+            {/* 9. Selection Process Timeline */}
+            <SelectionTimeline steps={job.selectionProcess} />
+
+            {/* 10. How To Apply */}
+            <HowToApply
+              steps={job.howToApplySteps}
+              organization={job.organization}
+            />
+
+            {/* 11. Important Links */}
+            <ImportantLinks links={job.importantLinks} />
+
+            {/* 12. FAQ Accordion */}
+            <FAQAccordion faqs={job.faqs} jobTitle={job.organization} />
+
+            {/* 13. Related Jobs */}
+            <RelatedJobs
+              jobs={relatedJobs}
+              categoryTitle={`More ${categoryName}`}
+            />
+          </div>
+        </ContentWithSidebar>
+
+        {/* Official Trust Section */}
+        <TrustSection />
+
+        {/* 14. Sticky Mobile Apply Bar */}
+        <StickyMobileApplyBar
+          lastDate={job.importantDates.applicationEndDate}
+          applyUrl={primaryApplyLink}
+          isEndingSoon={job.status === "ENDING_SOON"}
+        />
+      </div>
+    </>
   );
 }
