@@ -103,15 +103,24 @@ export interface JobPosting {
   updatedAt: string;
 }
 
+export type JobSortOption =
+  | "latest"
+  | "deadline"
+  | "views"
+  | "alphabetical"
+  | "createdAt"
+  | "viewsCount"
+  | "applicationEndDate";
+
 export interface JobSearchParams {
   query?: string;
   category?: JobCategory | "all";
-  status?: JobStatus;
+  status?: JobStatus | "all";
   location?: string;
   qualification?: string;
   page?: number;
   limit?: number;
-  sortBy?: "createdAt" | "viewsCount" | "applicationEndDate";
+  sortBy?: JobSortOption;
   sortOrder?: "asc" | "desc";
 }
 

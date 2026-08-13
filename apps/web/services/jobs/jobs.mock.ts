@@ -1,6 +1,7 @@
 import { JobPosting } from "@/types";
 
 export const MOCK_JOB_POSTINGS: JobPosting[] = [
+  // 1. SSC CGL 2026
   {
     id: "job-1",
     slug: "ssc-cgl-2026-recruitment",
@@ -12,7 +13,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     department: "Department of Personnel & Training (DoPT)",
     category: "government",
     status: "OPEN",
-    location: "All India (Multiple Centers)",
+    location: "All India",
     totalVacancies: 14582,
     salaryOrStipend: "Pay Level 4 to Level 8 (₹25,500 - ₹1,51,100)",
     qualificationSummary: "Bachelor's Degree in any discipline from a recognized university",
@@ -57,6 +58,8 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-06-15T10:00:00Z",
     updatedAt: "2026-06-16T14:30:00Z",
   },
+
+  // 2. UPSC Civil Services
   {
     id: "job-2",
     slug: "upsc-civil-services-2026-prelims",
@@ -104,6 +107,8 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-02-14T09:00:00Z",
     updatedAt: "2026-02-14T09:00:00Z",
   },
+
+  // 3. RRB NTPC
   {
     id: "job-3",
     slug: "rrb-ntpc-2026-graduate-recruitment",
@@ -114,7 +119,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     department: "Ministry of Railways",
     category: "government",
     status: "ENDING_SOON",
-    location: "Pan India (All 21 RRB Zones)",
+    location: "All India",
     totalVacancies: 11558,
     salaryOrStipend: "7th CPC Level 2 to Level 6 (₹19,900 - ₹35,400 Basic)",
     qualificationSummary: "12th Pass or Bachelor's Degree depending on post",
@@ -150,6 +155,8 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-09-10T12:00:00Z",
     updatedAt: "2026-09-12T16:00:00Z",
   },
+
+  // 4. IBPS PO
   {
     id: "job-4",
     slug: "ibps-po-xiv-recruitment-2026",
@@ -160,7 +167,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     department: "Public Sector Banks",
     category: "government",
     status: "ENDING_SOON",
-    location: "All India Banks",
+    location: "All India",
     totalVacancies: 4455,
     salaryOrStipend: "₹52,000 - ₹58,000 / month gross CTC",
     qualificationSummary: "Any Graduate degree from recognized University",
@@ -195,6 +202,8 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-08-01T08:30:00Z",
     updatedAt: "2026-08-02T10:00:00Z",
   },
+
+  // 5. SBI Clerk
   {
     id: "job-5",
     slug: "sbi-junior-associates-clerk-2026",
@@ -205,7 +214,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     department: "Central Recruitment & Promotion Department",
     category: "government",
     status: "OPEN",
-    location: "State-wise Vacancies",
+    location: "All India",
     totalVacancies: 8283,
     salaryOrStipend: "₹32,000 - ₹37,000 / month approx",
     qualificationSummary: "Graduation in any discipline",
@@ -239,8 +248,116 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-11-15T09:00:00Z",
     updatedAt: "2026-11-15T09:00:00Z",
   },
+
+  // 6. SSC CHSL 10+2
   {
-    id: "job-6",
+    id: "job-6-chsl",
+    slug: "ssc-chsl-2026-recruitment-10-plus-2",
+    title: "SSC CHSL (10+2) 2026 Recruitment for 3,712 LDC, JSA & DEO Posts",
+    shortSummary:
+      "Staff Selection Commission (SSC) Combined Higher Secondary Level (10+2) Examination 2026 for Lower Divisional Clerk, Junior Secretariat Assistant, and Data Entry Operator.",
+    organization: "Staff Selection Commission",
+    department: "Central Government Ministries",
+    category: "government",
+    status: "OPEN",
+    location: "All India",
+    totalVacancies: 3712,
+    salaryOrStipend: "Pay Level 2 & Level 4 (₹19,900 - ₹81,100)",
+    qualificationSummary: "12th Standard or equivalent from a recognized board",
+    importantDates: {
+      notificationDate: "2026-04-02",
+      applicationStartDate: "2026-04-08",
+      applicationEndDate: "2026-05-07",
+      examDate: "July 2026",
+    },
+    importantLinks: [
+      {
+        label: "Apply via SSC Portal",
+        url: "https://ssc.gov.in",
+        linkType: "apply_online",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 39800,
+    isFeatured: false,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-04-02T10:00:00Z",
+    updatedAt: "2026-04-02T10:00:00Z",
+  },
+
+  // 7. Delhi Police Constable (10th / 12th)
+  {
+    id: "job-7-delhi-police",
+    slug: "delhi-police-constable-executive-2026",
+    title: "Delhi Police Executive Constable 2026 Recruitment for 7,547 Posts",
+    shortSummary:
+      "SSC conducts recruitment for Constable (Executive) Male and Female in Delhi Police Examination 2026. Physical tests and computer-based examination.",
+    organization: "Delhi Police / SSC",
+    category: "government",
+    status: "OPEN",
+    location: "Delhi",
+    totalVacancies: 7547,
+    salaryOrStipend: "Pay Level 3 (₹21,700 - ₹69,100)",
+    qualificationSummary: "10+2 (Senior Secondary) Pass with valid LMV Driving License for Male",
+    importantDates: {
+      applicationStartDate: "2026-09-01",
+      applicationEndDate: "2026-09-30",
+    },
+    importantLinks: [
+      {
+        label: "SSC Delhi Police Portal",
+        url: "https://delhipolice.gov.in",
+        linkType: "apply_online",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 46200,
+    isFeatured: false,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-09-01T08:00:00Z",
+    updatedAt: "2026-09-01T08:00:00Z",
+  },
+
+  // 8. ISRO Scientist / Engineer (B.Tech / Graduate)
+  {
+    id: "job-8-isro",
+    slug: "isro-scientist-engineer-sc-recruitment-2026",
+    title: "ISRO ICRB Scientist / Engineer 'SC' 2026 Recruitment for 303 Posts",
+    shortSummary:
+      "Indian Space Research Organisation (ISRO) Centralised Recruitment Board invites applications for Scientist/Engineer 'SC' in Electronics, Mechanical, and Computer Science.",
+    organization: "Indian Space Research Organisation",
+    department: "Department of Space",
+    category: "government",
+    status: "OPEN",
+    location: "Karnataka",
+    totalVacancies: 303,
+    salaryOrStipend: "Level 10 (₹56,100 Basic + Allowances)",
+    qualificationSummary: "BE / B.Tech or equivalent with minimum 65% marks or 6.84 CGPA",
+    importantDates: {
+      applicationStartDate: "2026-05-10",
+      applicationEndDate: "2026-05-31",
+    },
+    importantLinks: [
+      {
+        label: "ISRO Careers Application",
+        url: "https://isro.gov.in/careers",
+        linkType: "apply_online",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 28900,
+    isFeatured: true,
+    isTrending: false,
+    isVerified: true,
+    createdAt: "2026-05-10T10:00:00Z",
+    updatedAt: "2026-05-10T10:00:00Z",
+  },
+
+  // 9. Google India Software Engineer
+  {
+    id: "job-6-google",
     slug: "google-india-software-engineer-early-career-2026",
     title: "Google India Software Engineer (Early Career / University Graduate) 2026",
     shortSummary:
@@ -248,7 +365,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Google India Pvt Ltd",
     category: "private",
     status: "OPEN",
-    location: "Bengaluru / Hyderabad / Pune",
+    location: "Karnataka",
     totalVacancies: "Multiple Openings",
     salaryOrStipend: "Competitive Tech Package (₹18 - ₹32 LPA CTC)",
     qualificationSummary: "B.Tech / B.E. / M.Tech / MCA in Computer Science or related STEM field",
@@ -271,8 +388,10 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-01-10T11:00:00Z",
     updatedAt: "2026-01-12T15:00:00Z",
   },
+
+  // 10. Infosys Specialist Programmer
   {
-    id: "job-7",
+    id: "job-7-infosys",
     slug: "infosys-specialist-programmer-2026",
     title: "Infosys Specialist Programmer (SP) & Digital Specialist Engineer (DSE) 2026",
     shortSummary:
@@ -280,7 +399,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Infosys Limited",
     category: "private",
     status: "OPEN",
-    location: "Pan India (Bangalore, Pune, Hyderabad, Chennai)",
+    location: "Maharashtra",
     totalVacancies: "2,500+ Openings",
     salaryOrStipend: "₹6.25 LPA - ₹9.5 LPA CTC",
     qualificationSummary: "B.E / B.Tech / M.E / M.Tech / MCA / M.Sc (CS/IT)",
@@ -303,8 +422,79 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-02-01T10:00:00Z",
     updatedAt: "2026-02-01T10:00:00Z",
   },
+
+  // 11. Tata Consultancy Services (TCS NQT 2026)
   {
-    id: "job-8",
+    id: "job-11-tcs",
+    slug: "tcs-national-qualifier-test-nqt-2026",
+    title: "TCS National Qualifier Test (NQT) 2026 for Ninja, Digital & Prime Roles",
+    shortSummary:
+      "Tata Consultancy Services announces national hiring for 2025 and 2026 batch graduates. Direct job opportunities across 50+ locations in India.",
+    organization: "Tata Consultancy Services",
+    category: "private",
+    status: "ENDING_SOON",
+    location: "All India",
+    totalVacancies: "15,000+ Freshers",
+    salaryOrStipend: "₹3.36 LPA to ₹9.0 LPA CTC",
+    qualificationSummary: "B.E. / B.Tech / M.E. / M.Tech / MCA / M.Sc with 60% aggregate",
+    importantDates: {
+      applicationStartDate: "2026-01-15",
+      applicationEndDate: "2026-03-10",
+      examDate: "March 2026",
+    },
+    importantLinks: [
+      {
+        label: "TCS NextStep Portal",
+        url: "https://nextstep.tcs.com",
+        linkType: "apply_online",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 56400,
+    isFeatured: true,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-01-15T09:00:00Z",
+    updatedAt: "2026-01-15T09:00:00Z",
+  },
+
+  // 12. HDFC Bank Deputy Manager
+  {
+    id: "job-12-hdfc",
+    slug: "hdfc-bank-future-bankers-program-2026",
+    title: "HDFC Bank Future Bankers Program 2026 — Deputy Manager Trainee",
+    shortSummary:
+      "HDFC Bank invites fresh and experienced graduates for the full-time Deputy Manager program with guaranteed job placement upon completion of training.",
+    organization: "HDFC Bank Ltd",
+    category: "private",
+    status: "OPEN",
+    location: "Maharashtra",
+    totalVacancies: "1,200 Posts",
+    salaryOrStipend: "₹4.50 LPA - ₹6.20 LPA CTC",
+    qualificationSummary: "Graduate in any stream with minimum 55% marks",
+    importantDates: {
+      applicationStartDate: "2026-02-10",
+      applicationEndDate: "2026-04-10",
+    },
+    importantLinks: [
+      {
+        label: "HDFC Careers",
+        url: "https://hdfcbank.com/careers",
+        linkType: "apply_online",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 22100,
+    isFeatured: false,
+    isTrending: false,
+    isVerified: true,
+    createdAt: "2026-02-10T10:00:00Z",
+    updatedAt: "2026-02-10T10:00:00Z",
+  },
+
+  // 13. NTA JEE Main Admit Card
+  {
+    id: "job-8-jee",
     slug: "nta-jee-main-2026-session-2-admit-card",
     title: "NTA JEE Main 2026 Session 2 Hall Ticket & City Intimation Slip",
     shortSummary:
@@ -312,7 +502,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "National Testing Agency (NTA)",
     category: "admit-card",
     status: "ADMIT_CARD_OUT",
-    location: "All India Exam Centers",
+    location: "All India",
     totalVacancies: "Entrance Exam",
     salaryOrStipend: "N/A (National Exam)",
     qualificationSummary: "10+2 / Intermediate with PCM",
@@ -335,8 +525,10 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-03-31T06:00:00Z",
     updatedAt: "2026-03-31T06:00:00Z",
   },
+
+  // 14. SSC GD Constable Admit Card
   {
-    id: "job-9",
+    id: "job-9-ssc-gd",
     slug: "ssc-gd-constable-2026-admit-card",
     title: "SSC GD Constable 2026 Computer Based Exam Admit Card Download",
     shortSummary:
@@ -344,7 +536,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Staff Selection Commission",
     category: "admit-card",
     status: "ADMIT_CARD_OUT",
-    location: "Regional Exam Centers",
+    location: "All India",
     totalVacancies: 39481,
     salaryOrStipend: "Pay Level 3 (₹21,700 - ₹69,100)",
     qualificationSummary: "10th Class (Matriculation) Pass",
@@ -367,8 +559,78 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-02-10T08:00:00Z",
     updatedAt: "2026-02-10T08:00:00Z",
   },
+
+  // 15. UPSC CSE Prelims Admit Card
   {
-    id: "job-10",
+    id: "job-15-upsc-admit",
+    slug: "upsc-civil-services-prelims-2026-admit-card",
+    title: "UPSC Civil Services Prelims 2026 e-Admit Card Available",
+    shortSummary:
+      "Union Public Service Commission (UPSC) has made available the e-Admit Card for Civil Services (Preliminary) Examination 2026. Verify exam centre and instructions.",
+    organization: "Union Public Service Commission",
+    category: "admit-card",
+    status: "ADMIT_CARD_OUT",
+    location: "All India",
+    totalVacancies: 1056,
+    salaryOrStipend: "N/A (Exam Admit Card)",
+    qualificationSummary: "Graduation",
+    importantDates: {
+      admitCardDate: "2026-05-05",
+      examDate: "2026-05-24",
+    },
+    importantLinks: [
+      {
+        label: "Download UPSC e-Admit Card",
+        url: "https://upsconline.nic.in",
+        linkType: "admit_card",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 64100,
+    isFeatured: true,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-05-05T09:00:00Z",
+    updatedAt: "2026-05-05T09:00:00Z",
+  },
+
+  // 16. CTET July 2026 Admit Card
+  {
+    id: "job-16-ctet",
+    slug: "ctet-july-2026-hall-ticket-download",
+    title: "Central Teacher Eligibility Test (CTET) July 2026 Admit Card",
+    shortSummary:
+      "Central Board of Secondary Education (CBSE) has issued the CTET July 2026 Hall Ticket for Paper I and Paper II. Download using application number.",
+    organization: "Central Board of Secondary Education",
+    category: "admit-card",
+    status: "ADMIT_CARD_OUT",
+    location: "All India",
+    totalVacancies: "Eligibility Test",
+    salaryOrStipend: "Teaching Certification",
+    qualificationSummary: "D.El.Ed / B.Ed / Graduation with Teaching Diploma",
+    importantDates: {
+      admitCardDate: "2026-06-25",
+      examDate: "2026-07-07",
+    },
+    importantLinks: [
+      {
+        label: "CTET Official Admit Card Portal",
+        url: "https://ctet.nic.in",
+        linkType: "admit_card",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 41900,
+    isFeatured: false,
+    isTrending: false,
+    isVerified: true,
+    createdAt: "2026-06-25T10:00:00Z",
+    updatedAt: "2026-06-25T10:00:00Z",
+  },
+
+  // 17. UPSC NDA-1 Result
+  {
+    id: "job-10-nda",
     slug: "upsc-nda-na-i-2026-written-result",
     title: "UPSC NDA & NA (I) 2026 Written Examination Result & Merit List Released",
     shortSummary:
@@ -376,7 +638,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Union Public Service Commission",
     category: "result",
     status: "RESULT_OUT",
-    location: "All India Defence Academies",
+    location: "All India",
     totalVacancies: 404,
     salaryOrStipend: "Cadet Stipend ₹56,100 during training",
     qualificationSummary: "12th Pass / Appearing",
@@ -398,8 +660,76 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-05-18T14:00:00Z",
     updatedAt: "2026-05-18T14:00:00Z",
   },
+
+  // 18. RRB ALP Stage-1 Scorecard & Result
   {
-    id: "job-11",
+    id: "job-18-rrb-alp",
+    slug: "rrb-alp-cbt-1-result-cut-off-marks-2026",
+    title: "RRB Assistant Loco Pilot (ALP) CBT-1 Result & Cut-off Marks Declared",
+    shortSummary:
+      "Railway Recruitment Boards have announced the normalized cut-off scores and candidate shortlisted list for CBT-2 examination for CEN 01/2026 ALP recruitment.",
+    organization: "Railway Recruitment Control Board",
+    category: "result",
+    status: "RESULT_OUT",
+    location: "All India",
+    totalVacancies: 18799,
+    salaryOrStipend: "Level 2 (₹19,900 Basic)",
+    qualificationSummary: "10th Pass + ITI or Diploma in Mechanical/Electrical Engineering",
+    importantDates: {
+      resultDate: "2026-04-20",
+    },
+    importantLinks: [
+      {
+        label: "View RRB ALP Result & Scorecard",
+        url: "https://rrbapply.gov.in",
+        linkType: "result_merit_list",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 58200,
+    isFeatured: true,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-04-20T12:00:00Z",
+    updatedAt: "2026-04-20T12:00:00Z",
+  },
+
+  // 19. SSC CGL Tier-1 Final Answer Key & Result
+  {
+    id: "job-19-cgl-result",
+    slug: "ssc-cgl-2026-tier-1-merit-list-cutoff",
+    title: "SSC CGL 2026 Tier-1 Scorecard, Category Cut-off & Qualified List",
+    shortSummary:
+      "Staff Selection Commission has uploaded the marks and roll-number wise qualification list for Tier-2 examination for CGL 2026.",
+    organization: "Staff Selection Commission",
+    category: "result",
+    status: "RESULT_OUT",
+    location: "All India",
+    totalVacancies: 14582,
+    salaryOrStipend: "Pay Level 4 - 8",
+    qualificationSummary: "Graduate",
+    importantDates: {
+      resultDate: "2026-11-04",
+    },
+    importantLinks: [
+      {
+        label: "Check CGL Tier-1 Marks",
+        url: "https://ssc.gov.in",
+        linkType: "result_merit_list",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 71300,
+    isFeatured: false,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-11-04T15:00:00Z",
+    updatedAt: "2026-11-04T15:00:00Z",
+  },
+
+  // 20. PM Internship Scheme
+  {
+    id: "job-11-pm-intern",
     slug: "pm-internship-scheme-round-2-2026",
     title: "Prime Minister's Internship Scheme 2026 — 1,25,000 Corporate Internships",
     shortSummary:
@@ -407,7 +737,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Ministry of Corporate Affairs",
     category: "internship",
     status: "OPEN",
-    location: "Across 730+ Districts in India",
+    location: "All India",
     totalVacancies: 125000,
     salaryOrStipend: "₹5,000 / month + ₹6,000 one-time grant",
     qualificationSummary: "10th, 12th, ITI, Polytechnic Diploma, or Graduation (BA, BSc, BCom, BCA, BBA, B.Pharma)",
@@ -430,8 +760,10 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-03-01T09:00:00Z",
     updatedAt: "2026-03-02T11:00:00Z",
   },
+
+  // 21. National Scholarship Portal
   {
-    id: "job-12",
+    id: "job-12-nsp",
     slug: "national-scholarship-portal-post-matric-2026",
     title: "National Scholarship Portal (NSP) Post-Matric & Merit Scholarship 2026",
     shortSummary:
@@ -439,7 +771,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Ministry of Education & Social Justice",
     category: "scholarship",
     status: "OPEN",
-    location: "All India Students",
+    location: "All India",
     totalVacancies: "82,000 Fresh Scholarships / Year",
     salaryOrStipend: "Up to ₹20,000 / annum financial assistance",
     qualificationSummary: "Students pursuing regular graduate/post-graduate courses",
@@ -462,8 +794,10 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     createdAt: "2026-07-01T10:00:00Z",
     updatedAt: "2026-07-01T10:00:00Z",
   },
+
+  // 22. BHEL Trade & Technician Apprenticeship
   {
-    id: "job-13",
+    id: "job-13-bhel",
     slug: "bhel-trade-technician-apprentice-2026",
     title: "BHEL Trade & Technician Apprenticeship 2026 for 450 Vacancies",
     shortSummary:
@@ -471,7 +805,7 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     organization: "Bharat Heavy Electricals Limited",
     category: "apprenticeship",
     status: "ENDING_SOON",
-    location: "Bhopal / Haridwar / Trichy Units",
+    location: "Madhya Pradesh",
     totalVacancies: 450,
     salaryOrStipend: "₹8,050 - ₹9,000 / month stipend",
     qualificationSummary: "ITI Pass in relevant trade / Diploma in Engineering",
@@ -493,5 +827,38 @@ export const MOCK_JOB_POSTINGS: JobPosting[] = [
     isVerified: true,
     createdAt: "2026-02-15T09:00:00Z",
     updatedAt: "2026-02-15T09:00:00Z",
+  },
+
+  // 23. SSC CGL 2026 Provisional Answer Key
+  {
+    id: "job-23-answerkey",
+    slug: "ssc-cgl-2026-tier-1-provisional-answer-key",
+    title: "SSC CGL 2026 Tier-1 Tentative Answer Key & Response Sheet",
+    shortSummary:
+      "Staff Selection Commission has released the provisional answer keys with candidate response sheets for CGL Tier-1. Submit challenges within specified window.",
+    organization: "Staff Selection Commission",
+    category: "answer-key",
+    status: "ANSWER_KEY_OUT",
+    location: "All India",
+    totalVacancies: 14582,
+    salaryOrStipend: "Pay Level 4 - 8",
+    qualificationSummary: "Bachelor's Degree",
+    importantDates: {
+      answerKeyDate: "2026-10-15",
+    },
+    importantLinks: [
+      {
+        label: "Submit Answer Key Challenge",
+        url: "https://ssc.gov.in",
+        linkType: "answer_key",
+        isExternal: true,
+      },
+    ],
+    viewsCount: 31200,
+    isFeatured: false,
+    isTrending: true,
+    isVerified: true,
+    createdAt: "2026-10-15T11:00:00Z",
+    updatedAt: "2026-10-15T11:00:00Z",
   },
 ];
