@@ -1,4 +1,9 @@
-import { JobPosting, JobCategory, JobSearchParams, PaginatedResponse } from "@/types";
+import {
+  JobPosting,
+  JobCategory,
+  JobSearchParams,
+  PaginatedResponse,
+} from "@/types";
 import { MOCK_JOB_POSTINGS } from "./jobs.mock";
 
 /**
@@ -8,7 +13,6 @@ import { MOCK_JOB_POSTINGS } from "./jobs.mock";
  */
 
 export async function getLatestJobs(limit: number = 8): Promise<JobPosting[]> {
-  // In production with Spring Boot: fetch from API endpoint
   const sorted = [...MOCK_JOB_POSTINGS].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
@@ -50,6 +54,7 @@ export async function searchJobs(
 ): Promise<PaginatedResponse<JobPosting>> {
   let results = [...MOCK_JOB_POSTINGS];
 
+  // 1. Text Search Query
   if (params.query) {
     const q = params.query.toLowerCase().trim();
     results = results.filter(
@@ -62,18 +67,109 @@ export async function searchJobs(
     );
   }
 
+  // 2. Category Filter
   if (params.category && params.category !== "all") {
     results = results.filter((job) => job.category === params.category);
   }
 
-  if (params.status) {
+  // 3. Status Filter
+  if (params.status && params.status !== "all") {
     results = results.filter((job) => job.status === params.status);
   }
 
-  const page = params.page || 1;
-  const pageSize = params.limit || 10;
+  // 4. Qualification Filter
+  if (params.qualification && params.qualification !== "all") {
+    const qual = params.qualification.toLowerCase();
+    results = results.filter((job) => {
+      const qSummary = job.qualificationSummary.toLowerCase();
+      if (qual === "10th" || qual === "matric") {
+        return qSummary.includes("10th") || qSummary.includes("matric");
+      }
+      if (qual === "12th" || qual === "inter" || qual === "10+2") {
+        return (
+          qSummary.includes("12th") ||
+          qSummary.includes("10+2") ||
+          qSummary.includes("intermediate") ||
+          qSummary.includes("senior secondary")
+        );
+      }
+      if (qual === "graduate" || qual === "degree") {
+        return (
+          qSummary.includes("graduate") ||
+          qSummary.includes("degree") ||
+          qSummary.includes("bachelor") ||
+          qSummary.includes("b.tech") ||
+          qSummary.includes("b.e") ||
+          qSummary.includes("b.sc") ||
+          qSummary.includes("b.com") ||
+          qSummary.includes("ba")
+        );
+      }
+      if (qual === "diploma" || qual === "polytechnic") {
+        return qSummary.includes("diploma") || qSummary.includes("polytechnic");
+      }
+      if (qual === "iti") {
+        return qSummary.includes("iti");
+      }
+      if (qual === "post-graduate" || qual === "master") {
+        return (
+          qSummary.includes("master") ||
+          qSummary.includes("post-graduate") ||
+          qSummary.includes("m.tech") ||
+          qSummary.includes("mca") ||
+          qSummary.includes("m.sc")
+        );
+      }
+      return qSummary.includes(qual);
+    });
+  }
+
+  // 5. Location Filter
+  if (params.location && params.location !== "all") {
+    const loc = params.location.toLowerCase();
+    results = results.filter((job) => {
+      const jLoc = job.location.toLowerCase();
+      if (loc === "all india") {
+        return jLoc.includes("all india") || jLoc.includes("pan india");
+      }
+      return jLoc.includes(loc);
+    });
+  }
+
+  // 6. Sorting
+  const sortBy = params.sortBy || "latest";
+  const isAsc = params.sortOrder === "asc";
+
+  results.sort((a, b) => {
+    if (sortBy === "deadline" || sortBy === "applicationEndDate") {
+      const dateA = a.importantDates.applicationEndDate || "9999-12-31";
+      const dateB = b.importantDates.applicationEndDate || "9999-12-31";
+      return isAsc
+        ? dateA.localeCompare(dateB)
+        : dateB.localeCompare(dateA);
+    }
+
+    if (sortBy === "views" || sortBy === "viewsCount") {
+      return isAsc ? a.viewsCount - b.viewsCount : b.viewsCount - a.viewsCount;
+    }
+
+    if (sortBy === "alphabetical") {
+      return isAsc
+        ? a.title.localeCompare(b.title)
+        : b.title.localeCompare(a.title);
+    }
+
+    // Default: latest / createdAt
+    const timeA = new Date(a.createdAt).getTime();
+    const timeB = new Date(b.createdAt).getTime();
+    return isAsc ? timeA - timeB : timeB - timeA;
+  });
+
+  // 7. Pagination
+  const page = Math.max(1, params.page || 1);
+  const pageSize = Math.max(1, params.limit || 8);
   const total = results.length;
-  const totalPages = Math.ceil(total / pageSize);
+  const totalPages = Math.ceil(total / pageSize) || 1;
   const offset = (page - 1) * pageSize;
   const items = results.slice(offset, offset + pageSize);
 
