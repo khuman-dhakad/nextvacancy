@@ -23,6 +23,14 @@ export interface VacancyDetail {
   totalVacancies: number | string;
   qualification: string;
   payScale?: string;
+  categoryBreakdown?: {
+    ur?: number | string;
+    obc?: number | string;
+    ews?: number | string;
+    sc?: number | string;
+    st?: number | string;
+    pwd?: number | string;
+  };
 }
 
 export interface ImportantDates {
@@ -39,9 +47,14 @@ export interface ImportantDates {
 
 export interface FeeStructure {
   general?: string;
+  obc?: string;
+  ews?: string;
   obcEws?: string;
+  sc?: string;
+  st?: string;
   scStPwd?: string;
   female?: string;
+  ph?: string;
   paymentMode?: string;
   exemptionNotes?: string;
 }
@@ -85,7 +98,10 @@ export interface JobPosting {
   location: string;
   totalVacancies: number | string;
   salaryOrStipend: string;
+  jobType?: "Full Time" | "Contractual" | "Permanent" | "Apprenticeship" | "Internship" | string;
+  applicationMode?: "Online" | "Offline" | "Walk-in" | string;
   qualificationSummary: string;
+  qualificationsList?: string[];
   importantDates: ImportantDates;
   feeStructure?: FeeStructure;
   ageLimit?: AgeLimit;

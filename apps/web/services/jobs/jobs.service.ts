@@ -49,6 +49,23 @@ export async function getJobBySlug(slug: string): Promise<JobPosting | null> {
   return job || null;
 }
 
+export async function getRelatedJobs(
+  category: JobCategory,
+  currentSlug: string,
+  limit: number = 4
+): Promise<JobPosting[]> {
+  const sameCategory = MOCK_JOB_POSTINGS.filter(
+    (job) => job.category === category && job.slug !== currentSlug
+  );
+  if (sameCategory.length >= limit) {
+    return sameCategory.slice(0, limit);
+  }
+  const remaining = MOCK_JOB_POSTINGS.filter(
+    (job) => job.slug !== currentSlug && !sameCategory.some((j) => j.id === job.id)
+  );
+  return [...sameCategory, ...remaining].slice(0, limit);
+}
+
 export async function searchJobs(
   params: JobSearchParams
 ): Promise<PaginatedResponse<JobPosting>> {
