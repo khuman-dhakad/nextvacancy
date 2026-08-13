@@ -36,6 +36,7 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  transpilePackages: ["lucide-react"],
   allowedDevOrigins: ["localhost:3000", "192.168.29.217"],
   async headers() {
     return [

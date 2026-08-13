@@ -104,6 +104,17 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </Link>
 
+            {/* Candidate Sign In */}
+            <Link href="/login">
+              <Button
+                variant="primary"
+                size="sm"
+                className="hidden sm:inline-flex text-xs font-bold shadow-xs min-h-[36px]"
+              >
+                Sign In
+              </Button>
+            </Link>
+
             {/* Mobile Navigation Drawer Trigger */}
             <MobileNavigation />
           </div>

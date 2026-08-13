@@ -4,7 +4,7 @@ import { UpdateBar } from "./UpdateBar";
 import { CategoryNavigation } from "./CategoryNavigation";
 import { Footer } from "./Footer";
 import { Container } from "@/components/ui";
-import { InstallBanner, OfflineNotice } from "@/components/pwa";
+import { InstallBanner, OfflineNotice, ServiceWorkerManager } from "@/components/pwa";
 
 export interface SiteLayoutProps {
   children: React.ReactNode;
@@ -21,6 +21,9 @@ export const SiteLayout: React.FC<SiteLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-white text-[var(--foreground)] antialiased relative">
+      {/* Service Worker Cleanup in Dev */}
+      <ServiceWorkerManager />
+
       {/* Real-time Network Status Banner */}
       <OfflineNotice />
 
