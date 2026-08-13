@@ -9,6 +9,7 @@ export interface InputProps
   error?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  rightElement?: React.ReactNode;
   fullWidth?: boolean;
 }
 
@@ -22,6 +23,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       error,
       leftIcon,
       rightIcon,
+      rightElement,
       fullWidth = true,
       disabled,
       required,
@@ -72,18 +74,22 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 ? "bg-[var(--surface-subtle)] text-[var(--muted)] cursor-not-allowed opacity-75"
                 : "hover:border-[var(--foreground)]",
               leftIcon ? "pl-10" : "",
-              rightIcon ? "pr-10" : "",
+              rightIcon || rightElement ? "pr-10" : "",
               className,
             ]
               .filter(Boolean)
               .join(" ")}
             {...props}
           />
-          {rightIcon && (
+          {rightElement ? (
+            <div className="absolute right-2 flex items-center justify-center">
+              {rightElement}
+            </div>
+          ) : rightIcon ? (
             <div className="absolute right-3 pointer-events-none text-[var(--muted)] flex items-center justify-center">
               {rightIcon}
             </div>
-          )}
+          ) : null}
         </div>
         {error ? (
           <p id={errorId} className="mt-1.5 text-xs font-medium text-[var(--danger)]" role="alert">

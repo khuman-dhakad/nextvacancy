@@ -143,6 +143,29 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
         {/* Scrollable Nav Links */}
         <nav aria-label="Mobile Menu Links" className="flex-1 overflow-y-auto p-4 space-y-6">
+          {/* Candidate Account Shortcuts */}
+          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Candidate Portal
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                href="/login"
+                onClick={handleLinkClick}
+                className="flex items-center justify-center py-2 px-3 rounded-lg bg-[var(--primary)] text-white text-xs font-bold shadow-xs hover:bg-[var(--primary-hover)] transition-colors min-h-[40px]"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                onClick={handleLinkClick}
+                className="flex items-center justify-center py-2 px-3 rounded-lg border border-[var(--border-strong)] bg-white text-slate-800 text-xs font-bold hover:border-[var(--primary)] transition-colors min-h-[40px]"
+              >
+                Register
+              </Link>
+            </div>
+          </div>
+
           {/* Main Opportunities */}
           <div className="space-y-1">
             <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
