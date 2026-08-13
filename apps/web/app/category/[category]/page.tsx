@@ -88,8 +88,19 @@ export async function generateMetadata({
   return {
     title: `${config.title} | NEXTVACANCY`,
     description: config.description,
+    alternates: {
+      canonical: `/category/${category}`,
+    },
     openGraph: {
       title: `${config.title} | NEXTVACANCY`,
+      description: config.description,
+      url: `/category/${category}`,
+      type: "website",
+      siteName: "NEXTVACANCY",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: config.title,
       description: config.description,
     },
   };

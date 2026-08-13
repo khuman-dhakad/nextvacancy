@@ -25,8 +25,19 @@ export async function generateMetadata({
   return {
     title: `Search: ${queryLabel} | NEXTVACANCY`,
     description: `Search results for ${queryLabel} across government recruitments, private jobs, admit cards, and exam results in India.`,
+    alternates: {
+      canonical: "/search",
+    },
     openGraph: {
       title: `Search: ${queryLabel} | NEXTVACANCY`,
+      description: `Browse latest recruitment notifications matching ${queryLabel}.`,
+      url: "/search",
+      type: "website",
+      siteName: "NEXTVACANCY",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Search: ${queryLabel}`,
       description: `Browse latest recruitment notifications matching ${queryLabel}.`,
     },
   };

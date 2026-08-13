@@ -28,10 +28,21 @@ export const metadata: Metadata = {
     "Cut Off Marks",
     "Merit List PDF",
   ],
+  alternates: {
+    canonical: "/results",
+  },
   openGraph: {
     title: "Exam Results & Merit Lists 2026 | NEXTVACANCY",
     description:
       "Check official exam results, scorecards, and qualifying cut-off marks.",
+    url: "/results",
+    type: "website",
+    siteName: "NEXTVACANCY",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Exam Results & Merit Lists 2026",
+    description: "Check published cut-off marks and qualified candidate merit lists.",
   },
 };
 

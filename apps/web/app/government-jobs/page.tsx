@@ -20,18 +20,29 @@ export const metadata: Metadata = {
   description:
     "Explore latest government job notifications (Sarkari Naukri) 2026 for UPSC, SSC, Railway (RRB), Banking (IBPS/SBI), Police, Defence, and State PSCs with eligibility, salary, and direct application links.",
   keywords: [
-    "Government Jobs",
-    "Sarkari Naukri 2026",
+    "Government Jobs 2026",
+    "Sarkari Naukri",
     "SSC CGL Recruitment",
     "UPSC Civil Services",
     "Railway RRB NTPC",
     "Bank PO Jobs",
     "Police Bharti",
   ],
+  alternates: {
+    canonical: "/government-jobs",
+  },
   openGraph: {
     title: "Government Jobs 2026 — Latest Sarkari Naukri Alerts | NEXTVACANCY",
     description:
       "Find and apply for 50,000+ active central and state government vacancies across India.",
+    url: "/government-jobs",
+    type: "website",
+    siteName: "NEXTVACANCY",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Government Jobs 2026 — Latest Sarkari Naukri Alerts",
+    description: "Find and apply for active central and state government vacancies.",
   },
 };
 

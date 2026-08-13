@@ -28,10 +28,21 @@ export const metadata: Metadata = {
     "Private Bank Jobs",
     "Engineering Vacancies",
   ],
+  alternates: {
+    canonical: "/private-jobs",
+  },
   openGraph: {
     title: "Private Sector Careers & Tech Openings 2026 | NEXTVACANCY",
     description:
       "Find high-growth careers in IT, banking, core engineering, and corporate sectors.",
+    url: "/private-jobs",
+    type: "website",
+    siteName: "NEXTVACANCY",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Private Sector Careers & Tech Openings 2026",
+    description: "Discover verified private sector job openings and campus hiring drives.",
   },
 };
 

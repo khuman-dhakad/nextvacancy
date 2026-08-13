@@ -28,10 +28,21 @@ export const metadata: Metadata = {
     "JEE Main Admit Card",
     "Exam City Slip",
   ],
+  alternates: {
+    canonical: "/admit-cards",
+  },
   openGraph: {
     title: "Admit Cards & Hall Ticket Releases 2026 | NEXTVACANCY",
     description:
       "Instant notification and direct official download links for competitive examination hall tickets.",
+    url: "/admit-cards",
+    type: "website",
+    siteName: "NEXTVACANCY",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Admit Cards & Hall Ticket Releases 2026",
+    description: "Download verified exam admit cards and hall tickets.",
   },
 };
 
