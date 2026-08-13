@@ -4,6 +4,7 @@ import { UpdateBar } from "./UpdateBar";
 import { CategoryNavigation } from "./CategoryNavigation";
 import { Footer } from "./Footer";
 import { Container } from "@/components/ui";
+import { InstallBanner, OfflineNotice } from "@/components/pwa";
 
 export interface SiteLayoutProps {
   children: React.ReactNode;
@@ -19,7 +20,10 @@ export const SiteLayout: React.FC<SiteLayoutProps> = ({
   activePath,
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-white text-[var(--foreground)] antialiased">
+    <div className="min-h-screen flex flex-col bg-white text-[var(--foreground)] antialiased relative">
+      {/* Real-time Network Status Banner */}
+      <OfflineNotice />
+
       {/* Skip to Main Content Link for Keyboard Accessibility */}
       <a
         href="#main-content"
@@ -44,6 +48,9 @@ export const SiteLayout: React.FC<SiteLayoutProps> = ({
 
       {/* Global Footer */}
       <Footer />
+
+      {/* PWA App Install Banner */}
+      <InstallBanner />
     </div>
   );
 };
