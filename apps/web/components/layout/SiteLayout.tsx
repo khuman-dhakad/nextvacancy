@@ -35,8 +35,8 @@ export const SiteLayout: React.FC<SiteLayoutProps> = ({
         Skip to main content
       </a>
 
-      {/* Global Header */}
-      <Header activePath={activePath} />
+      {/* Global Header — reads active path internally via usePathname() */}
+      <Header />
 
       {/* Latest Alerts Strip */}
       {showUpdateBar && <UpdateBar />}
@@ -86,16 +86,18 @@ export const ContentWithSidebar: React.FC<ContentWithSidebarProps> = ({
           {children}
         </div>
 
-        {/* Sidebar (4 cols on desktop, responsive below on mobile) */}
+        {/* Sidebar (4 cols on desktop — sticky so Apply button stays visible) */}
         <aside
           aria-label="Secondary Sidebar"
           className={[
             "w-full lg:col-span-4 space-y-6",
+            "lg:sticky lg:top-[88px] lg:self-start",
             sidebarPosition === "left" ? "lg:order-1" : "lg:order-2",
           ].join(" ")}
         >
           {sidebar}
         </aside>
+
       </div>
     </Container>
   );
