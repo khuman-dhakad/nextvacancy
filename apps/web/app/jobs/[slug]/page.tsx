@@ -242,7 +242,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           sidebar={
             <div className="space-y-6">
               {/* Quick Links in Sidebar */}
-              <ImportantLinks links={job.importantLinks} />
+              <ImportantLinks links={job.importantLinks} variant="compact" />
               <CommunitySidebarCard />
               <SidebarImportantLinks />
             </div>
