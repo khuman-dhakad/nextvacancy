@@ -4,310 +4,103 @@ import { notFound } from "next/navigation";
 import { getJobBySlug, getRelatedJobs } from "@/services";
 import { Container, Breadcrumb } from "@/components/ui";
 import { ContentWithSidebar } from "@/components/layout";
+import { CommunitySidebarCard, SidebarImportantLinks, TrustSection } from "@/components/homepage";
+import { JobHero, ImportantLinks, StickyMobileApplyBar } from "@/components/jobs";
 import {
-  CommunitySidebarCard,
-  SidebarImportantLinks,
-  TrustSection,
-} from "@/components/homepage";
-import {
-  JobHero,
-  OverviewCards,
-  DatesTable,
-  FeeTable,
-  AgeLimitCard,
+  RecruitmentOverview,
+  ImportantDates,
   VacancyTable,
-  QualificationSection,
-  SelectionTimeline,
-  HowToApply,
-  ImportantLinks,
-  FAQAccordion,
+  EligibilityCard,
+  SalaryCard,
+  SelectionStepper,
+  FeeTable,
+  DocumentsChecklist,
+  OfficialLinks,
+  FAQSection,
   RelatedJobs,
-  StickyMobileApplyBar,
-} from "@/components/jobs";
+} from "@/components/desktop/recruitment";
 
 interface JobDetailPageProps {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: JobDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: JobDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
-
-  if (!job) {
-    return {
-      title: "Recruitment Notification | NEXTVACANCY",
-      description: "Recruitment notification and exam details on NEXTVACANCY.",
-    };
-  }
-
-  const categoryLabel =
-    job.category === "government"
-      ? "Sarkari Naukri"
-      : job.category === "private"
-      ? "Private Job"
-      : job.category === "admit-card"
-      ? "Admit Card"
-      : job.category === "result"
-      ? "Exam Result"
-      : "Recruitment";
+  if (!job) return { title: "Recruitment Notification | NEXTVACANCY" };
 
   return {
-    title: `${job.title} — Notification, Eligibility, Fees & Apply Online | NEXTVACANCY`,
-    description: `${job.shortSummary} Check eligibility criteria, total vacancies, age limit, application fee structure, and direct official application portal links.`,
-    keywords: [
-      job.organization,
-      job.title,
-      categoryLabel,
-      "Recruitment 2026",
-      "Apply Online",
-      "Eligibility Criteria",
-      "Notification PDF",
-    ],
-    alternates: {
-      canonical: `/jobs/${job.slug}`,
-    },
-    openGraph: {
-      title: `${job.title} | NEXTVACANCY`,
-      description: job.shortSummary,
-      url: `/jobs/${job.slug}`,
-      type: "article",
-      siteName: "NEXTVACANCY",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${job.title} | NEXTVACANCY`,
-      description: job.shortSummary,
-    },
+    title: `${job.title} — Notification, Eligibility & Apply Online | NEXTVACANCY`,
+    description: `${job.shortSummary} View detailed vacancy breakdown, age criteria, salary structure, and official application portals.`,
+    keywords: [job.organization, job.title, "Recruitment 2026", "Sarkari Naukri", "Apply Online", "Eligibility Criteria"],
+    alternates: { canonical: `/jobs/${job.slug}` },
+    openGraph: { title: `${job.title} | NEXTVACANCY`, description: job.shortSummary, url: `/jobs/${job.slug}`, type: "article" },
+    twitter: { card: "summary_large_image", title: `${job.title} | NEXTVACANCY`, description: job.shortSummary },
   };
 }
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
-
-  if (!job) {
-    notFound();
-  }
+  if (!job) notFound();
 
   const relatedJobs = await getRelatedJobs(job.category, job.slug, 4);
-
-  const categoryName =
-    job.category === "government"
-      ? "Government Jobs"
-      : job.category === "private"
-      ? "Private Jobs"
-      : job.category === "admit-card"
-      ? "Admit Cards"
-      : job.category === "result"
-      ? "Exam Results"
-      : job.category === "scholarship"
-      ? "Scholarships"
-      : job.category === "internship"
-      ? "Internships"
-      : "Recruitment";
-
-  const categoryPath =
-    job.category === "government"
-      ? "/government-jobs"
-      : job.category === "private"
-      ? "/private-jobs"
-      : job.category === "admit-card"
-      ? "/admit-cards"
-      : job.category === "result"
-      ? "/results"
-      : `/category/${job.category}`;
-
   const primaryApplyLink = job.importantLinks.find((l) => l.linkType === "apply_online")?.url;
 
-  // Structured JSON-LD Schemas
-  const breadcrumbSchema = {
+  // Schema.org Structured Data
+  const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
+    "@graph": [
       {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://nextvacancy.com",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://nextvacancy.com" },
+          { "@type": "ListItem", position: 2, name: job.organization, item: `https://nextvacancy.com/jobs/${job.slug}` },
+        ],
       },
       {
-        "@type": "ListItem",
-        position: 2,
-        name: categoryName,
-        item: `https://nextvacancy.com${categoryPath}`,
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: job.title,
-        item: `https://nextvacancy.com/jobs/${job.slug}`,
+        "@type": "JobPosting",
+        title: job.title,
+        description: job.shortSummary,
+        datePosted: job.createdAt,
+        validThrough: job.importantDates.applicationEndDate ? `${job.importantDates.applicationEndDate}T23:59:59Z` : undefined,
+        employmentType: job.jobType === "Contractual" ? "CONTRACTOR" : "FULL_TIME",
+        hiringOrganization: { "@type": "Organization", name: job.organization },
+        jobLocation: { "@type": "Place", address: { "@type": "PostalAddress", addressLocality: job.location, addressCountry: "IN" } },
       },
     ],
   };
 
-  const jobPostingSchema = {
-    "@context": "https://schema.org",
-    "@type": "JobPosting",
-    title: job.title,
-    description: job.shortSummary,
-    datePosted: job.createdAt,
-    validThrough: job.importantDates.applicationEndDate
-      ? `${job.importantDates.applicationEndDate}T23:59:59Z`
-      : undefined,
-    employmentType: job.jobType === "Contractual" ? "CONTRACTOR" : "FULL_TIME",
-    hiringOrganization: {
-      "@type": "Organization",
-      name: job.organization,
-      sameAs: job.importantLinks.find((l) => l.linkType === "official_website")?.url,
-    },
-    jobLocation: {
-      "@type": "Place",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: job.location,
-        addressCountry: "IN",
-      },
-    },
-    baseSalary: {
-      "@type": "MonetaryAmount",
-      currency: "INR",
-      value: {
-        "@type": "QuantitativeValue",
-        value: job.salaryOrStipend,
-        unitText: "MONTH",
-      },
-    },
-  };
-
-  const faqSchema =
-    job.faqs && job.faqs.length > 0
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: job.faqs.map((faq) => ({
-            "@type": "Question",
-            name: faq.question,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: faq.answer,
-            },
-          })),
-        }
-      : null;
-
   return (
     <>
-      {/* Structured Data Scripts (SEO) */}
-      <script
-        type="application/ld+json"
-        id="breadcrumb-jsonld"
-      >
-        {JSON.stringify(breadcrumbSchema)}
-      </script>
-      <script
-        type="application/ld+json"
-        id="jobposting-jsonld"
-      >
-        {JSON.stringify(jobPostingSchema)}
-      </script>
-      {faqSchema && (
-        <script
-          type="application/ld+json"
-          id="faq-jsonld"
-        >
-          {JSON.stringify(faqSchema)}
-        </script>
-      )}
+      <script type="application/ld+json" id="job-schema" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <div className="bg-slate-50/50 min-h-screen pb-16 lg:pb-8">
-        {/* 1. Breadcrumbs */}
         <div className="bg-white border-b border-[var(--border)] py-3">
           <Container size="lg">
-            <Breadcrumb
-              items={[
-                { label: "Home", href: "/" },
-                { label: categoryName, href: categoryPath },
-                { label: job.organization, active: true },
-              ]}
-            />
+            <Breadcrumb items={[{ label: "Home", href: "/" }, { label: "Jobs", href: "/government-jobs" }, { label: job.organization, active: true }]} />
           </Container>
         </div>
 
-        {/* Main Content Area */}
-        <ContentWithSidebar
-          sidebar={
-            <div className="space-y-6">
-              {/* Quick Links in Sidebar */}
-              <ImportantLinks links={job.importantLinks} variant="compact" />
-              <CommunitySidebarCard />
-              <SidebarImportantLinks />
-            </div>
-          }
-        >
-          <div className="space-y-6">
-            {/* 2. Job Hero */}
+        <ContentWithSidebar sidebar={<div className="space-y-6"><ImportantLinks links={job.importantLinks} variant="compact" /><CommunitySidebarCard /><SidebarImportantLinks /></div>}>
+          <article className="space-y-6">
             <JobHero job={job} />
-
-            {/* 3. Quick Overview Cards */}
-            <OverviewCards job={job} />
-
-            {/* 4. Important Dates */}
-            <DatesTable dates={job.importantDates} />
-
-            {/* 5. Application Fee */}
+            <RecruitmentOverview job={job} />
+            <ImportantDates dates={job.importantDates} />
+            <VacancyTable vacancies={job.vacancyBreakdown} totalVacancies={job.totalVacancies} organization={job.organization} />
+            <EligibilityCard qualificationSummary={job.qualificationSummary} qualificationsList={job.qualificationsList} ageLimit={job.ageLimit} />
+            <SalaryCard salaryOrStipend={job.salaryOrStipend} />
+            <SelectionStepper steps={job.selectionProcess} />
             <FeeTable fee={job.feeStructure} />
-
-            {/* 6. Age Limit */}
-            <AgeLimitCard ageLimit={job.ageLimit} />
-
-            {/* 7. Vacancy Details */}
-            <VacancyTable
-              vacancies={job.vacancyBreakdown}
-              totalVacancies={job.totalVacancies}
-            />
-
-            {/* 8. Educational Qualification */}
-            <QualificationSection
-              summary={job.qualificationSummary}
-              qualificationsList={job.qualificationsList}
-            />
-
-            {/* 9. Selection Process Timeline */}
-            <SelectionTimeline steps={job.selectionProcess} />
-
-            {/* 10. How To Apply */}
-            <HowToApply
-              steps={job.howToApplySteps}
-              organization={job.organization}
-            />
-
-            {/* 11. Important Links */}
-            <ImportantLinks links={job.importantLinks} />
-
-            {/* 12. FAQ Accordion */}
-            <FAQAccordion faqs={job.faqs} jobTitle={job.organization} />
-
-            {/* 13. Related Jobs */}
-            <RelatedJobs
-              jobs={relatedJobs}
-              categoryTitle={`More ${categoryName}`}
-            />
-          </div>
+            <DocumentsChecklist documents={job.requiredDocuments} />
+            <OfficialLinks links={job.importantLinks} />
+            <FAQSection job={job} faqs={job.faqs} />
+            <RelatedJobs jobs={relatedJobs} />
+          </article>
         </ContentWithSidebar>
 
-        {/* Official Trust Section */}
         <TrustSection />
-
-        {/* 14. Sticky Mobile Apply Bar */}
-        <StickyMobileApplyBar
-          lastDate={job.importantDates.applicationEndDate}
-          applyUrl={primaryApplyLink}
-          isEndingSoon={job.status === "ENDING_SOON"}
-        />
+        <StickyMobileApplyBar lastDate={job.importantDates.applicationEndDate} applyUrl={primaryApplyLink} isEndingSoon={job.status === "ENDING_SOON"} />
       </div>
     </>
   );
