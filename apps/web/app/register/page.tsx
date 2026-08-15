@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-10 sm:py-16 px-4 bg-slate-50/50">
+    <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-10 sm:py-16 px-4 bg-[#F1F5F9]">
       <AuthCard
         title="Create Free Candidate Account"
         subtitle="Get instant exam notifications, customized feeds, and job alerts"
