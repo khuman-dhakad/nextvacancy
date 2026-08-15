@@ -97,16 +97,16 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
 }) => {
   return (
     <section
-      aria-label="Quick Category Portals"
-      className={["py-8 sm:py-10 bg-slate-50 border-b border-[var(--border)]", className]
+      aria-label="Popular Categories"
+      className={["py-10 bg-slate-50 border-b border-slate-200", className]
         .filter(Boolean)
         .join(" ")}
     >
       <Container size="lg" className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-              Explore Recruitment Portals
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              Popular Categories
             </h2>
             <p className="text-xs sm:text-sm text-slate-500">
               Select a category to view active notifications and application links
@@ -131,7 +131,7 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 href={item.href}
                 className="group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] rounded-2xl"
               >
-                <Card className="h-full bg-white border border-[var(--border)] hover:border-[var(--primary)] hover:shadow-md transition-all duration-200 p-4 sm:p-5 flex flex-col justify-between space-y-3">
+                <Card className="h-full bg-white border border-slate-200/90 hover:border-[var(--primary)] hover:shadow-md transition-all duration-200 p-4 sm:p-5 flex flex-col justify-between space-y-3 rounded-2xl">
                   <div className="flex items-start justify-between gap-2">
                     <div className={`p-2.5 rounded-xl ${item.color} shrink-0 group-hover:scale-105 transition-transform`}>
                       <Icon className="h-5 w-5" aria-hidden="true" />

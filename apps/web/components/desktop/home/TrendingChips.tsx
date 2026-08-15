@@ -1,6 +1,8 @@
 import React from "react";
 import Link from "next/link";
 import { Flame } from "lucide-react";
+import { Badge } from "@/components/ui";
+
 
 export interface TrendingChipItem {
   label: string;
@@ -45,9 +47,9 @@ export const TrendingChips: React.FC<TrendingChipsProps> = ({
         >
           <span>{chip.label}</span>
           {chip.isHot && (
-            <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-amber-500/20 text-[#F59E0B] border border-amber-500/30">
+            <Badge variant="danger" size="sm" className="text-[9px] px-1 py-0">
               HOT
-            </span>
+            </Badge>
           )}
         </Link>
       ))}

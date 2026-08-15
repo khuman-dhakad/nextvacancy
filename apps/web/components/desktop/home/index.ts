@@ -12,4 +12,5 @@ export * from "./FeaturedJobs";
 export * from "./Notifications";
 export * from "./CategoryGrid";
 export * from "./WhyChooseUs";
+export * from "./CommunityCTA";
 export * from "./Newsletter";

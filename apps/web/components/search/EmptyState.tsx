@@ -63,6 +63,30 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             </Button>
           </Link>
         </div>
+
+        {/* Popular Search Suggestions */}
+        <div className="pt-4 border-t border-slate-100 text-left space-y-2">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center">
+            Popular Searches
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
+            {[
+              { label: "SSC CGL 2026", q: "SSC CGL" },
+              { label: "RRB NTPC", q: "RRB" },
+              { label: "Bank PO", q: "Bank" },
+              { label: "UPSC CSE", q: "UPSC" },
+              { label: "Police Constable", q: "Police" },
+            ].map((s) => (
+              <Link
+                key={s.label}
+                href={`/search?q=${encodeURIComponent(s.q)}`}
+                className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 hover:bg-[var(--primary-subtle)] hover:text-[var(--primary)] text-slate-700 transition-colors"
+              >
+                {s.label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

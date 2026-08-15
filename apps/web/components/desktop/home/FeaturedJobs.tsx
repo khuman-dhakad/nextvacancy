@@ -92,10 +92,17 @@ export const FeaturedJobs: React.FC<FeaturedJobsProps> = ({ className = "" }) =>
 
         {/* 4-Column Grid matching reference image */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {FEATURED_JOBS_DATA.map((job) => (
-            <JobCard key={job.id} job={job} />
+          {FEATURED_JOBS_DATA.map((job, idx) => (
+            <div
+              key={job.id}
+              className="animate-fade-up"
+              style={{ animationDelay: `${idx * 80}ms` }}
+            >
+              <JobCard job={job} />
+            </div>
           ))}
         </div>
+
       </Container>
     </section>
   );

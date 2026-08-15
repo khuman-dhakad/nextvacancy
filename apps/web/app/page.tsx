@@ -3,12 +3,11 @@ import type { Metadata } from "next";
 import {
   Hero,
   StatsSection,
-  VerificationStrip,
   FeaturedJobs,
   Notifications,
   CategoryGrid,
   WhyChooseUs,
-  Newsletter,
+  CommunityCTA,
 } from "@/components/desktop/home";
 
 export const metadata: Metadata = {
@@ -48,29 +47,26 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <div className="w-full bg-[#F8FAFC]">
-      {/* 1. Hero Section with SearchPanel & TrendingChips */}
+      {/* 1. Premium Hero (Headline, Subtitle, Search, Location, Category, CTA, Trending Searches) */}
       <Hero />
 
-      {/* 2. Live Market Statistics (4 Luxury Metric Cards) */}
+      {/* 2. Live Statistics (Active Jobs, Admit Cards, Results, Internships) */}
       <StatsSection />
 
-      {/* 3. Platform Verification Strip (4 Trust Standards) */}
-      <VerificationStrip />
-
-      {/* 4. Featured Government Jobs (4-Column Recruitment Cards) */}
+      {/* 3. Featured Government Jobs (4 Premium Cards) */}
       <FeaturedJobs />
 
-      {/* 5. Latest Notifications (Editorial Gazette Feed) */}
+      {/* 4. Latest Notifications (Editorial Style List) */}
       <Notifications />
 
-      {/* 6. Popular Exam Categories (8 Icon Cards Grid) */}
+      {/* 5. Popular Categories (Icon Grid) */}
       <CategoryGrid />
 
-      {/* 7. Why NEXTVACANCY (Trust Pillars with Highlights) */}
+      {/* 6. Why NEXTVACANCY (3 Trust Cards) */}
       <WhyChooseUs />
 
-      {/* 8. Newsletter / Community CTA */}
-      <Newsletter />
+      {/* 7. Community CTA (WhatsApp, Telegram) */}
+      <CommunityCTA />
     </div>
   );
 }

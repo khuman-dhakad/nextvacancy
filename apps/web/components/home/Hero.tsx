@@ -7,7 +7,10 @@ export const Hero: React.FC = () => {
   return (
     <section
       aria-label="Hero and Smart Search Experience"
-      className="relative overflow-hidden bg-gradient-to-r from-[#061527] via-[#0A1E38] to-[#0E294B] text-white pt-14 pb-12 select-none"
+      className="relative overflow-hidden bg-[#0A1E38] text-white pt-14 pb-14 select-none"
+      style={{
+        background: "linear-gradient(135deg, #061527 0%, #0A1E38 50%, #0E294B 100%)",
+      }}
     >
       {/* Ambient Lighting Background Effect */}
       <div
@@ -21,10 +24,10 @@ export const Hero: React.FC = () => {
 
       <Container size="lg" className="relative">
         {/* Top Hero Row: Headline on Left, SVG Parliament Building on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Left Text Block */}
-          <div className="lg:col-span-7 space-y-4">
-            <h1 className="text-4xl sm:text-5xl lg:text-[46px] font-black tracking-tight text-white leading-[1.15]">
+          <div className="w-full lg:w-7/12 space-y-4 text-left">
+            <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-black tracking-tight text-white leading-[1.2]">
               India&apos;s Most Trusted
               <span className="block text-[#F59E0B] mt-1">
                 Government &amp; Private Jobs Portal
@@ -38,7 +41,7 @@ export const Hero: React.FC = () => {
           </div>
 
           {/* Right SVG Indian Parliament / Rashtrapati Bhavan Architecture Illustration */}
-          <div className="lg:col-span-5 hidden lg:flex justify-end items-center pointer-events-none select-none">
+          <div className="w-full lg:w-5/12 hidden lg:flex justify-end items-center pointer-events-none select-none">
             <svg
               viewBox="0 0 480 260"
               fill="none"
@@ -151,12 +154,12 @@ export const Hero: React.FC = () => {
         </div>
 
         {/* Floating 4-Column Search Experience */}
-        <div className="mt-10">
+        <div className="mt-10 w-full">
           <SearchPanel />
         </div>
 
         {/* Trending Searches Row */}
-        <div className="mt-5">
+        <div className="mt-5 w-full">
           <TrendingChips />
         </div>
       </Container>

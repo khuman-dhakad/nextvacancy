@@ -139,8 +139,8 @@ export const JobHero: React.FC<JobHeroProps> = ({ job, className = "" }) => {
           </div>
         </div>
 
-        {/* Right Column: Direct Actions (Apply / Download PDF) */}
-        <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0 w-full sm:w-auto lg:w-56 pt-2 lg:pt-0">
+        {/* Right Column: Direct Actions — hidden on mobile (covered by StickyMobileApplyBar) */}
+        <div className="hidden lg:flex flex-col gap-2.5 shrink-0 w-56 pt-2">
           {applyLink && (
             <a
               href={applyLink}

@@ -103,7 +103,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, className = "" }) => {
     <Card
       hoverable
       className={[
-        "bg-white border border-slate-200/90 rounded-[20px] p-6 shadow-xs transition-all duration-200 flex flex-col justify-between space-y-5 group",
+        "bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-5 group",
         cardThemeStyles[job.borderTheme],
         className,
       ]
