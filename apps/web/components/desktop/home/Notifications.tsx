@@ -166,7 +166,7 @@ export const Notifications: React.FC<NotificationsProps> = ({
 
                     <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
                       <Calendar className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                      <span>{item.date}</span>
+                      <time dateTime={item.date}>{item.date}</time>
                     </div>
                   </div>
                 </div>
