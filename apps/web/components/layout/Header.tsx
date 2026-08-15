@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
+
 import { usePathname, useRouter } from "next/navigation";
 import { Container, Button } from "@/components/ui";
 import { TrustBar } from "@/components/desktop/home/TrustBar";
@@ -16,12 +17,16 @@ export interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ className = "" }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [isMac, setIsMac] = useState(false);
 
-  // Detect OS and attach global keyboard shortcut (Ctrl+K / ⌘K)
+  // Detect OS safely without cascading renders
+  const isMac = React.useSyncExternalStore(
+    () => () => {},
+    () => (typeof navigator !== "undefined" ? navigator.platform.toUpperCase().includes("MAC") : false),
+    () => false
+  );
+
+  // Attach global keyboard shortcut (Ctrl+K / ⌘K)
   useEffect(() => {
-    setIsMac(navigator.platform.toUpperCase().includes("MAC"));
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -32,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({ className = "" }) => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [router]);
+
 
   return (
     <header className={["w-full flex flex-col select-none", className].filter(Boolean).join(" ")}>
