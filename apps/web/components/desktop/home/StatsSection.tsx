@@ -4,14 +4,14 @@ import { Container, Card } from "@/components/ui";
 
 const STATS_DATA = [
   {
-    id: "vacancies",
+    id: "active-jobs",
     icon: Briefcase,
     iconBg: "bg-blue-50 text-[var(--secondary)]",
     badge: "Live",
     badgeStyle: "bg-blue-50 text-[var(--secondary)] border-blue-200/80",
     value: "54,280+",
-    title: "Active Vacancies",
-    subtitle: "Central & State Govt Jobs",
+    title: "Active Jobs",
+    subtitle: "Central & State Vacancies",
   },
   {
     id: "admit-cards",
@@ -21,7 +21,7 @@ const STATS_DATA = [
     badgeStyle: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
     value: "460+",
     title: "Admit Cards",
-    subtitle: "Hall Ticket / Call Letters",
+    subtitle: "Hall Tickets & Exam City",
   },
   {
     id: "results",
@@ -30,18 +30,18 @@ const STATS_DATA = [
     badge: "Verified",
     badgeStyle: "bg-purple-50 text-purple-700 border-purple-200/80",
     value: "1,240+",
-    title: "Results Declared",
+    title: "Results",
     subtitle: "Scorecards & Merit Lists",
   },
   {
-    id: "scholarships",
+    id: "internships",
     icon: GraduationCap,
     iconBg: "bg-orange-50 text-[#EA580C]",
     badge: "New",
     badgeStyle: "bg-orange-50 text-[#EA580C] border-orange-200/80",
     value: "15,800+",
-    title: "Scholarships & Grants",
-    subtitle: "PM Schemes & Opportunities",
+    title: "Internships",
+    subtitle: "PM Scheme & Opportunities",
   },
 ];
 
@@ -52,7 +52,7 @@ export interface StatsSectionProps {
 export const StatsSection: React.FC<StatsSectionProps> = ({ className = "" }) => {
   return (
     <section
-      aria-label="Live Market Statistics"
+      aria-label="Live Statistics"
       className={["py-6 bg-[#F8FAFC]", className].filter(Boolean).join(" ")}
     >
       <Container size="lg">
@@ -63,7 +63,8 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ className = "" }) =>
             return (
               <Card
                 key={item.id}
-                className="bg-white border border-slate-200/90 rounded-[20px] p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between"
+                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between animate-fade-up"
+                style={{ animationDelay: `${STATS_DATA.indexOf(item) * 60}ms` }}
               >
                 {/* Top Row: Icon + Badge */}
                 <div className="flex items-center justify-between">
