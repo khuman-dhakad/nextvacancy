@@ -38,7 +38,7 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
               </p>
               <div className="flex items-center gap-3 pt-1">
                 <a
-                  href="https://whatsapp.com/channel"
+                  href="https://whatsapp.com/channel/0029VaFzY400YKFh2ooNfA0H"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700/60 hover:bg-emerald-700 text-emerald-200 text-xs font-semibold transition-colors border border-emerald-600/50"
@@ -47,7 +47,7 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
                   <span>WhatsApp Community</span>
                 </a>
                 <a
-                  href="https://t.me"
+                  href="https://t.me/nextvacancy_official"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-700/60 hover:bg-sky-700 text-sky-200 text-xs font-semibold transition-colors border border-sky-600/50"
