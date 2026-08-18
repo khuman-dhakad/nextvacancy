@@ -9,6 +9,7 @@ import {
   PlusCircle,
   FolderTree,
   Building2,
+  BarChart3,
   Globe,
   LogOut,
 } from "lucide-react";
@@ -43,6 +44,11 @@ const NAV_ITEMS = [
     label: "Organizations Master",
     href: "/admin/organizations",
     icon: Building2,
+  },
+  {
+    label: "Analytics & SEO",
+    href: "/admin/analytics",
+    icon: BarChart3,
   },
 ];
 
