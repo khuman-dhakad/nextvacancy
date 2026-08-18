@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
-import { getAdminSession } from "@/lib/auth/admin-auth";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import { getAdminJobById } from "@/services/admin/admin-jobs.service";
 import { AdminJobForm } from "@/components/desktop/admin";
 

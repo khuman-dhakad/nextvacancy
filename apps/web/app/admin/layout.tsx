@@ -1,6 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
-import { getAdminSession } from "@/lib/auth/admin-auth";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import { AdminSidebar, AdminTopbar } from "@/components/desktop/admin";
 
 export const metadata: Metadata = {

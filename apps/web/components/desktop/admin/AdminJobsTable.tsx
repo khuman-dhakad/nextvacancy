@@ -172,7 +172,7 @@ export const AdminJobsTable: React.FC<AdminJobsTableProps> = ({
                 setDeleteModalState({
                   isOpen: true,
                   isBulk: true,
-                  title: `${selectedIds.length} selected jobs`,
+                  jobTitle: `${selectedIds.length} selected jobs`,
                 })
               }
               disabled={isProcessing}

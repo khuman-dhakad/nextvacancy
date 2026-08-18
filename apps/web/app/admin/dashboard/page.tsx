@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { PlusCircle, Briefcase, Sparkles } from "lucide-react";
-import { getAdminSession } from "@/lib/auth/admin-auth";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import {
   getAdminDashboardStats,
   getAdminActivityLogs,

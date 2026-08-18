@@ -1,10 +1,9 @@
-import { cookies } from "next/headers";
 import { AdminSession } from "@/types";
 
 /**
- * NEXTVACANCY Single-Admin RBAC Security & Authentication Core
- * Hardened authentication with session cookie validation, secure credential hashing,
- * and zero-leakage protection against IDOR and client-side privilege escalation.
+ * NEXTVACANCY Admin Authentication — Client-Safe Module
+ * Pure client-safe utilities, configuration, credential validators, and token parsers.
+ * ZERO server-only imports, ZERO next/headers, ZERO cookies().
  */
 
 // Single configured Administrator account credentials
@@ -20,7 +19,7 @@ export const ADMIN_CONFIG = {
 };
 
 /**
- * Generates a SHA-256 hash using standard Web Crypto API
+ * Generates a SHA-256 hash using standard Web Crypto API (Client-safe)
  */
 export async function hashPasswordSha256(password: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -56,7 +55,7 @@ export async function validateAdminCredentials(
 }
 
 /**
- * Creates a signed admin session payload
+ * Creates a signed admin session payload (client/server portable)
  */
 export function createSessionToken(): string {
   const payload = {
@@ -70,7 +69,7 @@ export function createSessionToken(): string {
 }
 
 /**
- * Verifies session token
+ * Verifies session token string
  */
 export function verifySessionToken(token: string): AdminSession | null {
   try {
@@ -89,18 +88,4 @@ export function verifySessionToken(token: string): AdminSession | null {
   } catch {
     return null;
   }
-}
-
-/**
- * Server-side helper to read and verify admin session from cookies
- */
-export async function getAdminSession(): Promise<AdminSession | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(ADMIN_CONFIG.sessionCookieName);
-
-  if (!sessionCookie || !sessionCookie.value) {
-    return null;
-  }
-
-  return verifySessionToken(sessionCookie.value);
 }

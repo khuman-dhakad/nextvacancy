@@ -1,14 +1,14 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import {
-  ADMIN_CONFIG,
   validateAdminCredentials,
   createSessionToken,
   getAdminSession,
-} from "@/lib/auth/admin-auth";
+  setAdminSessionCookie,
+  clearAdminSessionCookie,
+} from "@/lib/auth/admin-auth.server";
 import {
   createAdminJob,
   updateAdminJob,
@@ -44,14 +44,7 @@ export async function loginAdminAction(formData: FormData): Promise<AdminActionR
   }
 
   const token = createSessionToken();
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_CONFIG.sessionCookieName, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: ADMIN_CONFIG.sessionMaxAge,
-  });
+  await setAdminSessionCookie(token);
 
   return { success: true, message: "Authentication successful." };
 }
@@ -60,8 +53,7 @@ export async function loginAdminAction(formData: FormData): Promise<AdminActionR
  * Admin Logout Server Action
  */
 export async function logoutAdminAction(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(ADMIN_CONFIG.sessionCookieName);
+  await clearAdminSessionCookie();
   redirect("/admin/login");
 }
 
