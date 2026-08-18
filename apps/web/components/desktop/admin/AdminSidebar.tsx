@@ -7,11 +7,13 @@ import {
   LayoutDashboard,
   Briefcase,
   PlusCircle,
+  FolderTree,
+  Building2,
+  BarChart3,
   Globe,
   LogOut,
 } from "lucide-react";
 import { logoutAdminAction } from "@/app/admin/actions";
-
 
 export interface AdminSidebarProps {
   className?: string;
@@ -33,7 +35,23 @@ const NAV_ITEMS = [
     href: "/admin/jobs/new",
     icon: PlusCircle,
   },
+  {
+    label: "Categories Master",
+    href: "/admin/categories",
+    icon: FolderTree,
+  },
+  {
+    label: "Organizations Master",
+    href: "/admin/organizations",
+    icon: Building2,
+  },
+  {
+    label: "Analytics & SEO",
+    href: "/admin/analytics",
+    icon: BarChart3,
+  },
 ];
+
 
 export const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = "" }) => {
   const pathname = usePathname();

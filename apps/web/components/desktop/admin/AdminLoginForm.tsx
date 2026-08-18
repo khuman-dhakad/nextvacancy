@@ -16,7 +16,8 @@ import {
 import { Card, Input, Button } from "@/components/ui";
 
 import { loginAdminAction } from "@/app/admin/actions";
-import { ADMIN_CONFIG } from "@/lib/auth/admin-auth";
+import { ADMIN_CONFIG } from "@/lib/auth/admin-config";
+
 
 export interface AdminLoginFormProps {
   className?: string;
