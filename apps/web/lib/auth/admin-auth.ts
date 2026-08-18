@@ -1,23 +1,9 @@
 import { cookies } from "next/headers";
 import { AdminSession } from "@/types";
+import { ADMIN_CONFIG } from "./admin-config";
 
-/**
- * NEXTVACANCY Single-Admin RBAC Security & Authentication Core
- * Hardened authentication with session cookie validation, secure credential hashing,
- * and zero-leakage protection against IDOR and client-side privilege escalation.
- */
+export { ADMIN_CONFIG };
 
-// Single configured Administrator account credentials
-export const ADMIN_CONFIG = {
-  username: "admin",
-  email: "admin@nextvacancy.com",
-  // SHA-256 of "NextVacancy@Admin2026!"
-  // Password plaintext: NextVacancy@Admin2026!
-  passwordPlain: "NextVacancy@Admin2026!",
-  passwordHashSha256: "721a1d13dbca142d137bc391f1ba4f7626927d6d5eb7fa8901ebc6b3e7f4c7d2",
-  sessionCookieName: "nextvacancy_admin_session",
-  sessionMaxAge: 60 * 60 * 24 * 7, // 7 days in seconds
-};
 
 /**
  * Generates a SHA-256 hash using standard Web Crypto API
