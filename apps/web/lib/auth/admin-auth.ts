@@ -1,46 +1,46 @@
-import { cookies } from "next/headers";
 import { AdminSession } from "@/types";
 import { ADMIN_CONFIG } from "./admin-config";
 
-
 /**
- * Generates a SHA-256 hash using standard Web Crypto API
+ * Generates a SHA-256 hash using standard Web Crypto API (Client-safe)
  */
-export async function hashPasswordSha256(password: string): Promise<string> {
+export async function hashPasswordSha256(
+  password: string
+): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(password);
   const hashBuffer = await crypto.subtle.digest("SHA-256", data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  return hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 /**
- * Validates admin credentials against hardcoded hash
+ * Validates admin credentials against configured admin account
  */
 export async function validateAdminCredentials(
   identifier: string,
   passwordPlain: string
 ): Promise<boolean> {
   const cleanIdentifier = identifier.trim().toLowerCase();
-  const isUsernameMatch =
+
+  const isIdentifierMatch =
     cleanIdentifier === ADMIN_CONFIG.username.toLowerCase() ||
     cleanIdentifier === ADMIN_CONFIG.email.toLowerCase();
 
-  if (!isUsernameMatch) {
-    return false;
-  }
+  if (!isIdentifierMatch) return false;
 
-  // Fast check and cryptographic hash check
-  if (passwordPlain === ADMIN_CONFIG.passwordPlain) {
-    return true;
-  }
+  // Fast path
+  if (passwordPlain === ADMIN_CONFIG.passwordPlain) return true;
 
   const computedHash = await hashPasswordSha256(passwordPlain);
   return computedHash === ADMIN_CONFIG.passwordHashSha256;
 }
 
 /**
- * Creates a signed admin session payload
+ * Creates portable admin session token
  */
 export function createSessionToken(): string {
   const payload = {
@@ -49,17 +49,25 @@ export function createSessionToken(): string {
     email: ADMIN_CONFIG.email,
     iat: Date.now(),
   };
-  // Base64 encoded payload for token representation
+
   return Buffer.from(JSON.stringify(payload)).toString("base64");
 }
 
 /**
- * Verifies session token
+ * Verifies admin session token
  */
-export function verifySessionToken(token: string): AdminSession | null {
+export function verifySessionToken(
+  token: string
+): AdminSession | null {
   try {
-    const decoded = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
-    if (decoded.role === "ADMIN" && decoded.username === ADMIN_CONFIG.username) {
+    const decoded = JSON.parse(
+      Buffer.from(token, "base64").toString("utf-8")
+    );
+
+    if (
+      decoded.role === "ADMIN" &&
+      decoded.username === ADMIN_CONFIG.username
+    ) {
       return {
         isAuthenticated: true,
         username: decoded.username,
@@ -69,22 +77,9 @@ export function verifySessionToken(token: string): AdminSession | null {
         token,
       };
     }
+
     return null;
   } catch {
     return null;
   }
-}
-
-/**
- * Server-side helper to read and verify admin session from cookies
- */
-export async function getAdminSession(): Promise<AdminSession | null> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get(ADMIN_CONFIG.sessionCookieName);
-
-  if (!sessionCookie || !sessionCookie.value) {
-    return null;
-  }
-
-  return verifySessionToken(sessionCookie.value);
 }
