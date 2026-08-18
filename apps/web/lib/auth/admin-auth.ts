@@ -2,8 +2,6 @@ import { cookies } from "next/headers";
 import { AdminSession } from "@/types";
 import { ADMIN_CONFIG } from "./admin-config";
 
-export { ADMIN_CONFIG };
-
 
 /**
  * Generates a SHA-256 hash using standard Web Crypto API
