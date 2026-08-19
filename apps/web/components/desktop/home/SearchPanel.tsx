@@ -22,9 +22,9 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         method="GET"
         role="search"
         aria-label="Search government and private job circulars"
-        className="bg-white/95 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/60 flex flex-col lg:flex-row items-stretch gap-2"
+        className="bg-white rounded-2xl sm:rounded-3xl p-2.5 shadow-2xl border border-white/80 flex flex-col lg:flex-row items-stretch gap-2"
       >
-        {/* Col 1: Keyword Input — takes all remaining space */}
+        {/* Col 1: Keyword Input */}
         <div className="flex-1 flex items-center gap-3 px-4 py-2 min-h-[52px] min-w-0">
           <Search className="h-5 w-5 text-slate-400 shrink-0" aria-hidden="true" />
           <div className="flex-1 min-w-0">
@@ -32,13 +32,13 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
               type="search"
               name="q"
               defaultValue={defaultQuery}
-              placeholder="Search by job title, post, department..."
+              placeholder="Search by job title, commission (SSC, UPSC, RRB), or post..."
               aria-label="Search by job title, post, or department"
-              className="w-full text-sm font-semibold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none bg-transparent"
+              className="w-full text-xs sm:text-sm font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none bg-transparent"
               autoComplete="off"
             />
             <span className="text-[11px] text-slate-400 font-medium block truncate mt-0.5">
-              e.g. SSC CGL, Railway, Bank PO, Clerk
+              e.g. SSC CGL, Railway NTPC, Bank PO, Clerk, Police SI
             </span>
           </div>
         </div>
@@ -46,15 +46,15 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         {/* Vertical Divider 1 */}
         <div className="hidden lg:block w-px self-stretch bg-slate-200 my-2 shrink-0" aria-hidden="true" />
 
-        {/* Col 2: Location Dropdown — fixed comfortable width */}
-        <div className="lg:w-44 xl:w-48 shrink-0 flex items-center gap-2.5 px-4 py-2 min-h-[52px]">
+        {/* Col 2: Location Dropdown */}
+        <div className="lg:w-48 xl:w-52 shrink-0 flex items-center gap-2.5 px-4 py-2 min-h-[52px]">
           <MapPin className="h-5 w-5 text-slate-400 shrink-0" aria-hidden="true" />
           <div className="relative flex-1 min-w-0">
             <select
               name="location"
               defaultValue={defaultLocation}
               aria-label="Select state or region"
-              className="w-full text-sm font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 truncate"
+              className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 truncate"
             >
               <option value="all">All India / Central</option>
               <option value="delhi">Delhi NCR</option>
@@ -80,15 +80,15 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         {/* Vertical Divider 2 */}
         <div className="hidden lg:block w-px self-stretch bg-slate-200 my-2 shrink-0" aria-hidden="true" />
 
-        {/* Col 3: Category Dropdown — fixed comfortable width */}
-        <div className="lg:w-44 xl:w-48 shrink-0 flex items-center gap-2.5 px-4 py-2 min-h-[52px]">
+        {/* Col 3: Category Dropdown */}
+        <div className="lg:w-48 xl:w-52 shrink-0 flex items-center gap-2.5 px-4 py-2 min-h-[52px]">
           <LayoutGrid className="h-5 w-5 text-slate-400 shrink-0" aria-hidden="true" />
           <div className="relative flex-1 min-w-0">
             <select
               name="category"
               defaultValue={defaultCategory}
               aria-label="Select job category"
-              className="w-full text-sm font-semibold text-slate-800 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 truncate"
+              className="w-full text-xs sm:text-sm font-bold text-slate-800 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5 truncate"
             >
               <option value="all">All Categories</option>
               <option value="government">Government Jobs</option>
@@ -108,13 +108,13 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
           </div>
         </div>
 
-        {/* Col 4: Search Button — auto width, never stretches */}
+        {/* Col 4: Search Button */}
         <div className="shrink-0">
           <Button
             type="submit"
             variant="accent"
             size="lg"
-            className="w-full lg:w-auto font-bold bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white min-h-[52px] px-8 text-sm shadow-md flex items-center justify-center gap-2 tracking-wide whitespace-nowrap transition-all active:scale-[0.98]"
+            className="w-full lg:w-auto font-black bg-[#D97706] hover:bg-[#B45309] text-white min-h-[52px] px-8 text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 tracking-wide whitespace-nowrap transition-all rounded-xl sm:rounded-2xl"
           >
             <span>Search Vacancies</span>
             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />

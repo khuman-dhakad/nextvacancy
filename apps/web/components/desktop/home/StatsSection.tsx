@@ -6,9 +6,9 @@ const STATS_DATA = [
   {
     id: "active-jobs",
     icon: Briefcase,
-    iconBg: "bg-blue-50 text-[var(--secondary)]",
-    badge: "Live",
-    badgeStyle: "bg-blue-50 text-[var(--secondary)] border-blue-200/80",
+    iconBg: "bg-blue-50 text-[var(--primary)] border-blue-200/80",
+    badge: "Live Circulars",
+    badgeStyle: "bg-blue-50 text-[var(--primary)] border-blue-200/80",
     value: "54,280+",
     title: "Active Jobs",
     subtitle: "Central & State Vacancies",
@@ -16,7 +16,7 @@ const STATS_DATA = [
   {
     id: "admit-cards",
     icon: FileCheck,
-    iconBg: "bg-emerald-50 text-emerald-700",
+    iconBg: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
     badge: "Updated Today",
     badgeStyle: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
     value: "460+",
@@ -26,22 +26,22 @@ const STATS_DATA = [
   {
     id: "results",
     icon: Award,
-    iconBg: "bg-purple-50 text-purple-700",
+    iconBg: "bg-purple-50 text-purple-700 border-purple-200/80",
     badge: "Verified",
     badgeStyle: "bg-purple-50 text-purple-700 border-purple-200/80",
     value: "1,240+",
-    title: "Results",
+    title: "Declared Results",
     subtitle: "Scorecards & Merit Lists",
   },
   {
     id: "internships",
     icon: GraduationCap,
-    iconBg: "bg-orange-50 text-[#EA580C]",
-    badge: "New",
-    badgeStyle: "bg-orange-50 text-[#EA580C] border-orange-200/80",
+    iconBg: "bg-amber-50 text-amber-800 border-amber-200/80",
+    badge: "PM Scheme",
+    badgeStyle: "bg-amber-50 text-amber-800 border-amber-200/80",
     value: "15,800+",
     title: "Internships",
-    subtitle: "PM Scheme & Opportunities",
+    subtitle: "Corporate & PSU Schemes",
   },
 ];
 
@@ -53,24 +53,23 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ className = "" }) =>
   return (
     <section
       aria-label="Live Statistics"
-      className={["py-6 bg-[#F8FAFC]", className].filter(Boolean).join(" ")}
+      className={["py-8 bg-[#F8FAFC]", className].filter(Boolean).join(" ")}
     >
       <Container size="lg">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {STATS_DATA.map((item) => {
             const Icon = item.icon;
 
             return (
               <Card
                 key={item.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between animate-fade-up"
-                style={{ animationDelay: `${STATS_DATA.indexOf(item) * 60}ms` }}
+                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between"
               >
                 {/* Top Row: Icon + Badge */}
                 <div className="flex items-center justify-between">
                   <div
                     className={[
-                      "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border border-slate-100",
+                      "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border",
                       item.iconBg,
                     ].join(" ")}
                   >
@@ -89,13 +88,13 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ className = "" }) =>
 
                 {/* Bottom Content */}
                 <div className="mt-5 space-y-1">
-                  <div className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-mono leading-none">
                     {item.value}
                   </div>
-                  <h3 className="text-sm font-bold text-slate-800 pt-1">
+                  <h3 className="text-sm font-bold text-slate-900 pt-1">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-slate-600 font-medium">
+                  <p className="text-xs text-slate-500 font-medium">
                     {item.subtitle}
                   </p>
                 </div>

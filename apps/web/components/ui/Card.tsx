@@ -11,9 +11,9 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <Component
         ref={ref}
         className={[
-          "rounded-xl border border-[var(--border)] bg-white text-[var(--foreground)] shadow-xs",
+          "rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-2xs",
           hoverable
-            ? "transition-all duration-200 hover:border-[var(--border-strong)] hover:shadow-sm hover:-translate-y-0.5"
+            ? "transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5"
             : "",
           className,
         ]
@@ -36,7 +36,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
     return (
       <div
         ref={ref}
-        className={["flex flex-col space-y-1.5 p-4 sm:p-5 border-b border-[var(--border)]", className]
+        className={["flex flex-col space-y-1.5 p-5 sm:p-6 border-b border-slate-100", className]
           .filter(Boolean)
           .join(" ")}
         {...props}
@@ -58,7 +58,7 @@ export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
     return (
       <Component
         ref={ref}
-        className={["text-base sm:text-lg font-bold tracking-tight text-[var(--foreground)]", className]
+        className={["text-base sm:text-lg font-black tracking-tight text-slate-900", className]
           .filter(Boolean)
           .join(" ")}
         {...props}
@@ -80,7 +80,7 @@ export const CardDescription = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={["text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed", className]
+      className={["text-xs sm:text-sm text-slate-500 leading-relaxed font-normal", className]
         .filter(Boolean)
         .join(" ")}
       {...props}
@@ -101,7 +101,7 @@ export const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
     return (
       <div
         ref={ref}
-        className={[noPadding ? "" : "p-4 sm:p-5", className].filter(Boolean).join(" ")}
+        className={[noPadding ? "" : "p-5 sm:p-6", className].filter(Boolean).join(" ")}
         {...props}
       >
         {children}
@@ -120,7 +120,7 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
       <div
         ref={ref}
         className={[
-          "flex items-center p-4 sm:p-5 border-t border-[var(--border)] bg-[var(--surface)]/50 rounded-b-xl",
+          "flex items-center p-5 sm:p-6 border-t border-slate-100 bg-slate-50/50 rounded-b-2xl",
           className,
         ]
           .filter(Boolean)

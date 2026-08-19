@@ -20,34 +20,34 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, { bg: string; dot: string }> = {
   success: {
-    bg: "bg-[var(--success-subtle)] text-[#065f46] border border-[#a7f3d0]",
-    dot: "bg-[var(--success)]",
+    bg: "bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-bold",
+    dot: "bg-emerald-600",
   },
   warning: {
-    bg: "bg-[var(--warning-subtle)] text-[#92400e] border border-[#fde68a]",
-    dot: "bg-[var(--warning)]",
+    bg: "bg-amber-50 text-amber-900 border border-amber-200/80 font-bold",
+    dot: "bg-amber-500",
   },
   danger: {
-    bg: "bg-[var(--danger-subtle)] text-[#991b1b] border border-[#fecaca]",
-    dot: "bg-[var(--danger)]",
+    bg: "bg-rose-50 text-rose-800 border border-rose-200/80 font-bold",
+    dot: "bg-rose-600",
   },
   info: {
-    bg: "bg-[var(--info-subtle)] text-[#075985] border border-[#bae6fd]",
-    dot: "bg-[var(--info)]",
+    bg: "bg-blue-50 text-blue-800 border border-blue-200/80 font-bold",
+    dot: "bg-blue-600",
   },
   neutral: {
-    bg: "bg-[var(--surface-subtle)] text-[var(--foreground)] border border-[var(--border)]",
-    dot: "bg-[var(--muted)]",
+    bg: "bg-slate-100 text-slate-700 border border-slate-200/80 font-semibold",
+    dot: "bg-slate-500",
   },
   accent: {
-    bg: "bg-[var(--accent-subtle)] text-[#92400e] border border-[#fde68a]",
-    dot: "bg-[var(--accent)]",
+    bg: "bg-amber-50 text-amber-900 border border-amber-300 font-bold",
+    dot: "bg-amber-600",
   },
 };
 
 const sizeStyles: Record<BadgeSize, string> = {
-  sm: "text-[11px] font-semibold px-2 py-0.5 gap-1 rounded",
-  md: "text-xs font-semibold px-2.5 py-1 gap-1.5 rounded-md",
+  sm: "text-[11px] px-2.5 py-0.5 gap-1 rounded-full",
+  md: "text-xs px-3 py-1 gap-1.5 rounded-full",
 };
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -65,7 +65,7 @@ export const Badge: React.FC<BadgeProps> = ({
   return (
     <span
       className={[
-        "inline-flex items-center font-medium select-none shrink-0 tracking-wide",
+        "inline-flex items-center select-none shrink-0 tracking-tight leading-none",
         currentVariant.bg,
         sizeStyles[size],
         className,
@@ -76,7 +76,7 @@ export const Badge: React.FC<BadgeProps> = ({
     >
       {dot && (
         <span
-          className={`h-1.5 w-1.5 rounded-full ${currentVariant.dot} shrink-0`}
+          className={`h-1.5 w-1.5 rounded-full ${currentVariant.dot} shrink-0 animate-pulse`}
           aria-hidden="true"
         />
       )}

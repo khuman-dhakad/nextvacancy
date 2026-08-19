@@ -8,8 +8,6 @@ import {
   KeyRound,
   GraduationCap,
   ArrowRight,
-  ExternalLink,
-  Calendar,
   Sparkles,
 } from "lucide-react";
 
@@ -97,97 +95,99 @@ export const Notifications: React.FC<NotificationsProps> = ({
     >
       <Container size="lg" className="space-y-8">
         {/* Editorial Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 pb-5">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold border border-red-200/80">
-              <BellRing className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Gazette Daily Bulletin</span>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-100 pb-5">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200">
+              <BellRing className="h-3 w-3 text-emerald-600 animate-pulse" aria-hidden="true" />
+              <span>Real-Time Bulletin</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Latest Notifications &amp; Official Releases
+              Latest Notifications &amp; Exam Updates
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              Real-time circulars for admit cards, answer keys, scorecards, and student scholarship
-              grants across national and state examination boards.
+            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+              Immediate releases for admit cards, answer keys, results, and student grants.
             </p>
           </div>
 
-          <Link href="/results" className="shrink-0">
-            <Button
-              variant="outline"
-              size="md"
-              className="font-bold text-xs sm:text-sm shadow-xs"
-              rightIcon={<ArrowRight className="h-4 w-4" aria-hidden="true" />}
-            >
-              All Circulars &amp; Results
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link href="/admit-cards">
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-bold text-xs rounded-xl shadow-2xs hover:bg-[#0F2744] hover:text-white hover:border-[#0F2744] transition-all"
+              >
+                All Admit Cards
+              </Button>
+            </Link>
+            <Link href="/results">
+              <Button
+                variant="outline"
+                size="sm"
+                className="font-bold text-xs rounded-xl shadow-2xs hover:bg-[#0F2744] hover:text-white hover:border-[#0F2744] transition-all"
+              >
+                All Results
+              </Button>
+            </Link>
+          </div>
         </div>
 
-        {/* Editorial Newspaper-Style Feed Card */}
-        <Card className="bg-white border border-slate-200/90 rounded-2xl shadow-xs divide-y divide-slate-100 overflow-hidden">
+        {/* Notifications Editorial List */}
+        <div className="space-y-3.5">
           {notifications.map((item) => {
-            const Icon = TYPE_ICONS[item.type];
+            const Icon = TYPE_ICONS[item.type] || Sparkles;
 
             return (
-              <div
+              <Card
                 key={item.id}
-                className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50/90 transition-colors group"
+                hoverable
+                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:border-[var(--primary)] hover:shadow-md transition-all duration-200 flex flex-col lg:flex-row lg:items-center justify-between gap-5 group"
               >
-                <div className="flex items-start gap-4 min-w-0">
-                  {/* Category Icon Badge */}
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 group-hover:bg-[var(--primary-subtle)] text-[var(--primary)] flex items-center justify-center shrink-0 transition-colors mt-0.5 border border-slate-200/60">
-                    <Icon className="h-5 w-5" aria-hidden="true" />
+                {/* Left Content */}
+                <div className="flex items-start gap-4 flex-1 min-w-0">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[var(--primary)] border border-blue-200/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                    <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
 
-                  {/* Notification Details */}
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={item.badgeVariant} size="sm">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <Badge variant={item.badgeVariant} size="sm" dot>
                         {item.badgeLabel}
                       </Badge>
-                      <span className="text-xs font-bold text-slate-700 truncate">
+                      <span className="text-xs font-bold text-slate-500 truncate">
                         {item.organization}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200/60">
-                        <Sparkles className="h-2.5 w-2.5" aria-hidden="true" />
-                        Verified
+                      <span className="text-slate-300 hidden sm:inline">•</span>
+                      <span className="text-[11px] font-semibold text-slate-400">
+                        {item.date}
                       </span>
                     </div>
 
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[var(--secondary)] transition-colors leading-snug">
-                      <Link
-                        href={item.href}
-                        className="focus-visible:outline-none focus-visible:underline"
-                      >
-                        {item.title}
-                      </Link>
-                    </h3>
-
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium">
-                      <Calendar className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
-                      <time dateTime={item.date}>{item.date}</time>
-                    </div>
+                    <Link
+                      href={item.href}
+                      className="block text-sm sm:text-base font-black text-slate-900 group-hover:text-[var(--primary)] transition-colors leading-snug line-clamp-2"
+                    >
+                      {item.title}
+                    </Link>
                   </div>
                 </div>
 
-                {/* Direct Action Link */}
-                <div className="pt-2 sm:pt-0 shrink-0">
+                {/* Right Action */}
+                <div className="shrink-0 pt-2 lg:pt-0">
                   <Link href={item.href}>
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      className="font-bold text-xs text-[var(--primary)] hover:bg-[var(--primary-subtle)] px-4 py-2 min-h-[38px] border border-slate-200/80"
-                      rightIcon={<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />}
+                      variant="primary"
+                      size="md"
+                      className="w-full sm:w-auto font-bold text-xs bg-[#0F2744] hover:bg-[#183B66] text-white rounded-xl shadow-xs"
+                      rightIcon={<ArrowRight className="h-4 w-4" />}
                     >
                       {item.actionLabel}
                     </Button>
                   </Link>
                 </div>
-              </div>
+              </Card>
             );
           })}
-        </Card>
+        </div>
       </Container>
     </section>
   );
