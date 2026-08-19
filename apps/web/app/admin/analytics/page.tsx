@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BarChart3, Activity } from "lucide-react";
-import { getAdminSession } from "@/lib/auth/admin-auth";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import {
   getAnalyticsOverviewKPIs,
   getTrafficInsights,

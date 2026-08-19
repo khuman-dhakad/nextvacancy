@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-import { ADMIN_CONFIG } from "@/lib/auth/admin-config";
 import {
   validateAdminCredentials,
   createSessionToken,
