@@ -13,8 +13,8 @@ export const Skeleton: React.FC<SkeletonProps> = ({
     <div
       aria-hidden="true"
       className={[
-        "animate-pulse bg-[var(--surface-subtle)] border border-[var(--border)]",
-        circle ? "rounded-full" : "rounded-md",
+        "animate-pulse bg-gradient-to-r from-slate-100 via-slate-200/70 to-slate-100 border border-slate-200/60",
+        circle ? "rounded-full" : "rounded-xl",
         className,
       ]
         .filter(Boolean)
