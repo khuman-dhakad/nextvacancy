@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAdminSession } from "@/lib/auth/admin-auth";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import { getAdminCategories } from "@/services/admin/admin-master-data.service";
 import { AdminCategoryManager } from "@/components/desktop/admin";
 
