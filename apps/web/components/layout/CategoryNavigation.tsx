@@ -45,7 +45,7 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
     <nav
       aria-label="Category Navigation"
       className={[
-        "bg-[var(--surface-subtle)] border-b border-[var(--border)] py-1.5 overflow-hidden",
+        "bg-white border-b border-[var(--border)] py-2 overflow-hidden",
         className,
       ]
         .filter(Boolean)
@@ -62,11 +62,11 @@ export const CategoryNavigation: React.FC<CategoryNavigationProps> = ({
                 key={item.href}
                 href={item.href}
                 className={[
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 whitespace-nowrap select-none",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold shrink-0 whitespace-nowrap select-none",
                   "transition-all duration-150 ease-in-out min-h-[32px]",
                   isActive
-                    ? "bg-[var(--primary)] text-white shadow-2xs"
-                    : "bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-900 border border-[var(--border)]",
+                    ? "bg-[#850A42] text-white shadow-2xs"
+                    : "bg-white text-[#064D79] hover:bg-[#F8E7EF] hover:text-[#850A42] border border-[var(--border)]",
                 ]
                   .filter(Boolean)
                   .join(" ")}

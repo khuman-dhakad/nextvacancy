@@ -53,7 +53,7 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ className = "" }) =>
   return (
     <section
       aria-label="Live Statistics"
-      className={["py-8 bg-[#F8FAFC]", className].filter(Boolean).join(" ")}
+      className={["py-6 bg-[#ECECEC]", className].filter(Boolean).join(" ")}
     >
       <Container size="lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -63,7 +63,7 @@ export const StatsSection: React.FC<StatsSectionProps> = ({ className = "" }) =>
             return (
               <Card
                 key={item.id}
-                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between"
+                className="bg-white border border-[#B9C8D1] rounded-none p-4 sm:p-5 shadow-none hover:shadow-sm hover:border-[#850A42] transition-all duration-200 flex flex-col justify-between"
               >
                 {/* Top Row: Icon + Badge */}
                 <div className="flex items-center justify-between">

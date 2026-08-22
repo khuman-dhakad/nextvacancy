@@ -44,24 +44,23 @@ export const Header: React.FC<HeaderProps> = ({ className = "" }) => {
       <TrustBar />
 
       {/* 2. Premium Sticky Main Header */}
-      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-[0_1px_0_rgb(15_39_68/0.04)] transition-shadow">
-        <Container size="lg" className="flex items-center justify-between h-[68px] gap-4">
+      <div className="sticky top-0 z-40 bg-[#850A42] border-b border-[#630731] shadow-md transition-shadow">
+        <Container size="lg" className="flex items-center justify-between h-[76px] gap-4">
           {/* Brand Logo */}
           <Link
             href="/"
             aria-label="NEXTVACANCY Homepage"
-            className="flex items-center gap-3 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-xl p-1 group shrink-0"
+            className="flex items-center gap-2 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white rounded-lg p-1 group shrink-0"
           >
-            <div className="h-10 w-10 rounded-xl bg-[#0F2744] text-white flex items-center justify-center font-black text-xl shadow-xs tracking-tight transition-transform group-hover:-rotate-3 group-hover:scale-105">
+            <div className="h-10 w-10 rounded-md bg-white text-[#850A42] flex items-center justify-center font-black text-xl shadow-xs tracking-tight transition-transform group-hover:scale-105">
               N
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-lg font-black tracking-tight text-[#0F2744] leading-none flex items-center gap-1">
-                NEXT<span className="text-indigo-600">VACANCY</span>
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-lg font-black tracking-tight text-white leading-none flex items-center gap-1">
+                NEXT<span className="text-amber-300">VACANCY</span>
               </span>
-              <span className="text-[10px] font-semibold text-slate-500 tracking-[0.16em] uppercase mt-0.5">
-                Jobs, exams &amp; career alerts
+              <span className="text-[10px] font-semibold text-pink-100 tracking-[0.12em] uppercase mt-0.5">
+                Official Job Portal
               </span>
             </div>
           </Link>
@@ -74,12 +73,12 @@ export const Header: React.FC<HeaderProps> = ({ className = "" }) => {
             <Link href="/search" aria-label="Search all recruitments">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-200/90 text-slate-600 hover:text-[#0F2744] hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 cursor-pointer text-xs font-bold shadow-2xs"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md border border-white/40 text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer text-xs font-bold"
                 aria-label={`Quick search recruitments (${isMac ? "⌘K" : "Ctrl K"})`}
               >
-                <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                <Search className="h-4 w-4 text-pink-100" aria-hidden="true" />
                 <span className="hidden sm:inline">Search</span>
-                <kbd className="hidden sm:inline text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md border border-slate-200 font-mono">
+                <kbd className="hidden sm:inline text-[10px] bg-white/15 text-pink-50 px-1.5 py-0.5 rounded border border-white/20 font-mono">
                   {isMac ? "⌘K" : "Ctrl K"}
                 </kbd>
               </button>
@@ -89,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({ className = "" }) => {
               <Button
                 variant="primary"
                 size="md"
-                className="bg-[#0F2744] hover:bg-[#183B66] text-white font-bold text-xs px-5 shadow-xs rounded-lg"
+                className="bg-white hover:bg-pink-50 text-[#850A42] font-bold text-xs px-5 shadow-xs rounded-md"
               >
                 Sign In
               </Button>

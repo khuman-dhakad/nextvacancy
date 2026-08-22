@@ -32,20 +32,20 @@ export const SearchHeroHeader: React.FC<SearchHeroHeaderProps> = ({
   return (
     <section
       aria-label="Search and Category Header"
-      className="bg-[var(--primary)] text-white pt-7 pb-9 sm:pt-10 sm:pb-12 border-b border-[var(--border-strong)]"
+      className="bg-[#850A42] text-white pt-6 pb-7 sm:pt-8 sm:pb-9 border-b border-[#630731]"
     >
       <Container size="lg" className="space-y-4 sm:space-y-6">
         {/* Title & Description */}
         <div className="max-w-3xl space-y-2">
           {badgeText && (
-            <Badge variant="accent" size="sm">
+            <Badge variant="accent" size="sm" className="bg-white/15 text-pink-50 border-white/30">
               {badgeText}
             </Badge>
           )}
           <h1 className="text-xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight">
             {title}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+          <p className="text-xs sm:text-sm text-pink-100 leading-relaxed max-w-2xl">
             {description}
           </p>
         </div>
@@ -56,7 +56,7 @@ export const SearchHeroHeader: React.FC<SearchHeroHeaderProps> = ({
             action={basePath}
             method="GET"
             role="search"
-            className="flex flex-col sm:flex-row items-center gap-2 p-1.5 sm:p-2 rounded-2xl bg-white shadow-lg border border-slate-200"
+            className="flex flex-col sm:flex-row items-center gap-2 p-1.5 sm:p-2 rounded-md bg-white shadow-lg border border-pink-200"
           >
             <div className="relative flex-1 w-full flex items-center">
               <Search className="absolute left-3.5 h-4 w-4 text-slate-400 pointer-events-none" aria-hidden="true" />
@@ -73,7 +73,7 @@ export const SearchHeroHeader: React.FC<SearchHeroHeaderProps> = ({
               type="submit"
               variant="accent"
               size="md"
-              className="w-full sm:w-auto px-5 font-bold shrink-0 min-h-[42px]"
+              className="w-full sm:w-auto px-5 font-bold shrink-0 min-h-[42px] rounded-md"
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
               Search
@@ -91,7 +91,7 @@ export const SearchHeroHeader: React.FC<SearchHeroHeaderProps> = ({
                 <Link
                   key={tag.label}
                   href={`${basePath}?q=${encodeURIComponent(tag.query)}`}
-                  className="px-2.5 py-0.5 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-[11px] font-medium transition-colors border border-slate-700"
+                  className="px-2.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-pink-50 text-[11px] font-medium transition-colors border border-white/25"
                 >
                   {tag.label}
                 </Link>
