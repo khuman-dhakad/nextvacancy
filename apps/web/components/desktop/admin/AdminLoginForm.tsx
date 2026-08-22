@@ -11,13 +11,10 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  KeyRound,
 } from "lucide-react";
 import { Card, Input, Button } from "@/components/ui";
 
 import { loginAdminAction } from "@/app/admin/actions";
-import { ADMIN_CONFIG } from "@/lib/auth/admin-auth";
-
 
 export interface AdminLoginFormProps {
   className?: string;
@@ -25,8 +22,8 @@ export interface AdminLoginFormProps {
 
 export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ className = "" }) => {
   const router = useRouter();
-  const [username, setUsername] = useState("admin@nextvacancy.com");
-  const [password, setPassword] = useState("NextVacancy@Admin2026!");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -49,12 +46,6 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ className = "" }
     } else {
       setErrorMessage(result.error || "Authentication failed. Please verify your credentials.");
     }
-  };
-
-  const handleFillDemo = () => {
-    setUsername(ADMIN_CONFIG.email);
-    setPassword(ADMIN_CONFIG.passwordPlain);
-    setErrorMessage(null);
   };
 
   return (
@@ -81,27 +72,6 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ className = "" }
             <div className="leading-snug">{errorMessage}</div>
           </div>
         )}
-
-        {/* Demo Credentials Auto-Fill Box */}
-        <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 space-y-2 text-xs">
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-amber-950 flex items-center gap-1.5">
-              <KeyRound className="h-3.5 w-3.5 text-amber-700" />
-              <span>Admin Credentials</span>
-            </span>
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              className="text-[11px] font-bold text-amber-900 hover:text-amber-700 underline cursor-pointer"
-            >
-              Auto-Fill
-            </button>
-          </div>
-          <div className="text-slate-700 font-mono text-[11px] space-y-0.5">
-            <div>Username: <strong className="text-slate-950">admin@nextvacancy.com</strong></div>
-            <div>Password: <strong className="text-slate-950">NextVacancy@Admin2026!</strong></div>
-          </div>
-        </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
