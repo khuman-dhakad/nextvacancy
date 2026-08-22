@@ -12,14 +12,14 @@
   --primary-subtle: #E7EEF6;
 
   /* Secondary: Blue (#1D4ED8) - Interactive, Links, Actions */
-  --secondary: #1D4ED8;
-  --secondary-hover: #1E40AF;
+  --secondary: #4F46E5;
+  --secondary-hover: #4338CA;
   --secondary-foreground: #FFFFFF;
   --secondary-subtle: #DBEAFE;
 
   /* Accent: Saffron / Gold (#D97706) - Highlighting, Urgent Updates */
-  --accent: #D97706;
-  --accent-hover: #B45309;
+  --accent: #F59E0B;
+  --accent-hover: #D97706;
   --accent-foreground: #FFFFFF;
   --accent-subtle: #FEF3C7;
 
@@ -54,8 +54,8 @@
   --muted: #64748B;
   --muted-foreground: #475569;
 
-  --ring: #0F2744;
-  --radius: 0.5rem;
+  --ring: #4F46E5;
+  --radius: 0.625rem;
 
   /* Design System Radius Tokens */
   --radius-sm: 0.375rem;   /* 6px  - badges, tags */
@@ -67,8 +67,8 @@
   /* Shadow Tokens */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
-  --shadow-card: 0 4px 16px -4px rgb(15 39 68 / 0.08), 0 1px 4px -1px rgb(0 0 0 / 0.05);
-  --shadow-elevated: 0 8px 32px -8px rgb(15 39 68 / 0.12), 0 2px 8px -2px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 8px 24px -12px rgb(15 39 68 / 0.2), 0 1px 3px rgb(15 39 68 / 0.06);
+  --shadow-elevated: 0 20px 48px -20px rgb(15 39 68 / 0.24), 0 4px 12px -4px rgb(15 39 68 / 0.08);
 }
 
 @theme inline {
@@ -134,6 +134,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   text-rendering: optimizeLegibility;
+  min-width: 320px;
+}
+
+::selection {
+  background: #c7d2fe;
+  color: #0f2744;
+}
+
+a {
+  text-underline-offset: 3px;
 }
 
 /* ==========================================================================
@@ -153,8 +163,8 @@ body {
 
 /* Focus styles for keyboard navigation */
 :focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+  outline: 3px solid #818cf8;
+  outline-offset: 3px;
 }
 
 /* ==========================================================================

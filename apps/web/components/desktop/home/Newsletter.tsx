@@ -11,23 +11,14 @@ export const Newsletter: React.FC<NewsletterProps> = ({ className = "" }) => {
     <section
       aria-label="Recruitment Digest and Newsletter Subscription"
       className={[
-        "py-16 bg-gradient-to-b from-slate-50/60 via-blue-50/30 to-slate-50/60 border-b border-slate-200",
+        "py-16 bg-slate-50 border-b border-slate-200",
         className,
       ]
         .filter(Boolean)
         .join(" ")}
     >
       <Container size="lg">
-        <div className="bg-gradient-to-br from-[#0B1D33] via-[#0F2744] to-[#122D4F] text-white rounded-3xl p-8 sm:p-12 lg:p-16 shadow-2xl border border-slate-700/80 relative overflow-hidden">
-          {/* Ambient Lighting Glow */}
-          <div
-            className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute -bottom-24 -left-24 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"
-            aria-hidden="true"
-          />
+        <div className="bg-[#0B1D33] text-white rounded-2xl p-8 sm:p-12 lg:p-16 shadow-[0_20px_48px_rgb(15_39_68/0.2)] border border-[#28486B] relative overflow-hidden">
 
           <div className="relative max-w-3xl mx-auto text-center space-y-6">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-amber-500/20 text-[#F59E0B] text-xs font-bold border border-amber-500/30">
