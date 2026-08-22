@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
 
 export const viewport: Viewport = {
-  themeColor: "#0F2744",
+  themeColor: "#850A42",
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
@@ -39,6 +39,12 @@ export const metadata: Metadata = {
   ],
   creator: "NEXTVACANCY",
   publisher: "NEXTVACANCY",
+  referrer: "strict-origin-when-cross-origin",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   category: "Recruitment & Education",
   keywords: [
     "Government Jobs 2026",

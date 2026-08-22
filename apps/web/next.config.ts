@@ -29,6 +29,22 @@ const securityHeaders = [
     value: "nosniff",
   },
   {
+    key: "X-Permitted-Cross-Domain-Policies",
+    value: "none",
+  },
+  {
+    key: "Origin-Agent-Cluster",
+    value: "?1",
+  },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin",
+  },
+  {
+    key: "Cross-Origin-Resource-Policy",
+    value: "same-origin",
+  },
+  {
     key: "Referrer-Policy",
     value: "strict-origin-when-cross-origin",
   },
@@ -54,6 +70,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   poweredByHeader: false,
+  compress: true,
+  generateEtags: true,
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
   transpilePackages: ["lucide-react"],
   allowedDevOrigins: ["localhost:3000", "192.168.29.217"],
   async headers() {
