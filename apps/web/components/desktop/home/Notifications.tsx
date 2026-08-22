@@ -89,22 +89,22 @@ export const Notifications: React.FC<NotificationsProps> = ({
   return (
     <section
       aria-label="Latest Examination Notifications and Results"
-      className={["py-14 bg-white border-b border-slate-200", className]
+      className={["py-8 bg-[#ECECEC] border-b border-slate-300", className]
         .filter(Boolean)
         .join(" ")}
     >
       <Container size="lg" className="space-y-8">
         {/* Editorial Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-100 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#850A42] text-white px-4 py-3 border border-[#630731]">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-800 text-[11px] font-bold border border-emerald-200">
-              <BellRing className="h-3 w-3 text-emerald-600 animate-pulse" aria-hidden="true" />
+            <div className="hidden sm:inline-flex items-center gap-1.5 text-pink-100 text-[11px] font-bold">
+              <BellRing className="h-3 w-3 text-amber-300 animate-pulse" aria-hidden="true" />
               <span>Real-Time Bulletin</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Latest Notifications &amp; Exam Updates
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Latest Job Notifications
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 font-medium">
+            <p className="text-xs sm:text-sm text-pink-100 font-medium">
               Immediate releases for admit cards, answer keys, results, and student grants.
             </p>
           </div>
@@ -140,11 +140,11 @@ export const Notifications: React.FC<NotificationsProps> = ({
               <Card
                 key={item.id}
                 hoverable
-                className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs hover:border-[var(--primary)] hover:shadow-md transition-all duration-200 flex flex-col lg:flex-row lg:items-center justify-between gap-5 group"
+                className="bg-white border border-[#8FAAB8] rounded-none p-4 sm:p-5 shadow-none hover:border-[#850A42] hover:shadow-sm transition-all duration-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4 group"
               >
                 {/* Left Content */}
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[var(--primary)] border border-blue-200/80 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                  <div className="w-10 h-10 rounded bg-[#F8E7EF] text-[#850A42] border border-pink-200 flex items-center justify-center shrink-0">
                     <Icon className="h-6 w-6" aria-hidden="true" />
                   </div>
 
@@ -164,7 +164,7 @@ export const Notifications: React.FC<NotificationsProps> = ({
 
                     <Link
                       href={item.href}
-                      className="block text-sm sm:text-base font-black text-slate-900 group-hover:text-[var(--primary)] transition-colors leading-snug line-clamp-2"
+                      className="block text-sm sm:text-base font-bold text-[#064D79] group-hover:text-[#850A42] transition-colors leading-snug line-clamp-2"
                     >
                       {item.title}
                     </Link>

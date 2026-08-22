@@ -44,8 +44,8 @@ export const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
               "px-3 py-2 rounded-lg text-[12px] font-semibold select-none transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-1",
               isActive
-                ? "bg-indigo-50 text-indigo-700 font-bold"
-                : "text-slate-600 hover:text-[var(--primary)] hover:bg-slate-50",
+                ? "bg-white text-[#850A42] font-bold"
+                : "text-white hover:text-white hover:bg-white/15",
             ]
               .filter(Boolean)
               .join(" ")}

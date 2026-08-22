@@ -13,22 +13,22 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
   return (
     <footer
       aria-label="Site Footer"
-      className={["bg-[#0B1D33] text-slate-300 border-t border-[#183B66] text-xs", className]
+      className={["bg-[#242424] text-slate-300 border-t-4 border-[#850A42] text-xs", className]
         .filter(Boolean)
         .join(" ")}
     >
       {/* 1. Main Footer Navigation Links */}
-      <div className="py-10 sm:py-12 border-b border-[#183B66]">
+      <div className="py-10 sm:py-12 border-b border-white/15">
         <Container size="lg">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
             {/* Col 1: Brand & Bio */}
             <div className="col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-white text-[#0F2744] flex items-center justify-center font-black text-base shadow-xs">
+                <div className="h-8 w-8 rounded-md bg-white text-[#850A42] flex items-center justify-center font-black text-base shadow-xs">
                   N
                 </div>
                 <span className="text-lg font-black tracking-tight text-white">
-                  NEXT<span className="text-[#D97706]">VACANCY</span>
+                  NEXT<span className="text-amber-300">VACANCY</span>
                 </span>
               </div>
               <p className="text-slate-400 leading-relaxed max-w-sm">
@@ -174,10 +174,10 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
       </div>
 
       {/* 2. Official Government Disclaimer Banner */}
-      <div className="py-5 bg-[#081525] border-b border-[#183B66]/80 text-[11px] text-slate-400 leading-relaxed">
+      <div className="py-5 bg-[#191919] border-b border-white/10 text-[11px] text-slate-400 leading-relaxed">
         <Container size="lg">
           <div className="flex items-start gap-2.5 max-w-5xl mx-auto">
-            <ShieldCheck className="h-4 w-4 text-[#D97706] shrink-0 mt-0.5" aria-hidden="true" />
+            <ShieldCheck className="h-4 w-4 text-amber-300 shrink-0 mt-0.5" aria-hidden="true" />
             <p>
               <strong className="text-slate-200">Legal Disclaimer:</strong> NEXTVACANCY is an independent educational and career information platform. We are not associated, affiliated, endorsed by, or in any way officially connected with the Government of India, State Governments, or any recruitment commission/body (UPSC, SSC, NTA, State PSCs, etc.). All notification details, vacancies, dates, and fees are compiled from official department gazettes and websites for public awareness.
             </p>
@@ -186,7 +186,7 @@ export const Footer: React.FC<FooterProps> = ({ className = "" }) => {
       </div>
 
       {/* 3. Copyright Bar */}
-      <div className="py-4 bg-[#050E1A] text-[11px] text-slate-500">
+      <div className="py-4 bg-[#111111] text-[11px] text-slate-500">
         <Container size="lg" className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
           <p>© {currentYear} NEXTVACANCY. All rights reserved.</p>
           <div className="flex items-center gap-4 text-slate-400">

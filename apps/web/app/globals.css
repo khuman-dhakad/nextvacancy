@@ -6,20 +6,20 @@
      ========================================================================== */
 
   /* Primary: Deep Navy (#0F2744) - Authority, Trust, Recruitment */
-  --primary: #0F2744;
-  --primary-hover: #183B66;
+  --primary: #850A42;
+  --primary-hover: #6E0837;
   --primary-foreground: #FFFFFF;
-  --primary-subtle: #E7EEF6;
+  --primary-subtle: #F8E7EF;
 
   /* Secondary: Blue (#1D4ED8) - Interactive, Links, Actions */
-  --secondary: #4F46E5;
-  --secondary-hover: #4338CA;
+  --secondary: #064D79;
+  --secondary-hover: #043B5D;
   --secondary-foreground: #FFFFFF;
   --secondary-subtle: #DBEAFE;
 
   /* Accent: Saffron / Gold (#D97706) - Highlighting, Urgent Updates */
-  --accent: #F59E0B;
-  --accent-hover: #D97706;
+  --accent: #078F3D;
+  --accent-hover: #056F2F;
   --accent-foreground: #FFFFFF;
   --accent-subtle: #FEF3C7;
 
@@ -41,20 +41,20 @@
   --info-subtle: #E0F2FE;
 
   /* Neutral Surface & Layout Tokens (Light Mode First) */
-  --background: #FFFFFF;
-  --foreground: #0F172A;
+  --background: #ECECEC;
+  --foreground: #202124;
 
-  --surface: #F8FAFC;
+  --surface: #F1F1F1;
   --surface-raised: #FFFFFF;
   --surface-subtle: #F1F5F9;
 
-  --border: #E2E8F0;
-  --border-strong: #CBD5E1;
+  --border: #B9C8D1;
+  --border-strong: #8FAAB8;
 
   --muted: #64748B;
   --muted-foreground: #475569;
 
-  --ring: #4F46E5;
+  --ring: #850A42;
   --radius: 0.625rem;
 
   /* Design System Radius Tokens */
@@ -67,8 +67,8 @@
   /* Shadow Tokens */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
-  --shadow-card: 0 8px 24px -12px rgb(15 39 68 / 0.2), 0 1px 3px rgb(15 39 68 / 0.06);
-  --shadow-elevated: 0 20px 48px -20px rgb(15 39 68 / 0.24), 0 4px 12px -4px rgb(15 39 68 / 0.08);
+  --shadow-card: 0 1px 3px rgb(20 38 48 / 0.12);
+  --shadow-elevated: 0 4px 12px rgb(20 38 48 / 0.16);
 }
 
 @theme inline {
@@ -129,7 +129,7 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
@@ -138,8 +138,8 @@ body {
 }
 
 ::selection {
-  background: #c7d2fe;
-  color: #0f2744;
+  background: #F4B8D1;
+  color: #850A42;
 }
 
 a {

@@ -47,7 +47,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="w-full bg-[#F8FAFC]">
+    <div className="w-full bg-[#ECECEC]">
       {/* 1. Premium Hero (Headline, Subtitle, Search, Location, Category, CTA, Trending Searches) */}
       <Hero />
 
