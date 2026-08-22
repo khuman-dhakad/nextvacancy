@@ -30,7 +30,7 @@ export const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
   return (
     <nav
       aria-label="Main Navigation"
-      className={["hidden lg:flex items-center gap-1", className].filter(Boolean).join(" ")}
+      className={["hidden lg:flex items-center gap-0.5", className].filter(Boolean).join(" ")}
     >
       {MAIN_NAV_LINKS.map((item) => {
         const isActive = activePath === item.href;
@@ -41,11 +41,11 @@ export const DesktopNavigation: React.FC<DesktopNavigationProps> = ({
             href={item.href}
             aria-current={isActive ? "page" : undefined}
             className={[
-              "px-3 py-2 rounded-lg text-xs font-semibold select-none transition-colors",
+              "px-3 py-2 rounded-lg text-[12px] font-semibold select-none transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-1",
               isActive
-                ? "bg-[var(--primary-subtle)] text-[var(--primary)] font-bold"
-                : "text-slate-700 hover:text-[var(--primary)] hover:bg-slate-100",
+                ? "bg-indigo-50 text-indigo-700 font-bold"
+                : "text-slate-600 hover:text-[var(--primary)] hover:bg-slate-50",
             ]
               .filter(Boolean)
               .join(" ")}

@@ -25,7 +25,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   primary:
     "bg-[#0F2744] text-white hover:bg-[#183B66] active:bg-[#0A1E38] shadow-xs border border-transparent font-bold",
   secondary:
-    "bg-[#1D4ED8] text-white hover:bg-[#1E40AF] active:bg-[#1E3A8A] shadow-xs border border-transparent font-bold",
+    "bg-indigo-600 text-white hover:bg-indigo-700 active:bg-indigo-800 shadow-xs border border-transparent font-bold",
   outline:
     "border border-slate-200/90 bg-white text-slate-800 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 shadow-2xs font-bold",
   ghost:
@@ -33,13 +33,13 @@ const variantStyles: Record<ButtonVariant, string> = {
   destructive:
     "bg-[#DC2626] text-white hover:bg-[#B91C1C] active:bg-[#991B1B] shadow-xs border border-transparent font-bold",
   accent:
-    "bg-[#D97706] text-white hover:bg-[#B45309] active:bg-[#92400E] shadow-xs border border-transparent font-bold",
+    "bg-amber-500 text-slate-950 hover:bg-amber-400 active:bg-amber-600 shadow-xs border border-transparent font-bold",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "min-h-[36px] px-3 py-1.5 text-xs gap-1.5 rounded-xl",
-  md: "min-h-[42px] px-4.5 py-2 text-xs sm:text-sm gap-2 rounded-xl",
-  lg: "min-h-[48px] px-6 py-2.5 text-sm sm:text-base gap-2.5 rounded-2xl",
+  sm: "min-h-[36px] px-3 py-1.5 text-xs gap-1.5 rounded-lg",
+  md: "min-h-[42px] px-4.5 py-2 text-xs sm:text-sm gap-2 rounded-lg",
+  lg: "min-h-[48px] px-6 py-2.5 text-sm sm:text-base gap-2.5 rounded-xl",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

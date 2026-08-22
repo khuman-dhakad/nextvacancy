@@ -7,6 +7,7 @@ import {
   Notifications,
   CategoryGrid,
   WhyChooseUs,
+  Newsletter,
   CommunityCTA,
 } from "@/components/desktop/home";
 
@@ -65,7 +66,10 @@ export default function HomePage() {
       {/* 6. Why NEXTVACANCY (3 Trust Cards) */}
       <WhyChooseUs />
 
-      {/* 7. Community CTA (WhatsApp, Telegram) */}
+      {/* 7. Recruitment Digest */}
+      <Newsletter />
+
+      {/* 8. Community CTA (WhatsApp, Telegram) */}
       <CommunityCTA />
     </div>
   );

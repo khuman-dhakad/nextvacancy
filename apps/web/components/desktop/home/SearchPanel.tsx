@@ -22,7 +22,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
         method="GET"
         role="search"
         aria-label="Search government and private job circulars"
-        className="bg-white rounded-2xl sm:rounded-3xl p-2.5 shadow-2xl border border-white/80 flex flex-col lg:flex-row items-stretch gap-2"
+        className="bg-white rounded-xl p-2 shadow-[0_20px_40px_rgb(3_15_31/0.28)] border border-slate-200 flex flex-col lg:flex-row items-stretch gap-1.5"
       >
         {/* Col 1: Keyword Input */}
         <div className="flex-1 flex items-center gap-3 px-4 py-2 min-h-[52px] min-w-0">
@@ -114,7 +114,7 @@ export const SearchPanel: React.FC<SearchPanelProps> = ({
             type="submit"
             variant="accent"
             size="lg"
-            className="w-full lg:w-auto font-black bg-[#D97706] hover:bg-[#B45309] text-white min-h-[52px] px-8 text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 tracking-wide whitespace-nowrap transition-all rounded-xl sm:rounded-2xl"
+            className="w-full lg:w-auto font-black bg-amber-500 hover:bg-amber-400 text-slate-950 min-h-[52px] px-8 text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 tracking-wide whitespace-nowrap transition-all rounded-lg"
           >
             <span>Search Vacancies</span>
             <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
