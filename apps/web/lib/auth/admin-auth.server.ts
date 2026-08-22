@@ -33,7 +33,7 @@ export async function setAdminSessionCookie(token: string): Promise<void> {
   cookieStore.set(ADMIN_CONFIG.sessionCookieName, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: ADMIN_CONFIG.sessionMaxAge,
   });
