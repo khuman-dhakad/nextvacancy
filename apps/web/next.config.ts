@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
 
 const isProd = process.env.NODE_ENV === "production";
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "img-src 'self' data: https:",
+  "font-src 'self' data:",
+  "connect-src 'self' https://api.nextvacancy.com",
+  `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
+  "style-src 'self' 'unsafe-inline'",
+  "upgrade-insecure-requests",
+].join("; ");
 
 const securityHeaders = [
   {
@@ -23,6 +36,10 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
   },
+  {
+    key: "Content-Security-Policy",
+    value: contentSecurityPolicy,
+  },
   ...(isProd
     ? [
         {
@@ -35,6 +52,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  output: "standalone",
   poweredByHeader: false,
   transpilePackages: ["lucide-react"],
   allowedDevOrigins: ["localhost:3000", "192.168.29.217"],
