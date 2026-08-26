@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session.server";
 import { Container } from "@/components/ui";
 import { getNotificationCenterData } from "@/services/notifications/notification.service";
 import {
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function NotificationsPage() {
+  await requireUser();
   const data = await getNotificationCenterData();
 
   return (

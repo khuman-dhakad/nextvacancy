@@ -1,6 +1,8 @@
 import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth/session.server";
 import { AuthCard, RegisterForm } from "@/components/auth";
 
 export const metadata: Metadata = {
@@ -16,7 +18,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const user = await getCurrentUser();
+  if (user) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-10 sm:py-16 px-4 bg-[#F1F5F9]">
       <AuthCard
