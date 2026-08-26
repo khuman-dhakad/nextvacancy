@@ -5,17 +5,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoginFormData, AuthFormErrors } from "@/types";
 import { validateLoginForm } from "@/lib/validations/auth";
+import { loginAction } from "@/app/login/actions";
 import { Input, Button } from "@/components/ui";
 import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export interface LoginFormProps {
   onSuccess?: () => void;
   className?: string;
+  redirectTo?: string;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSuccess,
   className = "",
+  redirectTo = "/dashboard",
 }) => {
   const router = useRouter();
 
@@ -38,7 +41,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear field-level error on change
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -60,19 +62,25 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API verification call (ready for Spring Boot /api/v1/auth/login)
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const result = await loginAction(formData);
+
+      if (!result.success) {
+        setServerError(result.error || "Invalid email or password.");
+        if (result.fieldErrors) {
+          setErrors(result.fieldErrors);
+        }
+        return;
+      }
 
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
       } else {
-        setTimeout(() => {
-          router.push("/");
-        }, 1000);
+        router.push(redirectTo);
+        router.refresh();
       }
     } catch {
-      setServerError("Invalid email or password. Please verify your credentials and try again.");
+      setServerError("Unable to connect to authentication service. Please try again.");
     } finally {
       setIsLoading(false);
     }

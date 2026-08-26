@@ -16,12 +16,25 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ForgotPasswordPage() {
+interface ForgotPasswordPageProps {
+  searchParams: Promise<{ token?: string }>;
+}
+
+export default async function ForgotPasswordPage({
+  searchParams,
+}: ForgotPasswordPageProps) {
+  const { token } = await searchParams;
+  const isResetMode = Boolean(token);
+
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center py-10 sm:py-16 px-4 bg-[#F1F5F9]">
       <AuthCard
-        title="Recover Your Password"
-        subtitle="We will help you regain secure access to your account"
+        title={isResetMode ? "Set New Password" : "Recover Your Password"}
+        subtitle={
+          isResetMode
+            ? "Choose a new secure password for your account"
+            : "We will help you regain secure access to your account"
+        }
         footer={
           <p>
             Remembered your password?{" "}
@@ -34,7 +47,7 @@ export default function ForgotPasswordPage() {
           </p>
         }
       >
-        <ForgotPasswordForm />
+        <ForgotPasswordForm token={token} />
       </AuthCard>
     </div>
   );
