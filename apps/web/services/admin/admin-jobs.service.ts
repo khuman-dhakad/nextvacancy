@@ -1,3 +1,5 @@
+import { eq, desc, asc, and, or, ilike, inArray, count, sql } from "drizzle-orm";
+import { db, jobs, auditLogs } from "@/lib/db";
 import {
   JobPosting,
   JobCategory,
@@ -7,146 +9,160 @@ import {
   AdminJobSearchParams,
   PaginatedResponse,
 } from "@/types";
+import { mapJobRecordToPosting } from "@/services/jobs/jobs.service";
 import { MOCK_JOB_POSTINGS } from "@/services/jobs/jobs.mock";
 
 /**
- * NEXTVACANCY Admin CMS & Recruitment Job Management Service
- * Full CRUD, search, filter, status toggles, duplication, and audit logging.
- * Ready for direct binding to Spring Boot `/api/v1/admin/jobs/*`.
- */
-
-// In-memory runtime store initialized from mock dataset
-let adminJobsStore: JobPosting[] = [...MOCK_JOB_POSTINGS];
-
-const activityLogsStore: AdminActivityLog[] = [
-  {
-    id: "act-1",
-    action: "LOGIN",
-    entityTitle: "Administrator Session Started",
-    timestamp: "Just now",
-    adminUser: "admin@nextvacancy.com",
-    details: "Authenticated from recognized IP 49.36.120.45",
-  },
-  {
-    id: "act-2",
-    action: "PUBLISH",
-    entityTitle: "SSC CGL 2026 Recruitment",
-    timestamp: "2 hours ago",
-    adminUser: "admin@nextvacancy.com",
-    details: "Published 14,582 Group B & C Vacancies notification",
-  },
-  {
-    id: "act-3",
-    action: "UPDATE",
-    entityTitle: "RRB NTPC 2026 Centralized Notification",
-    timestamp: "5 hours ago",
-    adminUser: "admin@nextvacancy.com",
-    details: "Updated application deadline and payment instructions",
-  },
-  {
-    id: "act-4",
-    action: "CREATE",
-    entityTitle: "IBPS PO / MT XV 2026 Recruitment",
-    timestamp: "Yesterday",
-    adminUser: "admin@nextvacancy.com",
-    details: "Created new 4,455 Bank PO vacancy article with fee matrix",
-  },
-];
-
-/**
- * Computes live analytics metrics across all recruitment categories
+ * Computes live analytics metrics across all recruitment categories from the database
  */
 export async function getAdminDashboardStats(): Promise<AdminAnalyticsStats> {
-  const total = adminJobsStore.length;
-  const govtJobs = adminJobsStore.filter((j) => j.category === "government").length;
-  const privateJobs = adminJobsStore.filter((j) => j.category === "private").length;
-  const admitCards = adminJobsStore.filter((j) => j.category === "admit-card" || j.status === "ADMIT_CARD_OUT").length;
-  const results = adminJobsStore.filter((j) => j.category === "result" || j.status === "RESULT_OUT").length;
-  const scholarships = adminJobsStore.filter((j) => j.category === "scholarship").length;
-  const internships = adminJobsStore.filter((j) => j.category === "internship" || j.category === "apprenticeship").length;
-  const draftsCount = adminJobsStore.filter((j) => j.status === "CLOSED").length;
-  const totalViews = adminJobsStore.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0);
+  try {
+    const allJobs = await db.select().from(jobs);
 
+    if (allJobs.length > 0) {
+      const total = allJobs.length;
+      const govtJobs = allJobs.filter((j) => j.category === "government").length;
+      const privateJobs = allJobs.filter((j) => j.category === "private").length;
+      const admitCards = allJobs.filter(
+        (j) => j.category === "admit-card" || j.status === "ADMIT_CARD_OUT"
+      ).length;
+      const results = allJobs.filter(
+        (j) => j.category === "result" || j.status === "RESULT_OUT"
+      ).length;
+      const scholarships = allJobs.filter((j) => j.category === "scholarship").length;
+      const internships = allJobs.filter(
+        (j) => j.category === "internship" || j.category === "apprenticeship"
+      ).length;
+      const draftsCount = allJobs.filter((j) => j.status === "CLOSED").length;
+      const totalViews = allJobs.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0);
+
+      return {
+        totalJobs: total,
+        govtJobs,
+        privateJobs,
+        admitCards,
+        results,
+        scholarships,
+        internships,
+        draftsCount,
+        totalViews,
+      };
+    }
+  } catch (error) {
+    console.warn("Database error in getAdminDashboardStats, calculating from mock:", error);
+  }
+
+  // Fallback
+  const total = MOCK_JOB_POSTINGS.length;
   return {
     totalJobs: total,
-    govtJobs,
-    privateJobs,
-    admitCards,
-    results,
-    scholarships,
-    internships,
-    draftsCount,
-    totalViews,
+    govtJobs: MOCK_JOB_POSTINGS.filter((j) => j.category === "government").length,
+    privateJobs: MOCK_JOB_POSTINGS.filter((j) => j.category === "private").length,
+    admitCards: MOCK_JOB_POSTINGS.filter((j) => j.category === "admit-card").length,
+    results: MOCK_JOB_POSTINGS.filter((j) => j.category === "result").length,
+    scholarships: MOCK_JOB_POSTINGS.filter((j) => j.category === "scholarship").length,
+    internships: MOCK_JOB_POSTINGS.filter((j) => j.category === "internship").length,
+    draftsCount: MOCK_JOB_POSTINGS.filter((j) => j.status === "CLOSED").length,
+    totalViews: MOCK_JOB_POSTINGS.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0),
   };
 }
 
 /**
- * Searches and paginates through the CMS job inventory
+ * Searches and paginates through the CMS job inventory with database queries
  */
 export async function getAdminJobs(
   params: AdminJobSearchParams = {}
 ): Promise<PaginatedResponse<JobPosting>> {
-  let results = [...adminJobsStore];
-
-  // 1. Text Search Query (Title, Org, Location, Qualification)
-  if (params.query && params.query.trim()) {
-    const q = params.query.toLowerCase().trim();
-    results = results.filter(
-      (job) =>
-        job.title.toLowerCase().includes(q) ||
-        job.organization.toLowerCase().includes(q) ||
-        job.location.toLowerCase().includes(q) ||
-        job.qualificationSummary.toLowerCase().includes(q)
-    );
-  }
-
-  // 2. Category Filter
-  if (params.category && params.category !== "all") {
-    results = results.filter((job) => job.category === params.category);
-  }
-
-  // 3. Status Filter
-  if (params.status && params.status !== "all") {
-    results = results.filter((job) => job.status === params.status);
-  }
-
-  // 4. Sorting
-  const sortBy = params.sortBy || "latest";
-  const isAsc = params.sortOrder === "asc";
-
-  results.sort((a, b) => {
-    if (sortBy === "title") {
-      return isAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
-    }
-    if (sortBy === "organization") {
-      return isAsc
-        ? a.organization.localeCompare(b.organization)
-        : b.organization.localeCompare(a.organization);
-    }
-    if (sortBy === "deadline") {
-      const dateA = a.importantDates.applicationEndDate || "9999-12-31";
-      const dateB = b.importantDates.applicationEndDate || "9999-12-31";
-      return isAsc ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
-    }
-    if (sortBy === "views") {
-      return isAsc ? a.viewsCount - b.viewsCount : b.viewsCount - a.viewsCount;
-    }
-    // Default: latest created
-    const timeA = new Date(a.createdAt).getTime();
-    const timeB = new Date(b.createdAt).getTime();
-    return isAsc ? timeA - timeB : timeB - timeA;
-  });
-
-  // 5. Pagination
   const page = Math.max(1, params.page || 1);
   const pageSize = Math.max(1, params.limit || 10);
+  const offset = (page - 1) * pageSize;
+
+  try {
+    const conditions = [];
+
+    // 1. Text Search Query
+    if (params.query && params.query.trim()) {
+      const q = `%${params.query.trim()}%`;
+      conditions.push(
+        or(
+          ilike(jobs.title, q),
+          ilike(jobs.organization, q),
+          ilike(jobs.location, q),
+          ilike(jobs.qualificationSummary, q)
+        )
+      );
+    }
+
+    // 2. Category Filter
+    if (params.category && params.category !== "all") {
+      conditions.push(eq(jobs.category, params.category));
+    }
+
+    // 3. Status Filter
+    if (params.status && params.status !== "all") {
+      conditions.push(eq(jobs.status, params.status));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    // 4. Sorting
+    const sortBy = params.sortBy || "latest";
+    const isAsc = params.sortOrder === "asc";
+
+    let orderExpr;
+    if (sortBy === "title") {
+      orderExpr = isAsc ? asc(jobs.title) : desc(jobs.title);
+    } else if (sortBy === "organization") {
+      orderExpr = isAsc ? asc(jobs.organization) : desc(jobs.organization);
+    } else if (sortBy === "deadline") {
+      orderExpr = isAsc
+        ? asc(sql`(${jobs.importantDates}->>'applicationEndDate')`)
+        : desc(sql`(${jobs.importantDates}->>'applicationEndDate')`);
+    } else if (sortBy === "views") {
+      orderExpr = isAsc ? asc(jobs.viewsCount) : desc(jobs.viewsCount);
+    } else {
+      orderExpr = isAsc ? asc(jobs.createdAt) : desc(jobs.createdAt);
+    }
+
+    const [countResult, rows] = await Promise.all([
+      db.select({ total: count() }).from(jobs).where(whereClause),
+      db
+        .select()
+        .from(jobs)
+        .where(whereClause)
+        .orderBy(orderExpr)
+        .limit(pageSize)
+        .offset(offset),
+    ]);
+
+    const total = countResult[0]?.total || 0;
+    const totalPages = Math.ceil(total / pageSize) || 1;
+
+    if (total > 0) {
+      return {
+        items: rows.map(mapJobRecordToPosting),
+        total,
+        page,
+        pageSize,
+        totalPages,
+      };
+    }
+  } catch (error) {
+    console.warn("Database error in getAdminJobs, fallback to mock:", error);
+  }
+
+  // Fallback
+  let results = [...MOCK_JOB_POSTINGS];
+  if (params.query) {
+    const q = params.query.toLowerCase();
+    results = results.filter(
+      (j) => j.title.toLowerCase().includes(q) || j.organization.toLowerCase().includes(q)
+    );
+  }
   const total = results.length;
   const totalPages = Math.ceil(total / pageSize) || 1;
-  const offset = (page - 1) * pageSize;
-  const items = results.slice(offset, offset + pageSize);
-
   return {
-    items,
+    items: results.slice(offset, offset + pageSize),
     total,
     page,
     pageSize,
@@ -158,13 +174,24 @@ export async function getAdminJobs(
  * Retrieves a single job by ID or slug for the edit CMS form
  */
 export async function getAdminJobById(id: string): Promise<JobPosting | null> {
-  const job = adminJobsStore.find((j) => j.id === id || j.slug === id);
+  try {
+    const rows = await db
+      .select()
+      .from(jobs)
+      .where(or(eq(jobs.id, id), eq(jobs.slug, id)))
+      .limit(1);
+
+    if (rows.length > 0) {
+      return mapJobRecordToPosting(rows[0]);
+    }
+  } catch (error) {
+    console.warn("Database error in getAdminJobById, falling back to mock:", error);
+  }
+
+  const job = MOCK_JOB_POSTINGS.find((j) => j.id === id || j.slug === id);
   return job ? JSON.parse(JSON.stringify(job)) : null;
 }
 
-/**
- * Helper to generate URL-safe slug from title
- */
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()
@@ -175,34 +202,37 @@ export function generateSlug(title: string): string {
 }
 
 /**
- * Creates a new job posting with automated slug and timestamp assignment
+ * Creates a new job posting in PostgreSQL and writes an audit log
  */
 export async function createAdminJob(
   jobData: Partial<JobPosting>
 ): Promise<JobPosting> {
   const id = `job-${Date.now()}`;
-  const now = new Date().toISOString();
-  const slug = jobData.slug?.trim() || generateSlug(jobData.title || "new-job") + `-${Date.now().toString().slice(-4)}`;
+  const now = new Date();
+  const slug =
+    jobData.slug?.trim() ||
+    generateSlug(jobData.title || "new-job") + `-${Date.now().toString().slice(-4)}`;
 
-  const newJob: JobPosting = {
+  const newJobRecord: typeof jobs.$inferInsert = {
     id,
     slug,
     title: jobData.title || "Untitled Recruitment",
     shortSummary: jobData.shortSummary || "",
     organization: jobData.organization || "Govt Authority",
-    department: jobData.department || "",
+    organizationLogo: jobData.organizationLogo || null,
+    department: jobData.department || null,
     category: (jobData.category as JobCategory) || "government",
     status: (jobData.status as JobStatus) || "OPEN",
     location: jobData.location || "All India",
-    totalVacancies: jobData.totalVacancies || "Check Notification",
+    totalVacancies: String(jobData.totalVacancies || "Check Notification"),
     salaryOrStipend: jobData.salaryOrStipend || "Pay Matrix Level",
     jobType: jobData.jobType || "Full Time",
     applicationMode: jobData.applicationMode || "Online",
     qualificationSummary: jobData.qualificationSummary || "Graduate / 12th Pass",
     qualificationsList: jobData.qualificationsList || [],
     importantDates: jobData.importantDates || {
-      applicationStartDate: now.split("T")[0],
-      applicationEndDate: now.split("T")[0],
+      applicationStartDate: now.toISOString().split("T")[0],
+      applicationEndDate: now.toISOString().split("T")[0],
     },
     feeStructure: jobData.feeStructure || { general: "₹100", sc: "₹0", female: "₹0" },
     ageLimit: jobData.ageLimit || { minAge: 18, maxAge: 32 },
@@ -224,76 +254,115 @@ export async function createAdminJob(
     updatedAt: now,
   };
 
-  adminJobsStore.unshift(newJob);
+  const [inserted] = await db.insert(jobs).values(newJobRecord).returning();
 
   // Log activity
-  activityLogsStore.unshift({
-    id: `act-${Date.now()}`,
-    action: "CREATE",
-    entityTitle: newJob.title,
-    timestamp: "Just now",
-    adminUser: "admin@nextvacancy.com",
-    details: `Created new ${newJob.category} vacancy with ID ${newJob.id}`,
-  });
+  await db
+    .insert(auditLogs)
+    .values({
+      id: `act-${Date.now()}`,
+      actor: "admin@nextvacancy.com",
+      action: "CREATE",
+      entity: "JOB",
+      entityId: inserted.id,
+      entityTitle: inserted.title,
+      details: `Created new ${inserted.category} vacancy with ID ${inserted.id}`,
+    })
+    .catch((err) => console.error("Audit log insertion failed:", err));
 
-  return newJob;
+  return mapJobRecordToPosting(inserted);
 }
 
 /**
- * Updates an existing job posting by ID
+ * Updates an existing job posting in PostgreSQL by ID
  */
 export async function updateAdminJob(
   id: string,
   updates: Partial<JobPosting>
 ): Promise<JobPosting | null> {
-  const index = adminJobsStore.findIndex((j) => j.id === id);
-  if (index === -1) return null;
+  const now = new Date();
 
-  const now = new Date().toISOString();
-  const existing = adminJobsStore[index];
-
-  const updated: JobPosting = {
-    ...existing,
-    ...updates,
-    id: existing.id, // preserve ID
-    slug: updates.slug?.trim() || existing.slug,
+  const updateValues: Partial<typeof jobs.$inferInsert> = {
     updatedAt: now,
   };
 
-  adminJobsStore[index] = updated;
+  if (updates.title !== undefined) updateValues.title = updates.title;
+  if (updates.slug !== undefined) updateValues.slug = updates.slug;
+  if (updates.shortSummary !== undefined) updateValues.shortSummary = updates.shortSummary;
+  if (updates.organization !== undefined) updateValues.organization = updates.organization;
+  if (updates.organizationLogo !== undefined) updateValues.organizationLogo = updates.organizationLogo;
+  if (updates.department !== undefined) updateValues.department = updates.department;
+  if (updates.category !== undefined) updateValues.category = updates.category;
+  if (updates.status !== undefined) updateValues.status = updates.status;
+  if (updates.location !== undefined) updateValues.location = updates.location;
+  if (updates.totalVacancies !== undefined) updateValues.totalVacancies = String(updates.totalVacancies);
+  if (updates.salaryOrStipend !== undefined) updateValues.salaryOrStipend = updates.salaryOrStipend;
+  if (updates.jobType !== undefined) updateValues.jobType = updates.jobType;
+  if (updates.applicationMode !== undefined) updateValues.applicationMode = updates.applicationMode;
+  if (updates.qualificationSummary !== undefined) updateValues.qualificationSummary = updates.qualificationSummary;
+  if (updates.qualificationsList !== undefined) updateValues.qualificationsList = updates.qualificationsList;
+  if (updates.importantDates !== undefined) updateValues.importantDates = updates.importantDates;
+  if (updates.feeStructure !== undefined) updateValues.feeStructure = updates.feeStructure;
+  if (updates.ageLimit !== undefined) updateValues.ageLimit = updates.ageLimit;
+  if (updates.vacancyBreakdown !== undefined) updateValues.vacancyBreakdown = updates.vacancyBreakdown;
+  if (updates.selectionProcess !== undefined) updateValues.selectionProcess = updates.selectionProcess;
+  if (updates.howToApplySteps !== undefined) updateValues.howToApplySteps = updates.howToApplySteps;
+  if (updates.requiredDocuments !== undefined) updateValues.requiredDocuments = updates.requiredDocuments;
+  if (updates.importantLinks !== undefined) updateValues.importantLinks = updates.importantLinks;
+  if (updates.faqs !== undefined) updateValues.faqs = updates.faqs;
+  if (updates.isFeatured !== undefined) updateValues.isFeatured = updates.isFeatured;
+  if (updates.isTrending !== undefined) updateValues.isTrending = updates.isTrending;
+  if (updates.isVerified !== undefined) updateValues.isVerified = updates.isVerified;
+
+  const [updated] = await db
+    .update(jobs)
+    .set(updateValues)
+    .where(eq(jobs.id, id))
+    .returning();
+
+  if (!updated) return null;
 
   // Log activity
-  activityLogsStore.unshift({
-    id: `act-${Date.now()}`,
-    action: "UPDATE",
-    entityTitle: updated.title,
-    timestamp: "Just now",
-    adminUser: "admin@nextvacancy.com",
-    details: `Updated circular details for ${updated.organization}`,
-  });
+  await db
+    .insert(auditLogs)
+    .values({
+      id: `act-${Date.now()}`,
+      actor: "admin@nextvacancy.com",
+      action: "UPDATE",
+      entity: "JOB",
+      entityId: updated.id,
+      entityTitle: updated.title,
+      details: `Updated circular details for ${updated.organization}`,
+    })
+    .catch((err) => console.error("Audit log insertion failed:", err));
 
-  return updated;
+  return mapJobRecordToPosting(updated);
 }
 
 /**
- * Deletes a job posting by ID
+ * Deletes a job posting from PostgreSQL by ID
  */
 export async function deleteAdminJob(id: string): Promise<boolean> {
-  const index = adminJobsStore.findIndex((j) => j.id === id);
-  if (index === -1) return false;
+  const [deleted] = await db
+    .delete(jobs)
+    .where(eq(jobs.id, id))
+    .returning({ id: jobs.id, title: jobs.title });
 
-  const deletedTitle = adminJobsStore[index].title;
-  adminJobsStore.splice(index, 1);
+  if (!deleted) return false;
 
   // Log activity
-  activityLogsStore.unshift({
-    id: `act-${Date.now()}`,
-    action: "DELETE",
-    entityTitle: deletedTitle,
-    timestamp: "Just now",
-    adminUser: "admin@nextvacancy.com",
-    details: `Deleted job posting record ${id}`,
-  });
+  await db
+    .insert(auditLogs)
+    .values({
+      id: `act-${Date.now()}`,
+      actor: "admin@nextvacancy.com",
+      action: "DELETE",
+      entity: "JOB",
+      entityId: deleted.id,
+      entityTitle: deleted.title,
+      details: `Deleted job posting record ${id}`,
+    })
+    .catch((err) => console.error("Audit log insertion failed:", err));
 
   return true;
 }
@@ -302,33 +371,67 @@ export async function deleteAdminJob(id: string): Promise<boolean> {
  * Duplicates a job posting to draft
  */
 export async function duplicateAdminJob(id: string): Promise<JobPosting | null> {
-  const original = adminJobsStore.find((j) => j.id === id);
+  const original = await getAdminJobById(id);
   if (!original) return null;
 
-  const copy = JSON.parse(JSON.stringify(original)) as JobPosting;
-  const now = new Date().toISOString();
+  const now = new Date();
+  const copyId = `job-${Date.now()}`;
+  const copySlug = `${original.slug}-copy-${Date.now().toString().slice(-4)}`;
+  const copyTitle = `${original.title} (Copy)`;
 
-  copy.id = `job-${Date.now()}`;
-  copy.title = `${original.title} (Copy)`;
-  copy.slug = `${original.slug}-copy-${Date.now().toString().slice(-4)}`;
-  copy.status = "CLOSED"; // Draft mode
-  copy.viewsCount = 0;
-  copy.createdAt = now;
-  copy.updatedAt = now;
+  const [inserted] = await db
+    .insert(jobs)
+    .values({
+      id: copyId,
+      slug: copySlug,
+      title: copyTitle,
+      shortSummary: original.shortSummary,
+      organization: original.organization,
+      organizationLogo: original.organizationLogo || null,
+      department: original.department || null,
+      category: original.category,
+      status: "CLOSED", // Draft mode
+      location: original.location,
+      totalVacancies: String(original.totalVacancies),
+      salaryOrStipend: original.salaryOrStipend,
+      jobType: original.jobType || "Full Time",
+      applicationMode: original.applicationMode || "Online",
+      qualificationSummary: original.qualificationSummary,
+      qualificationsList: original.qualificationsList || [],
+      importantDates: original.importantDates,
+      feeStructure: original.feeStructure || null,
+      ageLimit: original.ageLimit || null,
+      vacancyBreakdown: original.vacancyBreakdown || [],
+      selectionProcess: original.selectionProcess || [],
+      howToApplySteps: original.howToApplySteps || [],
+      requiredDocuments: original.requiredDocuments || [],
+      importantLinks: original.importantLinks,
+      faqs: original.faqs || [],
+      viewsCount: 0,
+      isFeatured: false,
+      isTrending: false,
+      isVerified: original.isVerified ?? true,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .returning();
 
-  adminJobsStore.unshift(copy);
+  if (!inserted) return null;
 
-  // Log activity
-  activityLogsStore.unshift({
-    id: `act-${Date.now()}`,
-    action: "DUPLICATE",
-    entityTitle: copy.title,
-    timestamp: "Just now",
-    adminUser: "admin@nextvacancy.com",
-    details: `Cloned from ${original.title} as draft`,
-  });
+  await db
+    .insert(auditLogs)
+    .values({
+      id: `act-${Date.now()}`,
+      actor: "admin@nextvacancy.com",
+      action: "DUPLICATE",
+      entity: "JOB",
+      entityId: inserted.id,
+      entityTitle: inserted.title,
+      details: `Cloned from ${original.title} as draft`,
+    })
+    .catch((err) => console.error("Audit log insertion failed:", err));
 
-  return copy;
+  return mapJobRecordToPosting(inserted);
 }
 
 /**
@@ -338,22 +441,28 @@ export async function toggleJobStatus(
   id: string,
   newStatus: JobStatus
 ): Promise<JobPosting | null> {
-  const index = adminJobsStore.findIndex((j) => j.id === id);
-  if (index === -1) return null;
+  const [updated] = await db
+    .update(jobs)
+    .set({ status: newStatus, updatedAt: new Date() })
+    .where(eq(jobs.id, id))
+    .returning();
 
-  adminJobsStore[index].status = newStatus;
-  adminJobsStore[index].updatedAt = new Date().toISOString();
+  if (!updated) return null;
 
-  activityLogsStore.unshift({
-    id: `act-${Date.now()}`,
-    action: newStatus === "OPEN" ? "PUBLISH" : "UNPUBLISH",
-    entityTitle: adminJobsStore[index].title,
-    timestamp: "Just now",
-    adminUser: "admin@nextvacancy.com",
-    details: `Changed publication status to ${newStatus}`,
-  });
+  await db
+    .insert(auditLogs)
+    .values({
+      id: `act-${Date.now()}`,
+      actor: "admin@nextvacancy.com",
+      action: newStatus === "OPEN" ? "PUBLISH" : "UNPUBLISH",
+      entity: "JOB",
+      entityId: updated.id,
+      entityTitle: updated.title,
+      details: `Changed publication status to ${newStatus}`,
+    })
+    .catch((err) => console.error("Audit log insertion failed:", err));
 
-  return adminJobsStore[index];
+  return mapJobRecordToPosting(updated);
 }
 
 /**
@@ -363,25 +472,28 @@ export async function bulkUpdateJobsStatus(
   ids: string[],
   status: JobStatus
 ): Promise<number> {
-  let updatedCount = 0;
-  for (const id of ids) {
-    const job = adminJobsStore.find((j) => j.id === id);
-    if (job) {
-      job.status = status;
-      job.updatedAt = new Date().toISOString();
-      updatedCount++;
-    }
-  }
+  if (ids.length === 0) return 0;
+
+  const updatedRows = await db
+    .update(jobs)
+    .set({ status, updatedAt: new Date() })
+    .where(inArray(jobs.id, ids))
+    .returning({ id: jobs.id });
+
+  const updatedCount = updatedRows.length;
 
   if (updatedCount > 0) {
-    activityLogsStore.unshift({
-      id: `act-${Date.now()}`,
-      action: "PUBLISH",
-      entityTitle: `${updatedCount} Job Postings`,
-      timestamp: "Just now",
-      adminUser: "admin@nextvacancy.com",
-      details: `Bulk status update to ${status}`,
-    });
+    await db
+      .insert(auditLogs)
+      .values({
+        id: `act-${Date.now()}`,
+        actor: "admin@nextvacancy.com",
+        action: "PUBLISH",
+        entity: "JOB",
+        entityTitle: `${updatedCount} Job Postings`,
+        details: `Bulk status update to ${status}`,
+      })
+      .catch((err) => console.error("Audit log insertion failed:", err));
   }
 
   return updatedCount;
@@ -391,27 +503,65 @@ export async function bulkUpdateJobsStatus(
  * Bulk deletes multiple jobs
  */
 export async function bulkDeleteJobs(ids: string[]): Promise<number> {
-  const initialLength = adminJobsStore.length;
-  adminJobsStore = adminJobsStore.filter((j) => !ids.includes(j.id));
-  const deletedCount = initialLength - adminJobsStore.length;
+  if (ids.length === 0) return 0;
+
+  const deletedRows = await db
+    .delete(jobs)
+    .where(inArray(jobs.id, ids))
+    .returning({ id: jobs.id });
+
+  const deletedCount = deletedRows.length;
 
   if (deletedCount > 0) {
-    activityLogsStore.unshift({
-      id: `act-${Date.now()}`,
-      action: "DELETE",
-      entityTitle: `${deletedCount} Job Postings`,
-      timestamp: "Just now",
-      adminUser: "admin@nextvacancy.com",
-      details: `Bulk deletion of ${deletedCount} records`,
-    });
+    await db
+      .insert(auditLogs)
+      .values({
+        id: `act-${Date.now()}`,
+        actor: "admin@nextvacancy.com",
+        action: "DELETE",
+        entity: "JOB",
+        entityTitle: `${deletedCount} Job Postings`,
+        details: `Bulk deletion of ${deletedCount} records`,
+      })
+      .catch((err) => console.error("Audit log insertion failed:", err));
   }
 
   return deletedCount;
 }
 
 /**
- * Returns latest administrator activity audit logs
+ * Returns latest administrator activity audit logs from PostgreSQL
  */
 export async function getAdminActivityLogs(limit: number = 10): Promise<AdminActivityLog[]> {
-  return activityLogsStore.slice(0, limit);
+  try {
+    const rows = await db
+      .select()
+      .from(auditLogs)
+      .orderBy(desc(auditLogs.timestamp))
+      .limit(limit);
+
+    if (rows.length > 0) {
+      return rows.map((log) => ({
+        id: log.id,
+        action: log.action as AdminActivityLog["action"],
+        entityTitle: log.entityTitle || log.entity,
+        timestamp: log.timestamp instanceof Date ? log.timestamp.toISOString() : String(log.timestamp),
+        adminUser: log.actor,
+        details: log.details || "",
+      }));
+    }
+  } catch (error) {
+    console.warn("Database error in getAdminActivityLogs, falling back to mock:", error);
+  }
+
+  return [
+    {
+      id: "act-1",
+      action: "LOGIN",
+      entityTitle: "Administrator Session Started",
+      timestamp: "Just now",
+      adminUser: "admin@nextvacancy.com",
+      details: "Authenticated from recognized IP",
+    },
+  ];
 }
