@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { X, Save, FolderTree, Sparkles } from "lucide-react";
 import { Card, Input, Button } from "@/components/ui";
 import { CategoryMaster } from "@/types";
-import { generateUniqueSlug } from "@/services/admin/admin-master-data.service";
+import { generateUniqueSlug } from "@/lib/slug";
 
 export interface AdminCategoryModalProps {
   isOpen: boolean;

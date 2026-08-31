@@ -23,7 +23,7 @@ interface OrganizationPageProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = getAllOrganizationSlugs();
+  const slugs = await getAllOrganizationSlugs();
   return slugs.map((slug) => ({ slug }));
 }
 

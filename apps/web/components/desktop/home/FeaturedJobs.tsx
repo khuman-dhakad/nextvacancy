@@ -3,8 +3,9 @@ import Link from "next/link";
 import { Container, Button } from "@/components/ui";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { JobCard, FeaturedJobItem } from "./JobCard";
+import { JobPosting } from "@/types";
 
-const FEATURED_JOBS: FeaturedJobItem[] = [
+const FALLBACK_FEATURED_JOBS: FeaturedJobItem[] = [
   {
     id: "job-1",
     slug: "railway-rrb-ntpc-2026-graduate-undergraduate",
@@ -59,11 +60,37 @@ const FEATURED_JOBS: FeaturedJobItem[] = [
   },
 ];
 
+function getEmblemType(org: string): FeaturedJobItem["emblemType"] {
+  const o = org.toLowerCase();
+  if (o.includes("rrb") || o.includes("railway")) return "rrb";
+  if (o.includes("ssc")) return "ssc";
+  if (o.includes("upsc")) return "upsc";
+  return "army";
+}
+
 export interface FeaturedJobsProps {
+  jobs?: JobPosting[];
   className?: string;
 }
 
-export const FeaturedJobs: React.FC<FeaturedJobsProps> = ({ className = "" }) => {
+export const FeaturedJobs: React.FC<FeaturedJobsProps> = ({ jobs = [], className = "" }) => {
+  const displayItems: FeaturedJobItem[] =
+    jobs.length > 0
+      ? jobs.map((job) => ({
+          id: job.id,
+          slug: job.slug,
+          title: job.title,
+          organization: job.organization,
+          categoryTag: job.category === "government" ? "Govt Gazette" : job.category,
+          categoryTagStyle: "bg-blue-50 text-[var(--primary)] border-blue-200/80",
+          totalPosts: `${job.totalVacancies} Posts`,
+          qualification: job.qualificationSummary || "Check Circular",
+          lastDate: job.importantDates?.applicationEndDate || "Open Now",
+          borderTheme: "navy",
+          emblemType: getEmblemType(job.organization),
+        }))
+      : FALLBACK_FEATURED_JOBS;
+
   return (
     <section
       aria-label="Featured Government Jobs"
@@ -101,7 +128,7 @@ export const FeaturedJobs: React.FC<FeaturedJobsProps> = ({ className = "" }) =>
 
         {/* 4 Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {FEATURED_JOBS.map((job) => (
+          {displayItems.slice(0, 4).map((job) => (
             <JobCard key={job.id} job={job} />
           ))}
         </div>
