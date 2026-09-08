@@ -1,5 +1,6 @@
 import { eq, desc, asc, and, or, ilike, inArray, count } from "drizzle-orm";
 import { db, categories, organizations, type Category, type Organization } from "@/lib/db";
+import { handleDatabaseError } from "@/lib/db/errors";
 import {
   CategoryMaster,
   OrganizationMaster,
@@ -131,7 +132,7 @@ export async function getAdminCategories(
       totalPages,
     };
   } catch (error) {
-    console.error("Database error in getAdminCategories:", error);
+    handleDatabaseError("getAdminCategories", error);
     return { items: [], total: 0, page, pageSize, totalPages: 1 };
   }
 }
@@ -148,7 +149,7 @@ export async function getCategoryById(id: string): Promise<CategoryMaster | null
       return mapCategoryRecord(rows[0]);
     }
   } catch (error) {
-    console.error("Database error in getCategoryById:", error);
+    handleDatabaseError("getCategoryById", error);
   }
   return null;
 }
@@ -338,7 +339,7 @@ export async function getAdminOrganizations(
       totalPages,
     };
   } catch (error) {
-    console.error("Database error in getAdminOrganizations:", error);
+    handleDatabaseError("getAdminOrganizations", error);
     return { items: [], total: 0, page, pageSize, totalPages: 1 };
   }
 }
@@ -355,7 +356,7 @@ export async function getOrganizationById(id: string): Promise<OrganizationMaste
       return mapOrganizationRecord(rows[0]);
     }
   } catch (error) {
-    console.error("Database error in getOrganizationById:", error);
+    handleDatabaseError("getOrganizationById", error);
   }
   return null;
 }

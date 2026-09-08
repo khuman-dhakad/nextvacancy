@@ -1,5 +1,6 @@
 import { eq, or, and, ilike, desc, sql } from "drizzle-orm";
 import { db, organizations, jobs, type Organization } from "@/lib/db";
+import { handleDatabaseError, isProduction } from "@/lib/db/errors";
 import { OrganizationProfile, JobPosting } from "@/types";
 import { mapJobRecordToPosting } from "@/services/jobs/jobs.service";
 import { MOCK_ORGANIZATION_PROFILES } from "./organization-profile.mock";
@@ -52,8 +53,10 @@ export async function getAllOrganizationProfiles(): Promise<OrganizationProfile[
       return rows.map((row) => mapOrgRecordToProfile(row));
     }
   } catch (error) {
-    console.warn("Database error in getAllOrganizationProfiles, falling back to mock:", error);
+    handleDatabaseError("getAllOrganizationProfiles", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_ORGANIZATION_PROFILES;
 }
@@ -72,8 +75,10 @@ export async function getAllOrganizationSlugs(): Promise<string[]> {
       return rows.map((r) => r.slug);
     }
   } catch (error) {
-    console.warn("Database error in getAllOrganizationSlugs, falling back to mock:", error);
+    handleDatabaseError("getAllOrganizationSlugs", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_ORGANIZATION_PROFILES.map((org) => org.slug);
 }
@@ -134,8 +139,10 @@ export async function getOrganizationProfileBySlug(
       });
     }
   } catch (error) {
-    console.warn("Database error in getOrganizationProfileBySlug, falling back to mock:", error);
+    handleDatabaseError("getOrganizationProfileBySlug", error);
   }
+
+  if (isProduction()) return null;
 
   const profile = MOCK_ORGANIZATION_PROFILES.find(
     (org) => org.slug.toLowerCase() === clean || org.shortName.toLowerCase() === clean
@@ -169,8 +176,10 @@ export async function getOrganizationJobs(
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database error in getOrganizationJobs, falling back to mock:", error);
+    handleDatabaseError("getOrganizationJobs", error);
   }
+
+  if (isProduction()) return [];
 
   const profile = MOCK_ORGANIZATION_PROFILES.find(
     (org) => org.slug.toLowerCase() === clean || org.shortName.toLowerCase() === clean
@@ -230,8 +239,10 @@ export async function getRelatedOrganizations(
 
     return otherRows.map((r) => mapOrgRecordToProfile(r));
   } catch (error) {
-    console.warn("Database error in getRelatedOrganizations, falling back to mock:", error);
+    handleDatabaseError("getRelatedOrganizations", error);
   }
+
+  if (isProduction()) return [];
 
   const related = MOCK_ORGANIZATION_PROFILES.filter(
     (org) => org.slug !== currentSlug && org.categoryType === categoryType
