@@ -2,22 +2,10 @@
 
 ## Included application hardening
 
-- Standalone Next.js output for small container images.
-- Non-root Docker runtime user.
-- Compression and ETags enabled.
-- Immutable one-year caching for Next static assets.
-- CSP, HSTS in production, clickjacking protection, MIME sniffing protection, referrer policy, browser isolation, and restrictive permissions policy.
-- AVIF/WebP image negotiation enabled through Next Image.
-- Stable sitemap timestamps to avoid unnecessary crawler churn.
-- `GET /api/health` for load balancers and container probes.
 
 ## Required deployment configuration
 
-- Set `NEXT_PUBLIC_SITE_URL` to the canonical HTTPS origin.
-- Set `NODE_ENV=production`.
-- Keep secrets server-side; never expose credentials through `NEXT_PUBLIC_*` variables.
-- Put the app behind a CDN/reverse proxy with TLS, HTTP/2 or HTTP/3, request-rate limiting, and WAF rules.
-- Use a managed database and connection pooling when replacing the mock service layer.
+- Apply versioned Drizzle migrations with `npm run db:migrate` before serving a new database. Use `npm run db:seed` only for development or staging unless the production data plan explicitly requires the initial catalog seed.
 - Keep at least two app instances behind a health-checked load balancer for zero-downtime deployments.
 - Configure centralized logs, error tracking, uptime monitoring, backups, and alerting.
 
@@ -29,4 +17,14 @@ Example tools: k6, Grafana Cloud k6, or Artillery. Set release gates such as les
 
 ## Security acceptance
 
+## Vercel and PostgreSQL deployment
+
+1. Create a managed PostgreSQL database with the provider of your choice.
+2. Ensure the Vercel Git integration account and the commit author have access to the Vercel project so deployments are not blocked by project permissions.
+3. Add its connection string as `DATABASE_URL` in the Vercel project under both Preview and Production environments. Do not add it as a `NEXT_PUBLIC_*` variable.
+4. Set `DATABASE_SSL=true` unless the provider explicitly requires another setting. Set `DB_POOL_MAX` to a conservative value appropriate for the provider's connection limit, and keep `DB_DEBUG=false` in Preview and Production.
+5. From `apps/web`, run `npm run db:migrate` against the intended database before the first deployment and after each migration release. Do not use `db:push` as the production deployment workflow.
+6. Run `npm run db:seed` only against local or staging databases unless production requires the repository's initial master data. The seed uses conflict-safe inserts and can be repeated for those environments.
+7. Redeploy Vercel after saving the variables, then verify `/api/health`, database-backed category/job/organization routes, and `/sitemap.xml`.
+8. Confirm deployment logs contain no `ECONNREFUSED` errors and no production request is served from mock/static fallback data.
 No application can honestly promise 100% security. Before launch, run dependency auditing, secret scanning, SAST, DAST, CSP validation, authentication/authorization tests, rate-limit tests, and an external penetration test. Review the CSP whenever analytics, payment, image, or API domains change.

@@ -1,5 +1,6 @@
 import { eq, desc, asc, and, or, ilike, inArray, count, sql } from "drizzle-orm";
 import { db, jobs, auditLogs } from "@/lib/db";
+import { handleDatabaseError, isProduction } from "@/lib/db/errors";
 import {
   JobPosting,
   JobCategory,
@@ -11,6 +12,10 @@ import {
 } from "@/types";
 import { mapJobRecordToPosting } from "@/services/jobs/jobs.service";
 import { MOCK_JOB_POSTINGS } from "@/services/jobs/jobs.mock";
+
+function getAuditActor(): string {
+  return process.env.ADMIN_EMAIL || "system";
+}
 
 /**
  * Computes live analytics metrics across all recruitment categories from the database
@@ -48,8 +53,22 @@ export async function getAdminDashboardStats(): Promise<AdminAnalyticsStats> {
         totalViews,
       };
     }
+
+    if (isProduction()) {
+      return {
+        totalJobs: 0,
+        govtJobs: 0,
+        privateJobs: 0,
+        admitCards: 0,
+        results: 0,
+        scholarships: 0,
+        internships: 0,
+        draftsCount: 0,
+        totalViews: 0,
+      };
+    }
   } catch (error) {
-    console.warn("Database error in getAdminDashboardStats, calculating from mock:", error);
+    handleDatabaseError("getAdminDashboardStats", error);
   }
 
   // Fallback
@@ -147,9 +166,15 @@ export async function getAdminJobs(
         totalPages,
       };
     }
+
+    if (isProduction()) {
+      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+    }
   } catch (error) {
-    console.warn("Database error in getAdminJobs, fallback to mock:", error);
+    handleDatabaseError("getAdminJobs", error);
   }
+
+  if (isProduction()) return { items: [], total: 0, page, pageSize, totalPages: 1 };
 
   // Fallback
   let results = [...MOCK_JOB_POSTINGS];
@@ -185,8 +210,10 @@ export async function getAdminJobById(id: string): Promise<JobPosting | null> {
       return mapJobRecordToPosting(rows[0]);
     }
   } catch (error) {
-    console.warn("Database error in getAdminJobById, falling back to mock:", error);
+    handleDatabaseError("getAdminJobById", error);
   }
+
+  if (isProduction()) return null;
 
   const job = MOCK_JOB_POSTINGS.find((j) => j.id === id || j.slug === id);
   return job ? JSON.parse(JSON.stringify(job)) : null;
@@ -261,14 +288,14 @@ export async function createAdminJob(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: getAuditActor(),
       action: "CREATE",
       entity: "JOB",
       entityId: inserted.id,
       entityTitle: inserted.title,
       details: `Created new ${inserted.category} vacancy with ID ${inserted.id}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(inserted);
 }
@@ -327,14 +354,14 @@ export async function updateAdminJob(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: getAuditActor(),
       action: "UPDATE",
       entity: "JOB",
       entityId: updated.id,
       entityTitle: updated.title,
       details: `Updated circular details for ${updated.organization}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(updated);
 }
@@ -355,14 +382,14 @@ export async function deleteAdminJob(id: string): Promise<boolean> {
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: getAuditActor(),
       action: "DELETE",
       entity: "JOB",
       entityId: deleted.id,
       entityTitle: deleted.title,
       details: `Deleted job posting record ${id}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return true;
 }
@@ -422,14 +449,14 @@ export async function duplicateAdminJob(id: string): Promise<JobPosting | null> 
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: getAuditActor(),
       action: "DUPLICATE",
       entity: "JOB",
       entityId: inserted.id,
       entityTitle: inserted.title,
       details: `Cloned from ${original.title} as draft`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(inserted);
 }
@@ -453,14 +480,14 @@ export async function toggleJobStatus(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: getAuditActor(),
       action: newStatus === "OPEN" ? "PUBLISH" : "UNPUBLISH",
       entity: "JOB",
       entityId: updated.id,
       entityTitle: updated.title,
       details: `Changed publication status to ${newStatus}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(updated);
 }
@@ -487,13 +514,13 @@ export async function bulkUpdateJobsStatus(
       .insert(auditLogs)
       .values({
         id: `act-${Date.now()}`,
-        actor: "admin@nextvacancy.com",
+        actor: getAuditActor(),
         action: "PUBLISH",
         entity: "JOB",
         entityTitle: `${updatedCount} Job Postings`,
         details: `Bulk status update to ${status}`,
       })
-      .catch((err) => console.error("Audit log insertion failed:", err));
+      ;
   }
 
   return updatedCount;
@@ -517,13 +544,13 @@ export async function bulkDeleteJobs(ids: string[]): Promise<number> {
       .insert(auditLogs)
       .values({
         id: `act-${Date.now()}`,
-        actor: "admin@nextvacancy.com",
+        actor: getAuditActor(),
         action: "DELETE",
         entity: "JOB",
         entityTitle: `${deletedCount} Job Postings`,
         details: `Bulk deletion of ${deletedCount} records`,
       })
-      .catch((err) => console.error("Audit log insertion failed:", err));
+      ;
   }
 
   return deletedCount;
@@ -551,8 +578,10 @@ export async function getAdminActivityLogs(limit: number = 10): Promise<AdminAct
       }));
     }
   } catch (error) {
-    console.warn("Database error in getAdminActivityLogs, falling back to mock:", error);
+    handleDatabaseError("getAdminActivityLogs", error);
   }
+
+  if (isProduction()) return [];
 
   return [
     {

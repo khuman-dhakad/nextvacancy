@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { AdminSession } from "@/types";
+import { verifyPassword } from "./password.server";
 
 /**
  * Admin authentication primitives. This module must only be imported by server code.
@@ -26,18 +27,7 @@ function getSessionSecret(): string {
 }
 
 /**
- * Generates a SHA-256 hash using the server runtime's Web Crypto API.
- */
-export async function hashPasswordSha256(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-/**
- * Validates admin credentials against a server-side SHA-256 hash.
+ * Validates admin credentials against a server-side salted scrypt hash.
  */
 export async function validateAdminCredentials(
   identifier: string,
@@ -52,20 +42,12 @@ export async function validateAdminCredentials(
     return false;
   }
 
-  const configuredHash = process.env.ADMIN_PASSWORD_HASH?.toLowerCase();
-  if (!configuredHash || !/^[a-f0-9]{64}$/.test(configuredHash)) {
+  const configuredHash = process.env.ADMIN_PASSWORD_HASH;
+  if (!configuredHash) {
     return false;
   }
 
-  const computedHash = await hashPasswordSha256(passwordPlain);
-  if (computedHash.length !== configuredHash.length) {
-    return false;
-  }
-
-  if (timingSafeEqual(Buffer.from(computedHash), Buffer.from(configuredHash))) {
-    return true;
-  }
-  return false;
+  return verifyPassword(passwordPlain, configuredHash);
 }
 
 export function createSessionToken(): string {

@@ -1,5 +1,6 @@
 import { eq, desc, asc, and, or, ilike, sql, count } from "drizzle-orm";
 import { db, jobs, type Job } from "@/lib/db";
+import { handleDatabaseError, isProduction } from "@/lib/db/errors";
 import {
   JobPosting,
   JobCategory,
@@ -60,8 +61,10 @@ export async function getLatestJobs(limit: number = 8): Promise<JobPosting[]> {
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getLatestJobs, falling back to mock:", error);
+    handleDatabaseError("getLatestJobs", error);
   }
+
+  if (isProduction()) return [];
 
   // Graceful fallback if database is empty or offline
   const sorted = [...MOCK_JOB_POSTINGS].sort(
@@ -83,8 +86,10 @@ export async function getEndingSoonJobs(limit: number = 4): Promise<JobPosting[]
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getEndingSoonJobs, falling back to mock:", error);
+    handleDatabaseError("getEndingSoonJobs", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_JOB_POSTINGS.filter((job) => job.status === "ENDING_SOON").slice(0, limit);
 }
@@ -102,8 +107,10 @@ export async function getFeaturedJobs(limit: number = 4): Promise<JobPosting[]> 
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getFeaturedJobs, falling back to mock:", error);
+    handleDatabaseError("getFeaturedJobs", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_JOB_POSTINGS.filter((job) => job.isFeatured).slice(0, limit);
 }
@@ -121,8 +128,10 @@ export async function getTrendingJobs(limit: number = 6): Promise<JobPosting[]> 
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getTrendingJobs, falling back to mock:", error);
+    handleDatabaseError("getTrendingJobs", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_JOB_POSTINGS.filter((job) => job.isTrending).slice(0, limit);
 }
@@ -143,8 +152,10 @@ export async function getJobsByCategory(
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getJobsByCategory, falling back to mock:", error);
+    handleDatabaseError("getJobsByCategory", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_JOB_POSTINGS.filter((job) => job.category === category).slice(0, limit);
 }
@@ -162,8 +173,10 @@ export async function getJobBySlug(slug: string): Promise<JobPosting | null> {
       return mapJobRecordToPosting(rows[0]);
     }
   } catch (error) {
-    console.warn("Database query failed in getJobBySlug, falling back to mock:", error);
+    handleDatabaseError("getJobBySlug", error);
   }
+
+  if (isProduction()) return null;
 
   const mock = MOCK_JOB_POSTINGS.find((item) => item.slug === cleanSlug);
   return mock || null;
@@ -186,8 +199,10 @@ export async function getRelatedJobs(
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getRelatedJobs, falling back to mock:", error);
+    handleDatabaseError("getRelatedJobs", error);
   }
+
+  if (isProduction()) return [];
 
   const sameCategory = MOCK_JOB_POSTINGS.filter(
     (job) => job.category === category && job.slug !== currentSlug
@@ -293,9 +308,15 @@ export async function searchJobs(
         totalPages,
       };
     }
+
+    if (isProduction()) {
+      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+    }
   } catch (error) {
-    console.warn("Database query failed in searchJobs, falling back to mock:", error);
+    handleDatabaseError("searchJobs", error);
   }
+
+  if (isProduction()) return { items: [], total: 0, page, pageSize, totalPages: 1 };
 
   // In-memory fallback
   let results = [...MOCK_JOB_POSTINGS];
