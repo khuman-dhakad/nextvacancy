@@ -1,3 +1,4 @@
+import { z } from "zod";
 import {
   LoginFormData,
   RegisterFormData,
@@ -9,6 +10,84 @@ import {
 export const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 export const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
 
+// Zod Schemas for server actions and robust backend validation
+export const LoginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email address is required")
+    .email("Please enter a valid email address (e.g. name@example.com)"),
+  password: z.string().min(1, "Password is required"),
+  rememberMe: z.boolean().optional().default(false),
+});
+
+export const RegisterSchema = z
+  .object({
+    fullName: z
+      .string()
+      .trim()
+      .min(2, "Full name must be at least 2 characters")
+      .max(100, "Full name is too long")
+      .regex(/^[a-zA-Z\s.'-]+$/, "Name can only contain alphabetic characters"),
+    email: z
+      .string()
+      .trim()
+      .min(1, "Email address is required")
+      .email("Please enter a valid email address (e.g. name@example.com)"),
+    mobile: z
+      .string()
+      .trim()
+      .refine(
+        (val) => !val || INDIAN_MOBILE_REGEX.test(val.replace(/\D/g, "")),
+        "Enter a valid 10-digit Indian mobile number (starts with 6, 7, 8, or 9)"
+      )
+      .optional()
+      .or(z.literal("")),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .max(128, "Password is too long")
+      .refine((p) => {
+        const strength = evaluatePasswordStrength(p);
+        return strength.score >= 3;
+      }, "Password must include uppercase, lowercase, numbers, and special characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the Terms of Service & Privacy Policy",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+export const ForgotPasswordSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email address is required")
+    .email("Please enter a valid email address (e.g. name@example.com)"),
+});
+
+export const ResetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Reset token is required"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .max(128, "Password is too long")
+      .refine((p) => {
+        const strength = evaluatePasswordStrength(p);
+        return strength.score >= 3;
+      }, "Password must include uppercase, lowercase, numbers, and special characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+// Legacy and Client Helper functions
 export function validateEmail(email: string): string | undefined {
   if (!email || !email.trim()) {
     return "Email address is required";
@@ -21,7 +100,7 @@ export function validateEmail(email: string): string | undefined {
 
 export function validateMobile(mobile: string): string | undefined {
   if (!mobile || !mobile.trim()) {
-    return "Mobile number is required";
+    return undefined; // Mobile is optional or empty
   }
   const cleanNumber = mobile.replace(/\D/g, "");
   if (!INDIAN_MOBILE_REGEX.test(cleanNumber)) {
@@ -44,6 +123,20 @@ export function validateFullName(name: string): string | undefined {
 }
 
 export function evaluatePasswordStrength(password: string): PasswordStrength {
+  if (!password) {
+    return {
+      score: 0,
+      label: "Very Weak",
+      checks: {
+        minLength: false,
+        hasUppercase: false,
+        hasLowercase: false,
+        hasNumber: false,
+        hasSpecialChar: false,
+      },
+    };
+  }
+
   const checks = {
     minLength: password.length >= 8,
     hasUppercase: /[A-Z]/.test(password),
@@ -120,8 +213,10 @@ export function validateRegisterForm(data: RegisterFormData): AuthFormErrors {
   const emailErr = validateEmail(data.email);
   if (emailErr) errors.email = emailErr;
 
-  const mobileErr = validateMobile(data.mobile);
-  if (mobileErr) errors.mobile = mobileErr;
+  if (data.mobile && data.mobile.trim()) {
+    const mobileErr = validateMobile(data.mobile);
+    if (mobileErr) errors.mobile = mobileErr;
+  }
 
   const passwordErr = validatePassword(data.password);
   if (passwordErr) errors.password = passwordErr;

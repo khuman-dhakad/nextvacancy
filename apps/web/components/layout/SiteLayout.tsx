@@ -5,12 +5,14 @@ import { CategoryNavigation } from "./CategoryNavigation";
 import { Footer } from "./Footer";
 import { Container } from "@/components/ui";
 import { InstallBanner, OfflineNotice, ServiceWorkerManager } from "@/components/pwa";
+import { UserProfile } from "@/types";
 
 export interface SiteLayoutProps {
   children: React.ReactNode;
   showUpdateBar?: boolean;
   showCategoryNav?: boolean;
   activePath?: string;
+  currentUser?: UserProfile | null;
 }
 
 export const SiteLayout: React.FC<SiteLayoutProps> = ({
@@ -18,6 +20,7 @@ export const SiteLayout: React.FC<SiteLayoutProps> = ({
   showUpdateBar = true,
   showCategoryNav = true,
   activePath,
+  currentUser,
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-white text-[var(--foreground)] antialiased relative">
@@ -35,8 +38,8 @@ export const SiteLayout: React.FC<SiteLayoutProps> = ({
         Skip to main content
       </a>
 
-      {/* Global Header — reads active path internally via usePathname() */}
-      <Header />
+      {/* Global Header — reads active path internally via usePathname() and renders currentUser */}
+      <Header currentUser={currentUser} />
 
       {/* Latest Alerts Strip */}
       {showUpdateBar && <UpdateBar />}
