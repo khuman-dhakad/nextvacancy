@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { X, Save, Building2, Globe } from "lucide-react";
 import { Card, Input, Button } from "@/components/ui";
 import { OrganizationMaster } from "@/types";
-import { generateUniqueSlug } from "@/services/admin/admin-master-data.service";
+import { generateUniqueSlug } from "@/lib/slug";
 
 export interface AdminOrganizationModalProps {
   isOpen: boolean;

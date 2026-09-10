@@ -10,6 +10,7 @@ import {
   Newsletter,
   CommunityCTA,
 } from "@/components/desktop/home";
+import { getFeaturedJobs, getLatestJobs } from "@/services/jobs/jobs.service";
 
 export const metadata: Metadata = {
   title: "NEXTVACANCY — India's Most Trusted Government & Private Jobs Portal 2026",
@@ -45,31 +46,36 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featuredJobs, latestJobs] = await Promise.all([
+    getFeaturedJobs(4),
+    getLatestJobs(6),
+  ]);
+
   return (
     <div className="w-full bg-[#ECECEC]">
-      {/* 1. Premium Hero (Headline, Subtitle, Search, Location, Category, CTA, Trending Searches) */}
+      {/* 1. Premium Hero */}
       <Hero />
 
-      {/* 2. Live Statistics (Active Jobs, Admit Cards, Results, Internships) */}
+      {/* 2. Live Statistics */}
       <StatsSection />
 
-      {/* 3. Featured Government Jobs (4 Premium Cards) */}
-      <FeaturedJobs />
+      {/* 3. Featured Government Jobs (Database-backed) */}
+      <FeaturedJobs jobs={featuredJobs} />
 
-      {/* 4. Latest Notifications (Editorial Style List) */}
-      <Notifications />
+      {/* 4. Latest Notifications (Database-backed) */}
+      <Notifications jobs={latestJobs} />
 
-      {/* 5. Popular Categories (Icon Grid) */}
+      {/* 5. Popular Categories */}
       <CategoryGrid />
 
-      {/* 6. Why NEXTVACANCY (3 Trust Cards) */}
+      {/* 6. Why NEXTVACANCY */}
       <WhyChooseUs />
 
       {/* 7. Recruitment Digest */}
       <Newsletter />
 
-      {/* 8. Community CTA (WhatsApp, Telegram) */}
+      {/* 8. Community CTA */}
       <CommunityCTA />
     </div>
   );

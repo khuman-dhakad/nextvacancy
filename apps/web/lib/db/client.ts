@@ -14,7 +14,8 @@ function getPool(): Pool {
   const connectionString = process.env.DATABASE_URL;
 
   const newPool = new Pool({
-    connectionString: connectionString || "postgresql://postgres:postgres@localhost:5432/nextvacancy",
+    connectionString:
+      connectionString || "postgresql://postgres:postgres@localhost:5432/nextvacancy",
     max: process.env.DB_POOL_MAX ? parseInt(process.env.DB_POOL_MAX, 10) : 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
@@ -25,7 +26,7 @@ function getPool(): Pool {
   });
 
   newPool.on("error", (err) => {
-    console.error("Unexpected error on idle PostgreSQL client", err);
+    console.error("Unexpected error on idle PostgreSQL client pool", err);
   });
 
   if (process.env.NODE_ENV !== "production") {

@@ -10,6 +10,7 @@ import {
   ArrowRight,
   Sparkles,
 } from "lucide-react";
+import { JobPosting } from "@/types";
 
 export interface NotificationItem {
   id: string;
@@ -79,13 +80,62 @@ const TYPE_ICONS = {
 
 export interface NotificationsProps {
   notifications?: NotificationItem[];
+  jobs?: JobPosting[];
   className?: string;
 }
 
 export const Notifications: React.FC<NotificationsProps> = ({
-  notifications = DEFAULT_NOTIFICATIONS,
+  notifications,
+  jobs = [],
   className = "",
 }) => {
+  let displayList: NotificationItem[] = DEFAULT_NOTIFICATIONS;
+
+  if (notifications && notifications.length > 0) {
+    displayList = notifications;
+  } else if (jobs.length > 0) {
+    displayList = jobs.map((j) => {
+      let type: NotificationItem["type"] = "admit-card";
+      let badgeLabel = "Live Circular";
+      let badgeVariant: NotificationItem["badgeVariant"] = "info";
+      let actionLabel = "View Circular";
+
+      if (j.status === "ADMIT_CARD_OUT" || j.category === "admit-card") {
+        type = "admit-card";
+        badgeLabel = "Admit Card Out";
+        badgeVariant = "success";
+        actionLabel = "Download Admit Card";
+      } else if (j.status === "RESULT_OUT" || j.category === "result") {
+        type = "result";
+        badgeLabel = "Result Declared";
+        badgeVariant = "accent";
+        actionLabel = "Check Result";
+      } else if (j.status === "ANSWER_KEY_OUT" || j.category === "answer-key") {
+        type = "answer-key";
+        badgeLabel = "Answer Key Out";
+        badgeVariant = "info";
+        actionLabel = "Check Answer Key";
+      } else if (j.category === "scholarship") {
+        type = "scholarship";
+        badgeLabel = "Scholarship";
+        badgeVariant = "warning";
+        actionLabel = "Apply for Grant";
+      }
+
+      return {
+        id: j.id,
+        type,
+        title: j.title,
+        organization: j.organization,
+        date: j.importantDates?.notificationDate || "Recent",
+        href: `/jobs/${j.slug}`,
+        badgeLabel,
+        badgeVariant,
+        actionLabel,
+      };
+    });
+  }
+
   return (
     <section
       aria-label="Latest Examination Notifications and Results"
@@ -133,7 +183,7 @@ export const Notifications: React.FC<NotificationsProps> = ({
 
         {/* Notifications Editorial List */}
         <div className="space-y-3.5">
-          {notifications.map((item) => {
+          {displayList.slice(0, 6).map((item) => {
             const Icon = TYPE_ICONS[item.type] || Sparkles;
 
             return (

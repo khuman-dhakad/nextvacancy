@@ -2,11 +2,9 @@ import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
   schema: "./lib/db/schema.ts",
-  out: "./drizzle",
+  out: "./lib/db/migrations",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/nextvacancy",
   },
-  verbose: true,
-  strict: true,
 });
