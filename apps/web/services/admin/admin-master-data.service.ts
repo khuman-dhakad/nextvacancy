@@ -8,6 +8,7 @@ import {
   OrganizationSearchParams,
   PaginatedResponse,
 } from "@/types";
+import { assertValidBoolean, assertValidBulkIds, assertValidCategoryCreate, assertValidCategoryUpdate, assertValidId, assertValidOrganizationCreate, assertValidOrganizationUpdate } from "@/lib/validations/admin";
 
 export function mapCategoryRecord(cat: Category): CategoryMaster {
   return {
@@ -157,6 +158,7 @@ export async function getCategoryById(id: string): Promise<CategoryMaster | null
 export async function createCategory(
   data: Partial<CategoryMaster>
 ): Promise<CategoryMaster> {
+  assertValidCategoryCreate(data);
   const allCats = await db.select({ slug: categories.slug }).from(categories);
   const existingSlugs = allCats.map((c) => c.slug);
   const slug =
@@ -186,6 +188,8 @@ export async function updateCategory(
   id: string,
   updates: Partial<CategoryMaster>
 ): Promise<CategoryMaster | null> {
+  assertValidId(id, "category ID");
+  assertValidCategoryUpdate(updates);
   const updateValues: Partial<typeof categories.$inferInsert> = {
     updatedAt: new Date(),
   };
@@ -207,6 +211,7 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string): Promise<boolean> {
+  assertValidId(id, "category ID");
   const [deleted] = await db
     .delete(categories)
     .where(eq(categories.id, id))
@@ -216,6 +221,7 @@ export async function deleteCategory(id: string): Promise<boolean> {
 }
 
 export async function toggleCategoryActive(id: string): Promise<CategoryMaster | null> {
+  assertValidId(id, "category ID");
   const current = await getCategoryById(id);
   if (!current) return null;
 
@@ -229,6 +235,7 @@ export async function toggleCategoryActive(id: string): Promise<CategoryMaster |
 }
 
 export async function toggleCategoryFeatured(id: string): Promise<CategoryMaster | null> {
+  assertValidId(id, "category ID");
   const current = await getCategoryById(id);
   if (!current) return null;
 
@@ -242,7 +249,8 @@ export async function toggleCategoryFeatured(id: string): Promise<CategoryMaster
 }
 
 export async function bulkUpdateCategoryStatus(ids: string[], isActive: boolean): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids, "category IDs");
+  assertValidBoolean(isActive, "isActive");
   const updatedRows = await db
     .update(categories)
     .set({ isActive, updatedAt: new Date() })
@@ -252,7 +260,7 @@ export async function bulkUpdateCategoryStatus(ids: string[], isActive: boolean)
 }
 
 export async function bulkDeleteCategories(ids: string[]): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids, "category IDs");
   const deletedRows = await db
     .delete(categories)
     .where(inArray(categories.id, ids))
@@ -364,6 +372,7 @@ export async function getOrganizationById(id: string): Promise<OrganizationMaste
 export async function createOrganization(
   data: Partial<OrganizationMaster>
 ): Promise<OrganizationMaster> {
+  assertValidOrganizationCreate(data);
   const allOrgs = await db.select({ slug: organizations.slug }).from(organizations);
   const existingSlugs = allOrgs.map((o) => o.slug);
   const slug =
@@ -397,6 +406,8 @@ export async function updateOrganization(
   id: string,
   updates: Partial<OrganizationMaster>
 ): Promise<OrganizationMaster | null> {
+  assertValidId(id, "organization ID");
+  assertValidOrganizationUpdate(updates);
   const updateValues: Partial<typeof organizations.$inferInsert> = {
     updatedAt: new Date(),
   };
@@ -421,6 +432,7 @@ export async function updateOrganization(
 }
 
 export async function deleteOrganization(id: string): Promise<boolean> {
+  assertValidId(id, "organization ID");
   const [deleted] = await db
     .delete(organizations)
     .where(eq(organizations.id, id))
@@ -430,6 +442,7 @@ export async function deleteOrganization(id: string): Promise<boolean> {
 }
 
 export async function toggleOrganizationActive(id: string): Promise<OrganizationMaster | null> {
+  assertValidId(id, "organization ID");
   const current = await getOrganizationById(id);
   if (!current) return null;
 
@@ -446,7 +459,8 @@ export async function bulkUpdateOrganizationStatus(
   ids: string[],
   isActive: boolean
 ): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids, "organization IDs");
+  assertValidBoolean(isActive, "isActive");
   const updatedRows = await db
     .update(organizations)
     .set({ isActive, updatedAt: new Date() })
@@ -456,7 +470,7 @@ export async function bulkUpdateOrganizationStatus(
 }
 
 export async function bulkDeleteOrganizations(ids: string[]): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids, "organization IDs");
   const deletedRows = await db
     .delete(organizations)
     .where(inArray(organizations.id, ids))

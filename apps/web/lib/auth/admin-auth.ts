@@ -26,9 +26,6 @@ function getSessionSecret(): string {
   return secret;
 }
 
-/**
- * Validates admin credentials against a server-side salted scrypt hash.
- */
 export async function validateAdminCredentials(
   identifier: string,
   passwordPlain: string
@@ -43,11 +40,7 @@ export async function validateAdminCredentials(
   }
 
   const configuredHash = process.env.ADMIN_PASSWORD_HASH;
-  if (!configuredHash) {
-    return false;
-  }
-
-  return verifyPassword(passwordPlain, configuredHash);
+  return Boolean(configuredHash && await verifyPassword(passwordPlain, configuredHash));
 }
 
 export function createSessionToken(): string {

@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import { Sparkles } from "lucide-react";
 
 import { Container } from "@/components/ui";
-import { getAllOrganizationProfiles } from "@/services/organization/organization-profile.service";
 import { OrganizationDirectoryGrid } from "@/components/desktop/organization";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Recruiting Organizations & Commissions Directory | NEXTVACANCY",
@@ -25,6 +26,9 @@ export const metadata: Metadata = {
 };
 
 export default async function OrganizationsDirectoryPage() {
+  const { getAllOrganizationProfiles } = await import(
+    "@/services/organization/organization-profile.service"
+  );
   const organizations = await getAllOrganizationProfiles();
 
   return (

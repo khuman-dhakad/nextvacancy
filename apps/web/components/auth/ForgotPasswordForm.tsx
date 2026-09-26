@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ForgotPasswordFormData, AuthFormErrors } from "@/types";
 import { validateForgotPasswordForm } from "@/lib/validations/auth";
+import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
 import { Input, Button } from "@/components/ui";
 import { Mail, Send, ArrowLeft, AlertCircle } from "lucide-react";
 import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
@@ -48,10 +49,14 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await requestPasswordResetAction();
+      const result = await requestPasswordResetAction(formData.email);
       if (!result.success) {
-        setServerError(result.error);
+        setServerError(result.error || "Unable to send reset instructions right now.");
         return;
+      }
+      setIsSuccess(true);
+      if (onSuccess) {
+        onSuccess();
       }
     } finally {
       setIsLoading(false);

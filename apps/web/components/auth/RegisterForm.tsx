@@ -80,16 +80,15 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         password: formData.password,
       });
       if (!result.success) {
-        setServerError(result.error || "Registration failed. Please try again.");
+        setServerError(result.error);
         return;
       }
-
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
       }
     } catch {
-      setServerError("An account with this email address already exists. Please sign in instead.");
+      setServerError("Unable to create your account right now. Please try again.");
     } finally {
       setIsLoading(false);
     }

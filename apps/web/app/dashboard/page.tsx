@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui";
 import { getUserDashboardData } from "@/services/dashboard/dashboard.service";
+import { requireCandidate } from "@/lib/auth/session.server";
 import {
   DashboardHeader,
   OverviewCards,
@@ -20,6 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardPage() {
+  await requireCandidate();
   const data = await getUserDashboardData();
 
   return (

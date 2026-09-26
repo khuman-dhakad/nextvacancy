@@ -1,6 +1,6 @@
 import { eq, or, and, ilike, desc, sql } from "drizzle-orm";
 import { db, organizations, jobs, type Organization } from "@/lib/db";
-import { handleDatabaseError, isProduction } from "@/lib/db/errors";
+import { handleDatabaseError } from "@/lib/db/errors";
 import { OrganizationProfile, JobPosting } from "@/types";
 import { mapJobRecordToPosting } from "@/services/jobs/jobs.service";
 import { MOCK_ORGANIZATION_PROFILES } from "./organization-profile.mock";

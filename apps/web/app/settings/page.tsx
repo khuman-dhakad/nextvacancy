@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui";
 import { getUserSettingsData } from "@/services/settings/settings.service";
+import { requireCandidate } from "@/lib/auth/session.server";
 import {
   SettingsHeader,
   ProfilePhoto,
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
+  await requireCandidate();
   const data = await getUserSettingsData();
 
   return (

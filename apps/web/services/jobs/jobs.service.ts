@@ -1,6 +1,6 @@
 import { eq, desc, asc, and, or, ilike, sql, count } from "drizzle-orm";
 import { db, jobs, type Job } from "@/lib/db";
-import { handleDatabaseError, isProduction } from "@/lib/db/errors";
+import { handleDatabaseError } from "@/lib/db/errors";
 import {
   JobPosting,
   JobCategory,

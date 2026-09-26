@@ -61,15 +61,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await loginCandidateAction({
-        email: formData.email,
-        password: formData.password,
-      });
+      const result = await loginCandidateAction({ email: formData.email, password: formData.password });
       if (!result.success) {
-        setServerError(result.error || "Invalid email or password. Please try again.");
+        setServerError(result.error);
         return;
       }
-
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
@@ -79,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         }, 1000);
       }
     } catch {
-      setServerError("Invalid email or password. Please verify your credentials and try again.");
+      setServerError("Unable to sign in right now. Please try again.");
     } finally {
       setIsLoading(false);
     }

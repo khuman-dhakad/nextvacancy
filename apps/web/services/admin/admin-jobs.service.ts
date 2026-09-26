@@ -1,6 +1,7 @@
 import { eq, desc, asc, and, or, ilike, inArray, count, sql } from "drizzle-orm";
 import { db, jobs, auditLogs } from "@/lib/db";
-import { handleDatabaseError, isProduction } from "@/lib/db/errors";
+import { handleDatabaseError } from "@/lib/db/errors";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import {
   JobPosting,
   JobCategory,
@@ -12,6 +13,12 @@ import {
 } from "@/types";
 import { mapJobRecordToPosting } from "@/services/jobs/jobs.service";
 import { MOCK_JOB_POSTINGS } from "@/services/jobs/jobs.mock";
+import { assertValidBulkIds, assertValidId, assertValidJobCreate, assertValidJobStatus, assertValidJobUpdate } from "@/lib/validations/admin";
+
+async function getAuditActor(): Promise<string> {
+  const session = await getAdminSession();
+  return session?.email || session?.username || "unknown-admin";
+}
 
 function getAuditActor(): string {
   return process.env.ADMIN_EMAIL || "system";
@@ -234,6 +241,7 @@ export function generateSlug(title: string): string {
 export async function createAdminJob(
   jobData: Partial<JobPosting>
 ): Promise<JobPosting> {
+  assertValidJobCreate(jobData);
   const id = `job-${Date.now()}`;
   const now = new Date();
   const slug =
@@ -288,7 +296,7 @@ export async function createAdminJob(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: getAuditActor(),
+      actor: await getAuditActor(),
       action: "CREATE",
       entity: "JOB",
       entityId: inserted.id,
@@ -307,6 +315,8 @@ export async function updateAdminJob(
   id: string,
   updates: Partial<JobPosting>
 ): Promise<JobPosting | null> {
+  assertValidId(id);
+  assertValidJobUpdate(updates);
   const now = new Date();
 
   const updateValues: Partial<typeof jobs.$inferInsert> = {
@@ -354,7 +364,7 @@ export async function updateAdminJob(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: getAuditActor(),
+      actor: await getAuditActor(),
       action: "UPDATE",
       entity: "JOB",
       entityId: updated.id,
@@ -370,6 +380,7 @@ export async function updateAdminJob(
  * Deletes a job posting from PostgreSQL by ID
  */
 export async function deleteAdminJob(id: string): Promise<boolean> {
+  assertValidId(id);
   const [deleted] = await db
     .delete(jobs)
     .where(eq(jobs.id, id))
@@ -382,7 +393,7 @@ export async function deleteAdminJob(id: string): Promise<boolean> {
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: getAuditActor(),
+      actor: await getAuditActor(),
       action: "DELETE",
       entity: "JOB",
       entityId: deleted.id,
@@ -449,7 +460,7 @@ export async function duplicateAdminJob(id: string): Promise<JobPosting | null> 
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: getAuditActor(),
+      actor: await getAuditActor(),
       action: "DUPLICATE",
       entity: "JOB",
       entityId: inserted.id,
@@ -468,6 +479,8 @@ export async function toggleJobStatus(
   id: string,
   newStatus: JobStatus
 ): Promise<JobPosting | null> {
+  assertValidId(id);
+  assertValidJobStatus(newStatus);
   const [updated] = await db
     .update(jobs)
     .set({ status: newStatus, updatedAt: new Date() })
@@ -480,7 +493,7 @@ export async function toggleJobStatus(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: getAuditActor(),
+      actor: await getAuditActor(),
       action: newStatus === "OPEN" ? "PUBLISH" : "UNPUBLISH",
       entity: "JOB",
       entityId: updated.id,
@@ -499,7 +512,8 @@ export async function bulkUpdateJobsStatus(
   ids: string[],
   status: JobStatus
 ): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids);
+  assertValidJobStatus(status);
 
   const updatedRows = await db
     .update(jobs)
@@ -514,7 +528,7 @@ export async function bulkUpdateJobsStatus(
       .insert(auditLogs)
       .values({
         id: `act-${Date.now()}`,
-        actor: getAuditActor(),
+        actor: await getAuditActor(),
         action: "PUBLISH",
         entity: "JOB",
         entityTitle: `${updatedCount} Job Postings`,
@@ -530,7 +544,7 @@ export async function bulkUpdateJobsStatus(
  * Bulk deletes multiple jobs
  */
 export async function bulkDeleteJobs(ids: string[]): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids);
 
   const deletedRows = await db
     .delete(jobs)
@@ -544,7 +558,7 @@ export async function bulkDeleteJobs(ids: string[]): Promise<number> {
       .insert(auditLogs)
       .values({
         id: `act-${Date.now()}`,
-        actor: getAuditActor(),
+        actor: await getAuditActor(),
         action: "DELETE",
         entity: "JOB",
         entityTitle: `${deletedCount} Job Postings`,

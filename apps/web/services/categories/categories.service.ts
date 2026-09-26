@@ -1,6 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { db, categories } from "@/lib/db";
-import { handleDatabaseError, isProduction } from "@/lib/db/errors";
+import { handleDatabaseError } from "@/lib/db/errors";
 import { CategoryMaster } from "@/types";
 import { mapCategoryRecord } from "@/services/admin/admin-master-data.service";
 
