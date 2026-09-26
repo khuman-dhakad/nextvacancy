@@ -35,5 +35,15 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Authentication tests
+        run: npm test
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Whitespace check
+        working-directory: .
+        run: git diff --check
+
       - name: Production build
         run: npm run build

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { RegisterFormData, AuthFormErrors } from "@/types";
 import { validateRegisterForm } from "@/lib/validations/auth";
+import { registerCandidateAction } from "@/app/auth/actions";
 import { Input, Button } from "@/components/ui";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 import {
@@ -72,15 +73,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API call (ready for Spring Boot /api/v1/auth/register)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      const result = await registerCandidateAction({
+        fullName: formData.fullName,
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password,
+      });
+      if (!result.success) {
+        setServerError(result.error);
+        return;
+      }
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
       }
     } catch {
-      setServerError("An account with this email address already exists. Please sign in instead.");
+      setServerError("Unable to create your account right now. Please try again.");
     } finally {
       setIsLoading(false);
     }

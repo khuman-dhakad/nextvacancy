@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { ForgotPasswordFormData, AuthFormErrors } from "@/types";
 import { validateForgotPasswordForm } from "@/lib/validations/auth";
+import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
 import { Input, Button } from "@/components/ui";
 import { Mail, Send, CheckCircle2, ArrowLeft, AlertCircle } from "lucide-react";
 
@@ -50,9 +51,11 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API call (ready for Spring Boot /api/v1/auth/forgot-password)
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
+      const result = await requestPasswordResetAction(formData.email);
+      if (!result.success) {
+        setServerError(result.error || "Unable to send reset instructions right now.");
+        return;
+      }
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();

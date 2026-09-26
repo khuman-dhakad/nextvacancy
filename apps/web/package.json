@@ -8,7 +8,9 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "test": "tsx scripts/test-auth.ts && tsx scripts/test-admin-validation.ts",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx lib/db/migrate.ts",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx lib/db/seed.ts",
     "db:studio": "drizzle-kit studio"
@@ -16,10 +18,11 @@
   "dependencies": {
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.31.0",
-    "next": "16.2.12",
+    "next": "^16.3.4",
     "pg": "^8.23.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
