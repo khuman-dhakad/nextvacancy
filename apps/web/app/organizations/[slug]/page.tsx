@@ -3,12 +3,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/ui";
 import {
-  getOrganizationProfileBySlug,
-  getOrganizationJobs,
-  getRelatedOrganizations,
-  getAllOrganizationSlugs,
-} from "@/services/organization/organization-profile.service";
-import {
   OrganizationBreadcrumbs,
   OrganizationHero,
   OrganizationStatsGrid,
@@ -22,13 +16,11 @@ interface OrganizationPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  const slugs = await getAllOrganizationSlugs();
-  return slugs.map((slug) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: OrganizationPageProps): Promise<Metadata> {
   const { slug } = await params;
+  const { getOrganizationProfileBySlug } = await import(
+    "@/services/organization/organization-profile.service"
+  );
   const profile = await getOrganizationProfileBySlug(slug);
 
   if (!profile) {
@@ -66,6 +58,11 @@ export async function generateMetadata({ params }: OrganizationPageProps): Promi
 
 export default async function OrganizationProfilePage({ params }: OrganizationPageProps) {
   const { slug } = await params;
+  const {
+    getOrganizationProfileBySlug,
+    getOrganizationJobs,
+    getRelatedOrganizations,
+  } = await import("@/services/organization/organization-profile.service");
   const profile = await getOrganizationProfileBySlug(slug);
 
   if (!profile) {

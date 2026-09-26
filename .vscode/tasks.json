@@ -1,0 +1,57 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "release-build-verification",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"--prefix",
+				"apps/web",
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "final-quality-gate",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"--prefix",
+				"apps/web",
+				"run",
+				"typecheck"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "final-build",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"--prefix",
+				"apps/web",
+				"run",
+				"build"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "final-lint",
+			"type": "shell",
+			"command": "npm.cmd",
+			"args": [
+				"--prefix",
+				"apps/web",
+				"run",
+				"lint"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RegisterFormData, AuthFormErrors } from "@/types";
 import { validateRegisterForm } from "@/lib/validations/auth";
-import { registerAction } from "@/app/register/actions";
+import { registerCandidateAction } from "@/app/auth/actions";
 import { Input, Button } from "@/components/ui";
 import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
 import {
@@ -76,16 +76,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await registerAction(formData);
-
+      const result = await registerCandidateAction({
+        fullName: formData.fullName,
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password,
+      });
       if (!result.success) {
-        setServerError(result.error || "Registration failed. Please review your details.");
-        if (result.fieldErrors) {
-          setErrors(result.fieldErrors);
-        }
+        setServerError(result.error);
         return;
       }
-
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
@@ -93,7 +93,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         router.refresh();
       }
     } catch {
-      setServerError("An error occurred during registration. Please try again.");
+      setServerError("Unable to create your account right now. Please try again.");
     } finally {
       setIsLoading(false);
     }

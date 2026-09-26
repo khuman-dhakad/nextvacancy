@@ -147,6 +147,10 @@ export const users = pgTable(
     isEmailVerified: boolean("is_email_verified").default(false).notNull(),
     failedLoginAttempts: integer("failed_login_attempts").default(0).notNull(),
     lockedUntil: timestamp("locked_until", { withTimezone: true }),
+    emailVerificationTokenHash: varchar("email_verification_token_hash", { length: 128 }),
+    emailVerificationTokenExpiresAt: timestamp("email_verification_token_expires_at", { withTimezone: true }),
+    passwordResetTokenHash: varchar("password_reset_token_hash", { length: 128 }),
+    passwordResetTokenExpiresAt: timestamp("password_reset_token_expires_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -221,6 +225,26 @@ export const savedJobsRelations = relations(savedJobs, ({ one }) => ({
   }),
 }));
 
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: varchar("id", { length: 128 }).primaryKey(),
+    userId: varchar("user_id", { length: 128 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 128 }).notNull().unique(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ipAddress: varchar("ip_address", { length: 64 }),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("sessions_token_hash_idx").on(table.tokenHash),
+    index("sessions_user_id_idx").on(table.userId),
+    index("sessions_expires_at_idx").on(table.expiresAt),
+  ]
+);
+
 export type Category = typeof categories.$inferSelect;
 export type NewCategory = typeof categories.$inferInsert;
 export type Organization = typeof organizations.$inferSelect;
@@ -233,3 +257,5 @@ export type SavedJob = typeof savedJobs.$inferSelect;
 export type NewSavedJob = typeof savedJobs.$inferInsert;
 export type AuditLog = typeof auditLogs.$inferSelect;
 export type NewAuditLog = typeof auditLogs.$inferInsert;
+export type Session = typeof sessions.$inferSelect;
+export type NewSession = typeof sessions.$inferInsert;

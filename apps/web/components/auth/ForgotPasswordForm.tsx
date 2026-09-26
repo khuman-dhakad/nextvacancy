@@ -3,21 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { ForgotPasswordFormData, AuthFormErrors } from "@/types";
-import { validateForgotPasswordForm, validatePassword, validateConfirmPassword } from "@/lib/validations/auth";
-import { forgotPasswordAction, resetPasswordAction } from "@/app/forgot-password/actions";
+import { validateForgotPasswordForm } from "@/lib/validations/auth";
+import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
 import { Input, Button } from "@/components/ui";
-import { PasswordStrengthMeter } from "./PasswordStrengthMeter";
-import { Mail, Lock, Eye, EyeOff, Send, CheckCircle2, ArrowLeft, AlertCircle, KeyRound } from "lucide-react";
+import { Mail, Send, ArrowLeft, AlertCircle } from "lucide-react";
+import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
 
 export interface ForgotPasswordFormProps {
-  token?: string;
-  onSuccess?: () => void;
   className?: string;
 }
 
 export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
-  token,
-  onSuccess,
   className = "",
 }) => {
 
@@ -37,7 +33,6 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const isResetMode = Boolean(token);
 
@@ -76,113 +71,20 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
 
       setIsLoading(true);
 
-      try {
-        const result = await resetPasswordAction({
-          token,
-          password: resetData.password,
-          confirmPassword: resetData.confirmPassword,
-        });
-
-        if (!result.success) {
-          setServerError(result.error || "Password reset failed.");
-          if (result.fieldErrors) {
-            setErrors(result.fieldErrors);
-          }
-          return;
-        }
-
-        setIsSuccess(true);
-        if (onSuccess) {
-          onSuccess();
-        }
-      } catch {
-        setServerError("An unexpected error occurred. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      const validationErrors = validateForgotPasswordForm(formData);
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
+    try {
+      const result = await requestPasswordResetAction(formData.email);
+      if (!result.success) {
+        setServerError(result.error || "Unable to send reset instructions right now.");
         return;
       }
-
-      setIsLoading(true);
-
-      try {
-        const result = await forgotPasswordAction(formData);
-
-        if (!result.success) {
-          setServerError(result.error || "Unable to send reset email.");
-          if (result.fieldErrors) {
-            setErrors(result.fieldErrors);
-          }
-          return;
-        }
-
-        setIsSuccess(true);
-        if (onSuccess) {
-          onSuccess();
-        }
-      } catch {
-        setServerError("Unable to send reset email. Please verify your address and try again.");
-      } finally {
-        setIsLoading(false);
+      setIsSuccess(true);
+      if (onSuccess) {
+        onSuccess();
       }
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  if (isSuccess) {
-    if (isResetMode) {
-      return (
-        <div className="text-center py-6 space-y-4 animate-in fade-in duration-300">
-          <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
-            <CheckCircle2 className="h-10 w-10" aria-hidden="true" />
-          </div>
-          <div className="space-y-1.5">
-            <h2 className="text-lg font-bold text-slate-900">Password Reset Successful!</h2>
-            <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
-              Your password has been updated. You can now sign in with your new credentials.
-            </p>
-          </div>
-          <div className="pt-3">
-            <Link href="/login">
-              <Button variant="primary" size="md" fullWidth className="font-bold min-h-[44px]">
-                Sign In Now
-              </Button>
-            </Link>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="text-center py-6 space-y-4 animate-in fade-in duration-300">
-        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
-          <CheckCircle2 className="h-10 w-10" aria-hidden="true" />
-        </div>
-        <div className="space-y-1.5">
-          <h2 className="text-lg font-bold text-slate-900">Password Recovery Email Dispatched</h2>
-          <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
-            If an account exists for <strong>{formData.email}</strong>, a secure password reset link has been sent. Please check your inbox and spam folder.
-          </p>
-        </div>
-        <div className="pt-3">
-          <Link href="/login">
-            <Button
-              variant="outline"
-              size="md"
-              fullWidth
-              className="font-bold min-h-[44px]"
-              leftIcon={<ArrowLeft className="h-4 w-4" />}
-            >
-              Back to Sign In
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} noValidate className={["space-y-4", className].filter(Boolean).join(" ")}>

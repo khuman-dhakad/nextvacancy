@@ -1,6 +1,9 @@
 import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { loadEnvConfig } from "@next/env";
 import { db, pool } from "./index";
 import path from "node:path";
+
+loadEnvConfig(process.cwd());
 
 export async function runMigrations() {
   console.log("⏳ Applying PostgreSQL database migrations...");

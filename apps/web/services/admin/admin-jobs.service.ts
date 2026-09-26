@@ -1,5 +1,7 @@
 import { eq, desc, asc, and, or, ilike, inArray, count, sql } from "drizzle-orm";
 import { db, jobs, auditLogs } from "@/lib/db";
+import { handleDatabaseError } from "@/lib/db/errors";
+import { getAdminSession } from "@/lib/auth/admin-auth.server";
 import {
   JobPosting,
   JobCategory,
@@ -11,6 +13,16 @@ import {
 } from "@/types";
 import { mapJobRecordToPosting } from "@/services/jobs/jobs.service";
 import { MOCK_JOB_POSTINGS } from "@/services/jobs/jobs.mock";
+import { assertValidBulkIds, assertValidId, assertValidJobCreate, assertValidJobStatus, assertValidJobUpdate } from "@/lib/validations/admin";
+
+async function getAuditActor(): Promise<string> {
+  const session = await getAdminSession();
+  return session?.email || session?.username || "unknown-admin";
+}
+
+function getAuditActor(): string {
+  return process.env.ADMIN_EMAIL || "system";
+}
 
 /**
  * Computes live analytics metrics across all recruitment categories from the database
@@ -48,8 +60,22 @@ export async function getAdminDashboardStats(): Promise<AdminAnalyticsStats> {
         totalViews,
       };
     }
+
+    if (isProduction()) {
+      return {
+        totalJobs: 0,
+        govtJobs: 0,
+        privateJobs: 0,
+        admitCards: 0,
+        results: 0,
+        scholarships: 0,
+        internships: 0,
+        draftsCount: 0,
+        totalViews: 0,
+      };
+    }
   } catch (error) {
-    console.warn("Database error in getAdminDashboardStats, calculating from mock:", error);
+    handleDatabaseError("getAdminDashboardStats", error);
   }
 
   // Fallback
@@ -147,9 +173,15 @@ export async function getAdminJobs(
         totalPages,
       };
     }
+
+    if (isProduction()) {
+      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+    }
   } catch (error) {
-    console.warn("Database error in getAdminJobs, fallback to mock:", error);
+    handleDatabaseError("getAdminJobs", error);
   }
+
+  if (isProduction()) return { items: [], total: 0, page, pageSize, totalPages: 1 };
 
   // Fallback
   let results = [...MOCK_JOB_POSTINGS];
@@ -185,8 +217,10 @@ export async function getAdminJobById(id: string): Promise<JobPosting | null> {
       return mapJobRecordToPosting(rows[0]);
     }
   } catch (error) {
-    console.warn("Database error in getAdminJobById, falling back to mock:", error);
+    handleDatabaseError("getAdminJobById", error);
   }
+
+  if (isProduction()) return null;
 
   const job = MOCK_JOB_POSTINGS.find((j) => j.id === id || j.slug === id);
   return job ? JSON.parse(JSON.stringify(job)) : null;
@@ -207,6 +241,7 @@ export function generateSlug(title: string): string {
 export async function createAdminJob(
   jobData: Partial<JobPosting>
 ): Promise<JobPosting> {
+  assertValidJobCreate(jobData);
   const id = `job-${Date.now()}`;
   const now = new Date();
   const slug =
@@ -261,14 +296,14 @@ export async function createAdminJob(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: await getAuditActor(),
       action: "CREATE",
       entity: "JOB",
       entityId: inserted.id,
       entityTitle: inserted.title,
       details: `Created new ${inserted.category} vacancy with ID ${inserted.id}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(inserted);
 }
@@ -280,6 +315,8 @@ export async function updateAdminJob(
   id: string,
   updates: Partial<JobPosting>
 ): Promise<JobPosting | null> {
+  assertValidId(id);
+  assertValidJobUpdate(updates);
   const now = new Date();
 
   const updateValues: Partial<typeof jobs.$inferInsert> = {
@@ -327,14 +364,14 @@ export async function updateAdminJob(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: await getAuditActor(),
       action: "UPDATE",
       entity: "JOB",
       entityId: updated.id,
       entityTitle: updated.title,
       details: `Updated circular details for ${updated.organization}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(updated);
 }
@@ -343,6 +380,7 @@ export async function updateAdminJob(
  * Deletes a job posting from PostgreSQL by ID
  */
 export async function deleteAdminJob(id: string): Promise<boolean> {
+  assertValidId(id);
   const [deleted] = await db
     .delete(jobs)
     .where(eq(jobs.id, id))
@@ -355,14 +393,14 @@ export async function deleteAdminJob(id: string): Promise<boolean> {
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: await getAuditActor(),
       action: "DELETE",
       entity: "JOB",
       entityId: deleted.id,
       entityTitle: deleted.title,
       details: `Deleted job posting record ${id}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return true;
 }
@@ -422,14 +460,14 @@ export async function duplicateAdminJob(id: string): Promise<JobPosting | null> 
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: await getAuditActor(),
       action: "DUPLICATE",
       entity: "JOB",
       entityId: inserted.id,
       entityTitle: inserted.title,
       details: `Cloned from ${original.title} as draft`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(inserted);
 }
@@ -441,6 +479,8 @@ export async function toggleJobStatus(
   id: string,
   newStatus: JobStatus
 ): Promise<JobPosting | null> {
+  assertValidId(id);
+  assertValidJobStatus(newStatus);
   const [updated] = await db
     .update(jobs)
     .set({ status: newStatus, updatedAt: new Date() })
@@ -453,14 +493,14 @@ export async function toggleJobStatus(
     .insert(auditLogs)
     .values({
       id: `act-${Date.now()}`,
-      actor: "admin@nextvacancy.com",
+      actor: await getAuditActor(),
       action: newStatus === "OPEN" ? "PUBLISH" : "UNPUBLISH",
       entity: "JOB",
       entityId: updated.id,
       entityTitle: updated.title,
       details: `Changed publication status to ${newStatus}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(updated);
 }
@@ -472,7 +512,8 @@ export async function bulkUpdateJobsStatus(
   ids: string[],
   status: JobStatus
 ): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids);
+  assertValidJobStatus(status);
 
   const updatedRows = await db
     .update(jobs)
@@ -487,13 +528,13 @@ export async function bulkUpdateJobsStatus(
       .insert(auditLogs)
       .values({
         id: `act-${Date.now()}`,
-        actor: "admin@nextvacancy.com",
+        actor: await getAuditActor(),
         action: "PUBLISH",
         entity: "JOB",
         entityTitle: `${updatedCount} Job Postings`,
         details: `Bulk status update to ${status}`,
       })
-      .catch((err) => console.error("Audit log insertion failed:", err));
+      ;
   }
 
   return updatedCount;
@@ -503,7 +544,7 @@ export async function bulkUpdateJobsStatus(
  * Bulk deletes multiple jobs
  */
 export async function bulkDeleteJobs(ids: string[]): Promise<number> {
-  if (ids.length === 0) return 0;
+  assertValidBulkIds(ids);
 
   const deletedRows = await db
     .delete(jobs)
@@ -517,13 +558,13 @@ export async function bulkDeleteJobs(ids: string[]): Promise<number> {
       .insert(auditLogs)
       .values({
         id: `act-${Date.now()}`,
-        actor: "admin@nextvacancy.com",
+        actor: await getAuditActor(),
         action: "DELETE",
         entity: "JOB",
         entityTitle: `${deletedCount} Job Postings`,
         details: `Bulk deletion of ${deletedCount} records`,
       })
-      .catch((err) => console.error("Audit log insertion failed:", err));
+      ;
   }
 
   return deletedCount;
@@ -551,8 +592,10 @@ export async function getAdminActivityLogs(limit: number = 10): Promise<AdminAct
       }));
     }
   } catch (error) {
-    console.warn("Database error in getAdminActivityLogs, falling back to mock:", error);
+    handleDatabaseError("getAdminActivityLogs", error);
   }
+
+  if (isProduction()) return [];
 
   return [
     {

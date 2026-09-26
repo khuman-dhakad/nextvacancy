@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoginFormData, AuthFormErrors } from "@/types";
 import { validateLoginForm } from "@/lib/validations/auth";
-import { loginAction } from "@/app/login/actions";
+import { loginCandidateAction } from "@/app/auth/actions";
 import { Input, Button } from "@/components/ui";
 import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -62,16 +62,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await loginAction(formData);
-
+      const result = await loginCandidateAction({ email: formData.email, password: formData.password });
       if (!result.success) {
-        setServerError(result.error || "Invalid email or password.");
-        if (result.fieldErrors) {
-          setErrors(result.fieldErrors);
-        }
+        setServerError(result.error);
         return;
       }
-
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
@@ -80,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         router.refresh();
       }
     } catch {
-      setServerError("Unable to connect to authentication service. Please try again.");
+      setServerError("Unable to sign in right now. Please try again.");
     } finally {
       setIsLoading(false);
     }

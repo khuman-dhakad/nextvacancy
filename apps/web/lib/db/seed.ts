@@ -1,6 +1,9 @@
 import { db, jobs, categories, organizations, pool } from "./index";
+import { loadEnvConfig } from "@next/env";
 import { MOCK_JOB_POSTINGS } from "../../services/jobs/jobs.mock";
 import { MOCK_ORGANIZATION_PROFILES } from "../../services/organization/organization-profile.service";
+
+loadEnvConfig(process.cwd());
 
 const INITIAL_CATEGORIES = [
   {

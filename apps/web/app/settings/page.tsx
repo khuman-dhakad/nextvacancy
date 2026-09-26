@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session.server";
 import { Container } from "@/components/ui";
 import { getUserSettingsData } from "@/services/settings/settings.service";
+import { requireCandidate } from "@/lib/auth/session.server";
 import {
   SettingsHeader,
   ProfilePhoto,
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
-  const user = await requireUser();
+  await requireCandidate();
   const data = await getUserSettingsData();
 
   const userProfile = {
