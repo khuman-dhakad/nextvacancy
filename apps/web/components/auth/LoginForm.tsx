@@ -12,11 +12,13 @@ import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, AlertCircle, CheckCircle2 }
 export interface LoginFormProps {
   onSuccess?: () => void;
   className?: string;
+  redirectTo?: string;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onSuccess,
   className = "",
+  redirectTo = "/dashboard",
 }) => {
   const router = useRouter();
 
@@ -39,7 +41,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear field-level error on change
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -70,9 +71,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        setTimeout(() => {
-          router.push("/");
-        }, 1000);
+        router.push(redirectTo);
+        router.refresh();
       }
     } catch {
       setServerError("Unable to sign in right now. Please try again.");

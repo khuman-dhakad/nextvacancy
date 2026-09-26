@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { RegisterFormData, AuthFormErrors } from "@/types";
 import { validateRegisterForm } from "@/lib/validations/auth";
 import { registerCandidateAction } from "@/app/auth/actions";
@@ -29,6 +30,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onSuccess,
   className = "",
 }) => {
+  const router = useRouter();
+
   const [formData, setFormData] = useState<RegisterFormData>({
     fullName: "",
     email: "",
@@ -86,6 +89,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
+      } else {
+        router.refresh();
       }
     } catch {
       setServerError("Unable to create your account right now. Please try again.");
@@ -103,12 +108,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <div className="space-y-1.5">
           <h2 className="text-lg font-bold text-slate-900">Registration Successful!</h2>
           <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
-            Your NEXTVACANCY account has been created. A verification link has been sent to{" "}
+            Your NEXTVACANCY candidate account has been created. A verification link has been sent to{" "}
             <strong>{formData.email}</strong>.
           </p>
         </div>
         <div className="pt-3">
-          <Link href="/login">
+          <Link href="/dashboard">
             <Button
               variant="accent"
               size="md"
@@ -116,7 +121,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
               className="font-bold shadow-md min-h-[44px]"
               rightIcon={<ArrowRight className="h-4 w-4" />}
             >
-              Continue to Sign In
+              Continue to Dashboard
             </Button>
           </Link>
         </div>
@@ -173,14 +178,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         name="mobile"
         type="tel"
         autoComplete="tel"
-        label="Indian Mobile Number"
+        label="Indian Mobile Number (Optional)"
         placeholder="9876543210"
         value={formData.mobile}
         onChange={handleChange}
         error={errors.mobile}
         leftIcon={<Phone className="h-4 w-4" aria-hidden="true" />}
         helperText="Used for critical exam admit card & result SMS alerts"
-        required
       />
 
       {/* Password with Strength Meter */}
@@ -265,7 +269,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             </Link>{" "}
             and{" "}
             <Link
-              href="/privacy"
+              href="/privacy-policy"
               className="text-[var(--primary)] font-bold hover:underline"
               target="_blank"
             >

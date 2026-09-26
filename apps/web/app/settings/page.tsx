@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session.server";
 import { Container } from "@/components/ui";
 import { getUserSettingsData } from "@/services/settings/settings.service";
 import { requireCandidate } from "@/lib/auth/session.server";
@@ -26,15 +27,23 @@ export default async function SettingsPage() {
   await requireCandidate();
   const data = await getUserSettingsData();
 
+  const userProfile = {
+    ...data.profile,
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    phone: user.mobile || data.profile.phone,
+  };
+
   return (
     <main className="min-h-screen bg-[#F8FAFC]">
       {/* 1. Settings Header */}
-      <SettingsHeader profile={data.profile} />
+      <SettingsHeader profile={userProfile} />
 
       {/* 2. Main Settings Grid */}
       <Container size="lg" className="py-8 space-y-8">
-        <ProfilePhoto fullName={data.profile.fullName} avatarUrl={data.profile.avatarUrl} />
-        <ProfileInformation initialProfile={data.profile} />
+        <ProfilePhoto fullName={userProfile.fullName} avatarUrl={userProfile.avatarUrl} />
+        <ProfileInformation initialProfile={userProfile} />
         <JobPreferences initialPreferences={data.jobPreferences} />
         <AccountPreferences initialPreferences={data.accountPreferences} />
         <PrivacySettings initialPrivacy={data.privacySettings} />

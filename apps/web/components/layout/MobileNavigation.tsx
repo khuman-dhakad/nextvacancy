@@ -18,16 +18,25 @@ import {
   Home,
   Info,
   HelpCircle,
+  LayoutDashboard,
+  Bell,
+  Settings,
+  LogOut,
 } from "lucide-react";
+import { UserProfile } from "@/types";
+import { logoutAction } from "@/app/login/actions";
 
 export interface MobileNavigationProps {
   className?: string;
+  currentUser?: UserProfile | null;
 }
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({
   className = "",
+  currentUser,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -66,6 +75,16 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
     setIsOpen(false);
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logoutAction();
+    } finally {
+      setIsLoggingOut(false);
+      setIsOpen(false);
+    }
+  };
+
   return (
     <div className={["lg:hidden", className].filter(Boolean).join(" ")}>
       {/* Hamburger Trigger Button */}
@@ -76,7 +95,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         aria-expanded={isOpen}
         aria-controls="mobile-navigation-drawer"
         aria-label="Open navigation menu"
-        className="inline-flex items-center justify-center h-11 w-11 rounded-lg text-slate-700 hover:text-[var(--primary)] hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] cursor-pointer"
+        className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer"
       >
         <Menu className="h-6 w-6" aria-hidden="true" />
       </button>
@@ -144,27 +163,76 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         {/* Scrollable Nav Links */}
         <nav aria-label="Mobile Menu Links" className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Candidate Account Shortcuts */}
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Candidate Portal
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href="/login"
-                onClick={handleLinkClick}
-                className="flex items-center justify-center py-2 px-3 rounded-lg bg-[var(--primary)] text-white text-xs font-bold shadow-xs hover:bg-[var(--primary-hover)] transition-colors min-h-[40px]"
+          {currentUser ? (
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-bold text-xs">
+                  {currentUser.fullName ? currentUser.fullName.charAt(0) : "U"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-slate-900 truncate">{currentUser.fullName}</p>
+                  <p className="text-[11px] text-slate-500 truncate">{currentUser.email}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 pt-1">
+                <Link
+                  href="/dashboard"
+                  onClick={handleLinkClick}
+                  className="flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:text-[var(--primary)]"
+                >
+                  <LayoutDashboard className="h-4 w-4 mb-1 text-[var(--primary)]" />
+                  <span>Dashboard</span>
+                </Link>
+                <Link
+                  href="/notifications"
+                  onClick={handleLinkClick}
+                  className="flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:text-[var(--primary)]"
+                >
+                  <Bell className="h-4 w-4 mb-1 text-slate-600" />
+                  <span>Alerts</span>
+                </Link>
+                <Link
+                  href="/settings"
+                  onClick={handleLinkClick}
+                  className="flex flex-col items-center justify-center p-2 rounded-lg bg-white border border-slate-200 text-[11px] font-bold text-slate-700 hover:text-[var(--primary)]"
+                >
+                  <Settings className="h-4 w-4 mb-1 text-slate-600" />
+                  <span>Settings</span>
+                </Link>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 text-xs font-bold hover:bg-rose-100 transition-colors"
               >
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                onClick={handleLinkClick}
-                className="flex items-center justify-center py-2 px-3 rounded-lg border border-[var(--border-strong)] bg-white text-slate-800 text-xs font-bold hover:border-[var(--primary)] transition-colors min-h-[40px]"
-              >
-                Register
-              </Link>
+                <LogOut className="h-3.5 w-3.5" />
+                <span>{isLoggingOut ? "Signing Out..." : "Sign Out"}</span>
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                Candidate Portal
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/login"
+                  onClick={handleLinkClick}
+                  className="flex items-center justify-center py-2 px-3 rounded-lg bg-[var(--primary)] text-white text-xs font-bold shadow-xs hover:bg-[var(--primary-hover)] transition-colors min-h-[40px]"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={handleLinkClick}
+                  className="flex items-center justify-center py-2 px-3 rounded-lg border border-[var(--border-strong)] bg-white text-slate-800 text-xs font-bold hover:border-[var(--primary)] transition-colors min-h-[40px]"
+                >
+                  Register
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Main Opportunities */}
           <div className="space-y-1">

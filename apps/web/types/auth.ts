@@ -22,7 +22,7 @@ export interface UserProfile {
   fullName: string;
   email: string;
   mobile?: string;
-  role: "USER" | "ADMIN";
+  role: "CANDIDATE" | "ADMIN" | "MODERATOR";
   isEmailVerified: boolean;
   createdAt: string;
 }

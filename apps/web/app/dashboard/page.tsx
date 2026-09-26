@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session.server";
 import { Container } from "@/components/ui";
 import { getUserDashboardData } from "@/services/dashboard/dashboard.service";
 import { requireCandidate } from "@/lib/auth/session.server";
@@ -24,10 +25,19 @@ export default async function DashboardPage() {
   await requireCandidate();
   const data = await getUserDashboardData();
 
+  // Populate dynamic authenticated candidate profile data
+  const candidateProfile = {
+    ...data.profile,
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    mobile: user.mobile || data.profile.mobile,
+  };
+
   return (
     <main className="min-h-screen bg-[#F8FAFC] pb-16">
       {/* 1. Welcome & Greeting Header */}
-      <DashboardHeader profile={data.profile} />
+      <DashboardHeader profile={candidateProfile} />
 
       {/* 2. Main Dashboard Content Grid */}
       <Container size="lg" className="py-8 space-y-8">
@@ -46,7 +56,7 @@ export default async function DashboardPage() {
         {/* Candidate Profile & Preferences */}
         <div className="grid grid-cols-1 gap-8">
           <NotificationPreferences initialPreferences={data.notificationPreferences} />
-          <ProfileSummary profile={data.profile} />
+          <ProfileSummary profile={candidateProfile} />
           <SecurityPanel sessions={data.securitySessions} />
         </div>
       </Container>

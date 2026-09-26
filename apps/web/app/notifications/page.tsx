@@ -1,5 +1,6 @@
 import React from "react";
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session.server";
 import { Container } from "@/components/ui";
 import { getNotificationCenterData } from "@/services/notifications/notification.service";
 import { requireCandidate } from "@/lib/auth/session.server";
