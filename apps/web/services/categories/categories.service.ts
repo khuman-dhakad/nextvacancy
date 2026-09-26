@@ -121,6 +121,8 @@ export async function getAllCategories(): Promise<CategoryMaster[]> {
     handleDatabaseError("getAllCategories", error);
   }
 
+  if (isProduction()) return [];
+
   return FALLBACK_CATEGORIES;
 }
 
@@ -141,6 +143,8 @@ export async function getFeaturedCategories(): Promise<CategoryMaster[]> {
   } catch (error) {
     handleDatabaseError("getFeaturedCategories", error);
   }
+
+  if (isProduction()) return [];
 
   return FALLBACK_CATEGORIES.filter((c) => c.isFeatured);
 }
@@ -163,6 +167,8 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryMaster | 
   } catch (error) {
     handleDatabaseError("getCategoryBySlug", error);
   }
+
+  if (isProduction()) return null;
 
   const found = FALLBACK_CATEGORIES.find((c) => c.slug === clean);
   return found || null;

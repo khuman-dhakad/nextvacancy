@@ -28,13 +28,20 @@ function getPool(): Pool {
     }
   }
 
+  if (!connectionString && process.env.NODE_ENV === "production") {
+    throw new Error(
+      "DATABASE_URL is required in production. Configure it before starting the application."
+    );
+  }
+
   const newPool = new Pool({
     connectionString: normalizedConnectionString,
     max: process.env.DB_POOL_MAX ? parseInt(process.env.DB_POOL_MAX, 10) : 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
     ssl:
-      process.env.NODE_ENV === "production" && process.env.DATABASE_SSL !== "false"
+      process.env.DATABASE_SSL === "true" ||
+      (process.env.NODE_ENV === "production" && process.env.DATABASE_SSL !== "false")
         ? { rejectUnauthorized: false }
         : false,
   });
@@ -43,9 +50,7 @@ function getPool(): Pool {
     console.error("Unexpected error on idle PostgreSQL client pool", err);
   });
 
-  if (process.env.NODE_ENV !== "production") {
-    global.__nextvacancy_pg_pool = newPool;
-  }
+  global.__nextvacancy_pg_pool = newPool;
 
   return newPool;
 }

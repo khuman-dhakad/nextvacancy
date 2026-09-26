@@ -56,6 +56,8 @@ export async function getAllOrganizationProfiles(): Promise<OrganizationProfile[
     handleDatabaseError("getAllOrganizationProfiles", error);
   }
 
+  if (isProduction()) return [];
+
   return MOCK_ORGANIZATION_PROFILES;
 }
 
@@ -75,6 +77,8 @@ export async function getAllOrganizationSlugs(): Promise<string[]> {
   } catch (error) {
     handleDatabaseError("getAllOrganizationSlugs", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_ORGANIZATION_PROFILES.map((org) => org.slug);
 }
@@ -138,6 +142,8 @@ export async function getOrganizationProfileBySlug(
     handleDatabaseError("getOrganizationProfileBySlug", error);
   }
 
+  if (isProduction()) return null;
+
   const profile = MOCK_ORGANIZATION_PROFILES.find(
     (org) => org.slug.toLowerCase() === clean || org.shortName.toLowerCase() === clean
   );
@@ -172,6 +178,8 @@ export async function getOrganizationJobs(
   } catch (error) {
     handleDatabaseError("getOrganizationJobs", error);
   }
+
+  if (isProduction()) return [];
 
   const profile = MOCK_ORGANIZATION_PROFILES.find(
     (org) => org.slug.toLowerCase() === clean || org.shortName.toLowerCase() === clean
@@ -233,6 +241,8 @@ export async function getRelatedOrganizations(
   } catch (error) {
     handleDatabaseError("getRelatedOrganizations", error);
   }
+
+  if (isProduction()) return [];
 
   const related = MOCK_ORGANIZATION_PROFILES.filter(
     (org) => org.slug !== currentSlug && org.categoryType === categoryType

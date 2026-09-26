@@ -20,6 +20,10 @@ async function getAuditActor(): Promise<string> {
   return session?.email || session?.username || "unknown-admin";
 }
 
+function getAuditActor(): string {
+  return process.env.ADMIN_EMAIL || "system";
+}
+
 /**
  * Computes live analytics metrics across all recruitment categories from the database
  */
@@ -54,6 +58,20 @@ export async function getAdminDashboardStats(): Promise<AdminAnalyticsStats> {
         internships,
         draftsCount,
         totalViews,
+      };
+    }
+
+    if (isProduction()) {
+      return {
+        totalJobs: 0,
+        govtJobs: 0,
+        privateJobs: 0,
+        admitCards: 0,
+        results: 0,
+        scholarships: 0,
+        internships: 0,
+        draftsCount: 0,
+        totalViews: 0,
       };
     }
   } catch (error) {
@@ -155,9 +173,15 @@ export async function getAdminJobs(
         totalPages,
       };
     }
+
+    if (isProduction()) {
+      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+    }
   } catch (error) {
     handleDatabaseError("getAdminJobs", error);
   }
+
+  if (isProduction()) return { items: [], total: 0, page, pageSize, totalPages: 1 };
 
   // Fallback
   let results = [...MOCK_JOB_POSTINGS];
@@ -195,6 +219,8 @@ export async function getAdminJobById(id: string): Promise<JobPosting | null> {
   } catch (error) {
     handleDatabaseError("getAdminJobById", error);
   }
+
+  if (isProduction()) return null;
 
   const job = MOCK_JOB_POSTINGS.find((j) => j.id === id || j.slug === id);
   return job ? JSON.parse(JSON.stringify(job)) : null;
@@ -277,7 +303,7 @@ export async function createAdminJob(
       entityTitle: inserted.title,
       details: `Created new ${inserted.category} vacancy with ID ${inserted.id}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(inserted);
 }
@@ -345,7 +371,7 @@ export async function updateAdminJob(
       entityTitle: updated.title,
       details: `Updated circular details for ${updated.organization}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(updated);
 }
@@ -374,7 +400,7 @@ export async function deleteAdminJob(id: string): Promise<boolean> {
       entityTitle: deleted.title,
       details: `Deleted job posting record ${id}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return true;
 }
@@ -441,7 +467,7 @@ export async function duplicateAdminJob(id: string): Promise<JobPosting | null> 
       entityTitle: inserted.title,
       details: `Cloned from ${original.title} as draft`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(inserted);
 }
@@ -474,7 +500,7 @@ export async function toggleJobStatus(
       entityTitle: updated.title,
       details: `Changed publication status to ${newStatus}`,
     })
-    .catch((err) => console.error("Audit log insertion failed:", err));
+    ;
 
   return mapJobRecordToPosting(updated);
 }
@@ -508,7 +534,7 @@ export async function bulkUpdateJobsStatus(
         entityTitle: `${updatedCount} Job Postings`,
         details: `Bulk status update to ${status}`,
       })
-      .catch((err) => console.error("Audit log insertion failed:", err));
+      ;
   }
 
   return updatedCount;
@@ -538,7 +564,7 @@ export async function bulkDeleteJobs(ids: string[]): Promise<number> {
         entityTitle: `${deletedCount} Job Postings`,
         details: `Bulk deletion of ${deletedCount} records`,
       })
-      .catch((err) => console.error("Audit log insertion failed:", err));
+      ;
   }
 
   return deletedCount;
@@ -568,6 +594,8 @@ export async function getAdminActivityLogs(limit: number = 10): Promise<AdminAct
   } catch (error) {
     handleDatabaseError("getAdminActivityLogs", error);
   }
+
+  if (isProduction()) return [];
 
   return [
     {

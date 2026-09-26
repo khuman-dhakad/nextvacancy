@@ -6,15 +6,14 @@ import { ForgotPasswordFormData, AuthFormErrors } from "@/types";
 import { validateForgotPasswordForm } from "@/lib/validations/auth";
 import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
 import { Input, Button } from "@/components/ui";
-import { Mail, Send, CheckCircle2, ArrowLeft, AlertCircle } from "lucide-react";
+import { Mail, Send, ArrowLeft, AlertCircle } from "lucide-react";
+import { requestPasswordResetAction } from "@/app/auth/password-reset-actions";
 
 export interface ForgotPasswordFormProps {
-  onSuccess?: () => void;
   className?: string;
 }
 
 export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
-  onSuccess,
   className = "",
 }) => {
   const [formData, setFormData] = useState<ForgotPasswordFormData>({
@@ -24,7 +23,6 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
   const [errors, setErrors] = useState<AuthFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -60,42 +58,10 @@ export const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({
       if (onSuccess) {
         onSuccess();
       }
-    } catch {
-      setServerError("Unable to send reset email. Please verify your address and try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (isSuccess) {
-    return (
-      <div className="text-center py-6 space-y-4 animate-in fade-in duration-300">
-        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
-          <CheckCircle2 className="h-10 w-10" aria-hidden="true" />
-        </div>
-        <div className="space-y-1.5">
-          <h2 className="text-lg font-bold text-slate-900">Password Reset Link Sent</h2>
-          <p className="text-xs text-slate-600 max-w-xs mx-auto leading-relaxed">
-            We have sent password recovery instructions to{" "}
-            <strong>{formData.email}</strong>. Please check your inbox and spam folder.
-          </p>
-        </div>
-        <div className="pt-3">
-          <Link href="/login">
-            <Button
-              variant="outline"
-              size="md"
-              fullWidth
-              className="font-bold min-h-[44px]"
-              leftIcon={<ArrowLeft className="h-4 w-4" />}
-            >
-              Back to Sign In
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleSubmit} noValidate className={["space-y-4", className].filter(Boolean).join(" ")}>

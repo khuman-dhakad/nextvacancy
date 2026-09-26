@@ -64,6 +64,8 @@ export async function getLatestJobs(limit: number = 8): Promise<JobPosting[]> {
     handleDatabaseError("getLatestJobs", error);
   }
 
+  if (isProduction()) return [];
+
   // Graceful fallback if database is empty or offline
   const sorted = [...MOCK_JOB_POSTINGS].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -87,6 +89,8 @@ export async function getEndingSoonJobs(limit: number = 4): Promise<JobPosting[]
     handleDatabaseError("getEndingSoonJobs", error);
   }
 
+  if (isProduction()) return [];
+
   return MOCK_JOB_POSTINGS.filter((job) => job.status === "ENDING_SOON").slice(0, limit);
 }
 
@@ -106,6 +110,8 @@ export async function getFeaturedJobs(limit: number = 4): Promise<JobPosting[]> 
     handleDatabaseError("getFeaturedJobs", error);
   }
 
+  if (isProduction()) return [];
+
   return MOCK_JOB_POSTINGS.filter((job) => job.isFeatured).slice(0, limit);
 }
 
@@ -124,6 +130,8 @@ export async function getTrendingJobs(limit: number = 6): Promise<JobPosting[]> 
   } catch (error) {
     handleDatabaseError("getTrendingJobs", error);
   }
+
+  if (isProduction()) return [];
 
   return MOCK_JOB_POSTINGS.filter((job) => job.isTrending).slice(0, limit);
 }
@@ -147,6 +155,8 @@ export async function getJobsByCategory(
     handleDatabaseError("getJobsByCategory", error);
   }
 
+  if (isProduction()) return [];
+
   return MOCK_JOB_POSTINGS.filter((job) => job.category === category).slice(0, limit);
 }
 
@@ -165,6 +175,8 @@ export async function getJobBySlug(slug: string): Promise<JobPosting | null> {
   } catch (error) {
     handleDatabaseError("getJobBySlug", error);
   }
+
+  if (isProduction()) return null;
 
   const mock = MOCK_JOB_POSTINGS.find((item) => item.slug === cleanSlug);
   return mock || null;
@@ -189,6 +201,8 @@ export async function getRelatedJobs(
   } catch (error) {
     handleDatabaseError("getRelatedJobs", error);
   }
+
+  if (isProduction()) return [];
 
   const sameCategory = MOCK_JOB_POSTINGS.filter(
     (job) => job.category === category && job.slug !== currentSlug
@@ -294,9 +308,15 @@ export async function searchJobs(
         totalPages,
       };
     }
+
+    if (isProduction()) {
+      return { items: [], total: 0, page, pageSize, totalPages: 1 };
+    }
   } catch (error) {
     handleDatabaseError("searchJobs", error);
   }
+
+  if (isProduction()) return { items: [], total: 0, page, pageSize, totalPages: 1 };
 
   // In-memory fallback
   let results = [...MOCK_JOB_POSTINGS];
