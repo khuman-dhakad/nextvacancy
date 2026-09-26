@@ -1,7 +1,13 @@
 import { MetadataRoute } from "next";
-import { searchJobs, getAllCategories, getAllOrganizationSlugs } from "@/services";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [{ searchJobs }, { getAllCategories }, { getAllOrganizationSlugs }] = await Promise.all([
+    import("@/services/jobs/jobs.service"),
+    import("@/services/categories/categories.service"),
+    import("@/services/organization/organization-profile.service"),
+  ]);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
   const generatedAt = new Date("2026-01-01T00:00:00.000Z");
 
