@@ -1,5 +1,6 @@
 import { eq, desc } from "drizzle-orm";
 import { db, categories } from "@/lib/db";
+import { handleDatabaseError } from "@/lib/db/errors";
 import { CategoryMaster } from "@/types";
 import { mapCategoryRecord } from "@/services/admin/admin-master-data.service";
 
@@ -117,7 +118,7 @@ export async function getAllCategories(): Promise<CategoryMaster[]> {
       return rows.map(mapCategoryRecord);
     }
   } catch (error) {
-    console.warn("Database error in getAllCategories, falling back to static:", error);
+    handleDatabaseError("getAllCategories", error);
   }
 
   return FALLBACK_CATEGORIES;
@@ -138,7 +139,7 @@ export async function getFeaturedCategories(): Promise<CategoryMaster[]> {
       return rows.map(mapCategoryRecord);
     }
   } catch (error) {
-    console.warn("Database error in getFeaturedCategories, falling back to static:", error);
+    handleDatabaseError("getFeaturedCategories", error);
   }
 
   return FALLBACK_CATEGORIES.filter((c) => c.isFeatured);
@@ -160,7 +161,7 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryMaster | 
       return mapCategoryRecord(rows[0]);
     }
   } catch (error) {
-    console.warn("Database error in getCategoryBySlug, falling back to static:", error);
+    handleDatabaseError("getCategoryBySlug", error);
   }
 
   const found = FALLBACK_CATEGORIES.find((c) => c.slug === clean);

@@ -1,5 +1,6 @@
 import { eq, desc, asc, and, or, ilike, sql, count } from "drizzle-orm";
 import { db, jobs, type Job } from "@/lib/db";
+import { handleDatabaseError } from "@/lib/db/errors";
 import {
   JobPosting,
   JobCategory,
@@ -60,7 +61,7 @@ export async function getLatestJobs(limit: number = 8): Promise<JobPosting[]> {
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getLatestJobs, falling back to mock:", error);
+    handleDatabaseError("getLatestJobs", error);
   }
 
   // Graceful fallback if database is empty or offline
@@ -83,7 +84,7 @@ export async function getEndingSoonJobs(limit: number = 4): Promise<JobPosting[]
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getEndingSoonJobs, falling back to mock:", error);
+    handleDatabaseError("getEndingSoonJobs", error);
   }
 
   return MOCK_JOB_POSTINGS.filter((job) => job.status === "ENDING_SOON").slice(0, limit);
@@ -102,7 +103,7 @@ export async function getFeaturedJobs(limit: number = 4): Promise<JobPosting[]> 
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getFeaturedJobs, falling back to mock:", error);
+    handleDatabaseError("getFeaturedJobs", error);
   }
 
   return MOCK_JOB_POSTINGS.filter((job) => job.isFeatured).slice(0, limit);
@@ -121,7 +122,7 @@ export async function getTrendingJobs(limit: number = 6): Promise<JobPosting[]> 
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getTrendingJobs, falling back to mock:", error);
+    handleDatabaseError("getTrendingJobs", error);
   }
 
   return MOCK_JOB_POSTINGS.filter((job) => job.isTrending).slice(0, limit);
@@ -143,7 +144,7 @@ export async function getJobsByCategory(
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getJobsByCategory, falling back to mock:", error);
+    handleDatabaseError("getJobsByCategory", error);
   }
 
   return MOCK_JOB_POSTINGS.filter((job) => job.category === category).slice(0, limit);
@@ -162,7 +163,7 @@ export async function getJobBySlug(slug: string): Promise<JobPosting | null> {
       return mapJobRecordToPosting(rows[0]);
     }
   } catch (error) {
-    console.warn("Database query failed in getJobBySlug, falling back to mock:", error);
+    handleDatabaseError("getJobBySlug", error);
   }
 
   const mock = MOCK_JOB_POSTINGS.find((item) => item.slug === cleanSlug);
@@ -186,7 +187,7 @@ export async function getRelatedJobs(
       return rows.map(mapJobRecordToPosting);
     }
   } catch (error) {
-    console.warn("Database query failed in getRelatedJobs, falling back to mock:", error);
+    handleDatabaseError("getRelatedJobs", error);
   }
 
   const sameCategory = MOCK_JOB_POSTINGS.filter(
@@ -294,7 +295,7 @@ export async function searchJobs(
       };
     }
   } catch (error) {
-    console.warn("Database query failed in searchJobs, falling back to mock:", error);
+    handleDatabaseError("searchJobs", error);
   }
 
   // In-memory fallback

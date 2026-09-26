@@ -1,7 +1,13 @@
 import { MetadataRoute } from "next";
-import { searchJobs, getAllCategories, getAllOrganizationSlugs } from "@/services";
+
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [{ searchJobs }, { getAllCategories }, { getAllOrganizationSlugs }] = await Promise.all([
+    import("@/services/jobs/jobs.service"),
+    import("@/services/categories/categories.service"),
+    import("@/services/organization/organization-profile.service"),
+  ]);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
   const generatedAt = new Date("2026-01-01T00:00:00.000Z");
 
@@ -100,7 +106,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // 4. Dynamic job detail routes from database
-  const { items: allJobs } = await searchJobs({ limit: 1000 });
+  const jobsPerPage = 500;
+  const firstPage = await searchJobs({ page: 1, limit: jobsPerPage });
+  const remainingPages = await Promise.all(
+    Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, index) =>
+      searchJobs({ page: index + 2, limit: jobsPerPage })
+    )
+  );
+  const allJobs = [firstPage, ...remainingPages].flatMap((page) => page.items);
   const dynamicJobRoutes: MetadataRoute.Sitemap = allJobs.map((job) => ({
     url: `${siteUrl}/jobs/${job.slug}`,
     lastModified: new Date(job.updatedAt || job.createdAt || generatedAt),

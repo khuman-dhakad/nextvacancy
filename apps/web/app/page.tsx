@@ -10,7 +10,8 @@ import {
   Newsletter,
   CommunityCTA,
 } from "@/components/desktop/home";
-import { getFeaturedJobs, getLatestJobs } from "@/services/jobs/jobs.service";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "NEXTVACANCY — India's Most Trusted Government & Private Jobs Portal 2026",
@@ -47,6 +48,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+  const { getFeaturedJobs, getLatestJobs } = await import("@/services/jobs/jobs.service");
   const [featuredJobs, latestJobs] = await Promise.all([
     getFeaturedJobs(4),
     getLatestJobs(6),

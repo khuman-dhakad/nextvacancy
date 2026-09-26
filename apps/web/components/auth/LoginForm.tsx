@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LoginFormData, AuthFormErrors } from "@/types";
 import { validateLoginForm } from "@/lib/validations/auth";
+import { loginCandidateAction } from "@/app/auth/actions";
 import { Input, Button } from "@/components/ui";
 import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 
@@ -60,9 +61,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     setIsLoading(true);
 
     try {
-      // Simulate API verification call (ready for Spring Boot /api/v1/auth/login)
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
+      const result = await loginCandidateAction({ email: formData.email, password: formData.password });
+      if (!result.success) {
+        setServerError(result.error);
+        return;
+      }
       setIsSuccess(true);
       if (onSuccess) {
         onSuccess();
@@ -72,7 +75,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         }, 1000);
       }
     } catch {
-      setServerError("Invalid email or password. Please verify your credentials and try again.");
+      setServerError("Unable to sign in right now. Please try again.");
     } finally {
       setIsLoading(false);
     }

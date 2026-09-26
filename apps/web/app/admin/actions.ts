@@ -43,6 +43,18 @@ import {
   CategoryMaster,
   OrganizationMaster,
 } from "@/types";
+import {
+  assertValidBoolean,
+  assertValidBulkIds,
+  assertValidCategoryCreate,
+  assertValidCategoryUpdate,
+  assertValidId,
+  assertValidJobCreate,
+  assertValidJobStatus,
+  assertValidJobUpdate,
+  assertValidOrganizationCreate,
+  assertValidOrganizationUpdate,
+} from "@/lib/validations/admin";
 
 export interface AdminActionResult<T = unknown> {
   success: boolean;
@@ -109,6 +121,7 @@ export async function createJobAction(
   jobData: Partial<JobPosting>
 ): Promise<AdminActionResult<JobPosting>> {
   await requireAuth();
+  try { assertValidJobCreate(jobData); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid job data." }; }
 
   try {
     const created = await createAdminJob(jobData);
@@ -135,6 +148,7 @@ export async function updateJobAction(
   updates: Partial<JobPosting>
 ): Promise<AdminActionResult<JobPosting>> {
   await requireAuth();
+  try { assertValidId(id); assertValidJobUpdate(updates); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid job update." }; }
 
   try {
     const updated = await updateAdminJob(id, updates);
@@ -164,6 +178,7 @@ export async function deleteJobAction(
   id: string
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidId(id); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid job ID." }; }
 
   try {
     const ok = await deleteAdminJob(id);
@@ -191,6 +206,7 @@ export async function duplicateJobAction(
   id: string
 ): Promise<AdminActionResult<JobPosting>> {
   await requireAuth();
+  try { assertValidId(id); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid job ID." }; }
 
   try {
     const job = await duplicateAdminJob(id);
@@ -220,6 +236,7 @@ export async function toggleJobStatusAction(
   status: JobStatus
 ): Promise<AdminActionResult<JobPosting>> {
   await requireAuth();
+  try { assertValidId(id); assertValidJobStatus(status); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid job status." }; }
 
   try {
     const job = await toggleJobStatus(id, status);
@@ -249,6 +266,7 @@ export async function bulkUpdateStatusAction(
   status: JobStatus
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidBulkIds(ids); assertValidJobStatus(status); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid bulk job update." }; }
 
   try {
     const count = await bulkUpdateJobsStatus(ids, status);
@@ -272,6 +290,7 @@ export async function bulkDeleteAction(
   ids: string[]
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidBulkIds(ids); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid bulk job deletion." }; }
 
   try {
     const count = await bulkDeleteJobs(ids);
@@ -299,6 +318,7 @@ export async function createCategoryAction(
   data: Partial<CategoryMaster>
 ): Promise<AdminActionResult<CategoryMaster>> {
   await requireAuth();
+  try { assertValidCategoryCreate(data); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category data." }; }
 
   try {
     const created = await createCategory(data);
@@ -323,6 +343,7 @@ export async function updateCategoryAction(
   data: Partial<CategoryMaster>
 ): Promise<AdminActionResult<CategoryMaster>> {
   await requireAuth();
+  try { assertValidId(id, "category ID"); assertValidCategoryUpdate(data); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category update." }; }
 
   try {
     const updated = await updateCategory(id, data);
@@ -350,6 +371,7 @@ export async function deleteCategoryAction(
   id: string
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidId(id, "category ID"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category ID." }; }
 
   try {
     const ok = await deleteCategory(id);
@@ -376,6 +398,7 @@ export async function toggleCategoryActiveAction(
   id: string
 ): Promise<AdminActionResult<CategoryMaster>> {
   await requireAuth();
+  try { assertValidId(id, "category ID"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category ID." }; }
 
   try {
     const updated = await toggleCategoryActive(id);
@@ -403,6 +426,7 @@ export async function toggleCategoryFeaturedAction(
   id: string
 ): Promise<AdminActionResult<CategoryMaster>> {
   await requireAuth();
+  try { assertValidId(id, "category ID"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category ID." }; }
 
   try {
     const updated = await toggleCategoryFeatured(id);
@@ -430,6 +454,7 @@ export async function bulkDeleteCategoriesAction(
   ids: string[]
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidBulkIds(ids, "category IDs"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category IDs." }; }
 
   try {
     const count = await bulkDeleteCategories(ids);
@@ -453,6 +478,7 @@ export async function bulkUpdateCategoryStatusAction(
   isActive: boolean
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidBulkIds(ids, "category IDs"); assertValidBoolean(isActive, "isActive"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid category status update." }; }
 
   try {
     const count = await bulkUpdateCategoryStatus(ids, isActive);
@@ -479,6 +505,7 @@ export async function createOrganizationAction(
   data: Partial<OrganizationMaster>
 ): Promise<AdminActionResult<OrganizationMaster>> {
   await requireAuth();
+  try { assertValidOrganizationCreate(data); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid organization data." }; }
 
   try {
     const created = await createOrganization(data);
@@ -503,6 +530,7 @@ export async function updateOrganizationAction(
   data: Partial<OrganizationMaster>
 ): Promise<AdminActionResult<OrganizationMaster>> {
   await requireAuth();
+  try { assertValidId(id, "organization ID"); assertValidOrganizationUpdate(data); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid organization update." }; }
 
   try {
     const updated = await updateOrganization(id, data);
@@ -530,6 +558,7 @@ export async function deleteOrganizationAction(
   id: string
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidId(id, "organization ID"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid organization ID." }; }
 
   try {
     const ok = await deleteOrganization(id);
@@ -556,6 +585,7 @@ export async function toggleOrganizationActiveAction(
   id: string
 ): Promise<AdminActionResult<OrganizationMaster>> {
   await requireAuth();
+  try { assertValidId(id, "organization ID"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid organization ID." }; }
 
   try {
     const updated = await toggleOrganizationActive(id);
@@ -583,6 +613,7 @@ export async function bulkDeleteOrganizationsAction(
   ids: string[]
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidBulkIds(ids, "organization IDs"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid organization IDs." }; }
 
   try {
     const count = await bulkDeleteOrganizations(ids);
@@ -606,6 +637,7 @@ export async function bulkUpdateOrganizationStatusAction(
   isActive: boolean
 ): Promise<AdminActionResult> {
   await requireAuth();
+  try { assertValidBulkIds(ids, "organization IDs"); assertValidBoolean(isActive, "isActive"); } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Invalid organization status update." }; }
 
   try {
     const count = await bulkUpdateOrganizationStatus(ids, isActive);

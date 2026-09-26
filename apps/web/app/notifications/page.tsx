@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { Container } from "@/components/ui";
 import { getNotificationCenterData } from "@/services/notifications/notification.service";
+import { requireCandidate } from "@/lib/auth/session.server";
 import {
   NotificationList,
   PreferencePanel,
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function NotificationsPage() {
+  await requireCandidate();
   const data = await getNotificationCenterData();
 
   return (
