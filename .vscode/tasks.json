@@ -7,7 +7,7 @@
 			"command": "npm.cmd",
 			"args": [
 				"--prefix",
-				"apps/web",
+				"archive/legacy-next-app",
 				"run",
 				"build"
 			],
@@ -20,7 +20,7 @@
 			"command": "npm.cmd",
 			"args": [
 				"--prefix",
-				"apps/web",
+				"archive/legacy-next-app",
 				"run",
 				"typecheck"
 			],
@@ -33,7 +33,7 @@
 			"command": "npm.cmd",
 			"args": [
 				"--prefix",
-				"apps/web",
+				"archive/legacy-next-app",
 				"run",
 				"build"
 			],
@@ -46,7 +46,7 @@
 			"command": "npm.cmd",
 			"args": [
 				"--prefix",
-				"apps/web",
+				"archive/legacy-next-app",
 				"run",
 				"lint"
 			],
