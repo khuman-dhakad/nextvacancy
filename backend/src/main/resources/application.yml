@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: nextvacancy-api
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    baseline-description: Existing Drizzle schema
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+  mail:
+    default-encoding: UTF-8
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${PORT:8080}
+  address: ${SERVER_ADDRESS:0.0.0.0}
+  forward-headers-strategy: framework
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  jwt:
+    secret: ${JWT_SECRET}
+    issuer: nextvacancy
+    access-token-ttl: ${JWT_ACCESS_TOKEN_TTL_SECONDS:900}
+    refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL_SECONDS:2592000}
+  admin:
+    username: ${ADMIN_USERNAME}
+    email: ${ADMIN_EMAIL}
+    password-hash: ${ADMIN_PASSWORD_HASH}
+  email:
+    api-key: ${RESEND_API_KEY}
+    from: ${RESEND_FROM_EMAIL}
+  public-url: ${APP_PUBLIC_URL}
+
+logging:
+  level:
+    root: INFO
+    com.nextvacancy: INFO

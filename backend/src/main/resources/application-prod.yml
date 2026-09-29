@@ -1,0 +1,32 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  datasource:
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_SIZE:15}
+      minimum-idle: ${DATABASE_POOL_MIN_IDLE:2}
+      connection-timeout: 30000
+      validation-timeout: 5000
+
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+
+management:
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  file:
+    name: ${LOG_FILE:/var/log/nextvacancy/api.log}
+  logback:
+    rollingpolicy:
+      max-file-size: 20MB
+      max-history: 14
