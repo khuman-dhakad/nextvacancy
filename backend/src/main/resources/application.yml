@@ -2,24 +2,30 @@ spring:
   application:
     name: nextvacancy-api
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME:}
-    password: ${DATABASE_PASSWORD:}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nextvacancy}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
   flyway:
     enabled: true
-    baseline-on-migrate: true
+    baseline-on-migrate: false
     baseline-version: 1
     baseline-description: Existing Drizzle schema
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:validate}
     properties:
       hibernate:
         format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           time_zone: UTC
+          batch_size: 20
   mail:
     default-encoding: UTF-8
   jackson:
@@ -30,39 +36,53 @@ server:
   address: ${SERVER_ADDRESS:0.0.0.0}
   forward-headers-strategy: framework
   shutdown: graceful
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-stacktrace: never
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+      base-path: /actuator
   endpoint:
     health:
       probes:
         enabled: true
-      show-details: never
+      show-details: when-authorized
+    info:
+      enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
 
 app:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://frontend.example.invalid,http://localhost:3000,http://localhost:5173}
   jwt:
-    secret: ${JWT_SECRET}
+    secret: ${JWT_SECRET:your-default-secret-change-in-production}
     issuer: nextvacancy
-    access-token-ttl: ${JWT_ACCESS_TOKEN_TTL_SECONDS:900}
-    refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL_SECONDS:2592000}
+    access-token-ttl: ${JWT_ACCESS_TOKEN_TTL_SECONDS:3600}
+    refresh-token-ttl: ${JWT_REFRESH_TOKEN_TTL_SECONDS:604800}
   admin:
-    username: ${ADMIN_USERNAME}
-    email: ${ADMIN_EMAIL}
-    password-hash: ${ADMIN_PASSWORD_HASH}
+    username: ${ADMIN_USERNAME:}
+    email: ${ADMIN_EMAIL:}
+    password-hash: ${ADMIN_PASSWORD_HASH:}
   email:
-    api-key: ${RESEND_API_KEY}
-    from: ${RESEND_FROM_EMAIL}
-  public-url: ${APP_PUBLIC_URL}
+    api-key: ${RESEND_API_KEY:}
+    from: ${RESEND_FROM_EMAIL:}
+  public-url: ${APP_PUBLIC_URL:http://localhost:3000}
 
 logging:
   level:
     root: WARN
     com.nextvacancy: INFO
     org.springframework.security: INFO
+    org.springframework.boot: WARN
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
