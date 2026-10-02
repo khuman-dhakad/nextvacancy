@@ -46,8 +46,7 @@ class PostgreSqlIntegrationTest {
     static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
             .withDatabaseName("nextvacancy_integration")
             .withUsername("integration_test")
-            .withPassword("integration_test_only")
-            .withInitScript("db/postgres-test-schema.sql");
+            .withPassword("integration_test_only");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
