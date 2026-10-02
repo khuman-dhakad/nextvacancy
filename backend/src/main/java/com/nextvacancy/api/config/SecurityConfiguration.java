@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.nextvacancy.api.security.JwtAuthenticationFilter;
 import com.nextvacancy.api.security.AuthCsrfFilter;
+import com.nextvacancy.api.auth.AuthRequestSizeLimitFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.http.HttpStatus;
@@ -61,7 +62,33 @@ public class SecurityConfiguration {
                         .accessDeniedHandler(accessDeniedHandler()))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new AuthCsrfFilter(), JwtAuthenticationFilter.class)
+                .addFilterBefore(new AuthRequestSizeLimitFilter(), AuthCsrfFilter.class)
                 .build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${app.cors.allowed-origins}") String allowedOrigins) {
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList();
+        if (origins.isEmpty() || origins.stream().anyMatch(origin -> !isAllowedOrigin(origin))) {
+            throw new IllegalStateException(
+                    "CORS_ALLOWED_ORIGINS must contain explicit HTTPS origins without paths or wildcards.");
+        }
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(origins);
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Accept", "Content-Type", "Authorization", "X-CSRF-Token"));
+        configuration.setExposedHeaders(List.of("Link"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", configuration);
+        return source;
     }
 
     @Bean
@@ -71,31 +98,6 @@ public class SecurityConfiguration {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             objectMapper.writeValue(response.getOutputStream(), Map.of("error", "Authentication is required."));
         };
-    }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource(
-            @Value("${app.cors.allowed-origins}") String allowedOrigins) {
-        List<String> origins = Arrays.stream(allowedOrigins.split(","))
-                .map(String::trim)
-                .filter(origin -> !origin.isEmpty())
-                .toList();
-        if (origins.isEmpty() || origins.stream().anyMatch(origin -> !isHttpsOrigin(origin))) {
-            throw new IllegalStateException(
-                    "CORS_ALLOWED_ORIGINS must contain explicit HTTPS origins without paths or wildcards.");
-        }
-
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(origins);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setExposedHeaders(List.of("Link"));
-        configuration.setAllowedHeaders(List.of("Accept", "Content-Type", "Authorization", "X-CSRF-Token"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
-        return source;
     }
 
     @Bean
@@ -115,15 +117,22 @@ public class SecurityConfiguration {
         return registration;
     }
 
-    private static boolean isHttpsOrigin(String origin) {
+    private boolean isAllowedOrigin(String origin) {
         try {
             URI uri = URI.create(origin);
             String host = uri.getHost();
+            boolean isLocalhost = host != null && (
+                    host.equalsIgnoreCase("localhost")
+                            || host.startsWith("127.")
+                            || host.equals("::1")
+                            || host.endsWith(".localhost")
+                            || host.endsWith(".invalid")
+                            || host.endsWith(".example")
+                            || host.endsWith(".example.com")
+                            || host.endsWith(".test"));
             return "https".equalsIgnoreCase(uri.getScheme())
                     && host != null
-                    && !host.equalsIgnoreCase("localhost")
-                    && !host.startsWith("127.")
-                    && !host.equals("::1")
+                    && !isLocalhost
                     && uri.getRawUserInfo() == null
                     && (uri.getRawPath() == null || uri.getRawPath().isEmpty() || "/".equals(uri.getRawPath()))
                     && uri.getRawQuery() == null

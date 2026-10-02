@@ -1,6 +1,7 @@
 package com.nextvacancy.api.error;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.nextvacancy.api.auth.AccountConflictException;
 import com.nextvacancy.api.auth.AccountLockedException;
@@ -14,6 +15,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -32,7 +34,7 @@ public class ApiExceptionHandler {
             ConstraintViolationException.class,
             HandlerMethodValidationException.class,
             MethodArgumentTypeMismatchException.class,
-            MethodArgumentNotValidException.class,
+            HttpMessageNotReadableException.class,
             InvalidTokenException.class
     })
     public ResponseEntity<Map<String, String>> handleInvalidRequest(Exception exception) {
@@ -40,6 +42,17 @@ public class ApiExceptionHandler {
                 ? exception.getMessage()
                 : "Request validation failed.";
         return ResponseEntity.badRequest().body(Map.of("error", message));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidBody(MethodArgumentNotValidException exception) {
+        Map<String, String> fieldErrors = new TreeMap<>();
+        exception.getBindingResult().getFieldErrors().forEach(fieldError ->
+                fieldErrors.putIfAbsent(fieldError.getField(),
+                        fieldError.getDefaultMessage() == null ? "Invalid value." : fieldError.getDefaultMessage()));
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "Request validation failed.",
+                "fieldErrors", fieldErrors));
     }
 
     @ExceptionHandler(BadCredentialsException.class)

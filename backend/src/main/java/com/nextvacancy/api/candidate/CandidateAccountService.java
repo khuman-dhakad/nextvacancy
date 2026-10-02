@@ -146,14 +146,14 @@ public class CandidateAccountService {
         }
 
         return current.stream()
-                .map(item -> new CandidateNotificationPreferenceResponse(
-                        item.getId(),
-                        item.getCategory(),
-                        item.getLabel(),
-                        item.isEmailEnabled(),
-                        item.isWhatsappEnabled(),
-                        item.isPushEnabled(),
-                        item.getUpdatedAt()))
+                .map(preference -> new CandidateNotificationPreferenceResponse(
+                        preference.getId(),
+                        preference.getCategory(),
+                        preference.getLabel(),
+                        preference.isEmailEnabled(),
+                        preference.isWhatsappEnabled(),
+                        preference.isPushEnabled(),
+                        preference.getUpdatedAt()))
                 .toList();
     }
 
