@@ -63,7 +63,7 @@ management:
 
 app:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://frontend.example.invalid,http://localhost:3000,http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://frontend.example.invalid}
   jwt:
     secret: ${JWT_SECRET:your-default-secret-change-in-production}
     issuer: nextvacancy
