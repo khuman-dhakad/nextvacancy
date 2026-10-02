@@ -11,11 +11,19 @@ dist/
 
 # Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env*.example
 *.env
+
+# Secret and credential files
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+**/secrets/
+**/*credentials*.json
+**/*service-account*.json
 
 # Logs
 *.log
