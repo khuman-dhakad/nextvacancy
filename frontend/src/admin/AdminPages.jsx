@@ -487,7 +487,7 @@ export function AdminJobEditorPage() {
 
 function useMasterData(endpoint, kind) {
   const request = useAdminApi();
-  const [items, setItems] = useState([]);
+  const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -503,7 +503,7 @@ function useMasterData(endpoint, kind) {
     setLoading(true);
     setError("");
     try {
-      setItems(await request(endpoint));
+      setRecords(await request(endpoint));
     } catch (failure) {
       setError(failure.message || `Unable to load ${kind}s.`);
     } finally {
@@ -534,26 +534,26 @@ function useMasterData(endpoint, kind) {
     }
   }
 
-  function edit(item) {
-    setEditingId(item.id);
+  function edit(record) {
+    setEditingId(record.id);
     setForm(kind === "category" ? {
-      name: item.name ?? "", slug: item.slug ?? "", description: item.description ?? "",
-      icon: item.icon ?? "", isActive: item.isActive, isFeatured: item.isFeatured,
+      name: record.name ?? "", slug: record.slug ?? "", description: record.description ?? "",
+      icon: record.icon ?? "", isActive: record.isActive, isFeatured: record.isFeatured,
     } : {
-      name: item.name ?? "", shortName: item.shortName ?? "", slug: item.slug ?? "",
-      logoUrl: item.logoUrl ?? "", website: item.website ?? "", description: item.description ?? "",
-      state: item.state ?? "", categoryType: item.categoryType ?? "", isActive: item.isActive,
+      name: record.name ?? "", shortName: record.shortName ?? "", slug: record.slug ?? "",
+      logoUrl: record.logoUrl ?? "", website: record.website ?? "", description: record.description ?? "",
+      state: record.state ?? "", categoryType: record.categoryType ?? "", isActive: record.isActive,
     });
   }
 
-  async function toggle(item) {
+  async function toggle(record) {
     setError("");
     setNotice("");
     try {
       const statusBody = kind === "category"
-        ? { isActive: !item.isActive, isFeatured: item.isFeatured }
-        : { isActive: !item.isActive };
-      await request(`${endpoint}/${encodeURIComponent(item.id)}/status`, { method: "PATCH", body: statusBody });
+        ? { isActive: !record.isActive, isFeatured: record.isFeatured }
+        : { isActive: !record.isActive };
+      await request(`${endpoint}/${encodeURIComponent(record.id)}/status`, { method: "PATCH", body: statusBody });
       setNotice(`${kind[0].toUpperCase()}${kind.slice(1)} status updated.`);
       await load();
     } catch (failure) {
@@ -561,13 +561,13 @@ function useMasterData(endpoint, kind) {
     }
   }
 
-  async function toggleFeatured(item) {
+  async function toggleFeatured(record) {
     setError("");
     setNotice("");
     try {
-      await request(`${endpoint}/${encodeURIComponent(item.id)}/status`, {
+      await request(`${endpoint}/${encodeURIComponent(record.id)}/status`, {
         method: "PATCH",
-        body: { isActive: item.isActive, isFeatured: !item.isFeatured },
+        body: { isActive: record.isActive, isFeatured: !record.isFeatured },
       });
       setNotice("Featured status updated.");
       await load();
@@ -576,12 +576,12 @@ function useMasterData(endpoint, kind) {
     }
   }
 
-  async function remove(item) {
-    if (!window.confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
+  async function remove(record) {
+    if (!window.confirm(`Delete "${record.name}"? This cannot be undone.`)) return;
     setError("");
     setNotice("");
     try {
-      await request(`${endpoint}/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+      await request(`${endpoint}/${encodeURIComponent(record.id)}`, { method: "DELETE" });
       setNotice(`${kind[0].toUpperCase()}${kind.slice(1)} deleted.`);
       await load();
     } catch (failure) {
@@ -623,65 +623,65 @@ function useMasterData(endpoint, kind) {
     }
   }
 
-  return { items, loading, saving, error, notice, form, setForm, editingId, setEditingId, setNotice, save, edit, toggle, toggleFeatured, remove, selectedIds, setSelectedIds, bulkActive, bulkRemove };
+  return { records, loading, saving, error, notice, form, setForm, editingId, setEditingId, setNotice, save, edit, toggle, toggleFeatured, remove, selectedIds, setSelectedIds, bulkActive, bulkRemove };
 }
 
 function MasterDataPage({ kind }) {
   const category = kind === "category";
   const endpoint = category ? "/api/v1/admin/categories" : "/api/v1/admin/organizations";
   const title = category ? "Category management" : "Organization management";
-  const data = useMasterData(endpoint, kind);
+  const masterData = useMasterData(endpoint, kind);
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8">
       <SectionHeader title={title} subtitle={`Create, edit, activate, and remove database-backed ${kind} records.`}
         action={<Link className="text-sm font-semibold text-rose-900 underline" to="/admin/dashboard">Back to dashboard</Link>} />
-      <Notice message={data.error} /><Notice message={data.notice} type="success" />
-      <form className="mb-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-3" onSubmit={data.save}>
-        <Field label="Name" required maxLength={255} value={data.form.name} onChange={(value) => data.setForm((current) => ({ ...current, name: value }))} />
+      <Notice message={masterData.error} /><Notice message={masterData.notice} type="success" />
+      <form className="mb-6 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-3" onSubmit={masterData.save}>
+        <Field label="Name" required maxLength={255} value={masterData.form.name} onChange={(value) => masterData.setForm((current) => ({ ...current, name: value }))} />
         {category ? <>
-          <Field label="Slug (optional)" maxLength={255} value={data.form.slug} onChange={(value) => data.setForm((current) => ({ ...current, slug: value }))} />
-          <Field label="Icon" maxLength={128} value={data.form.icon} onChange={(value) => data.setForm((current) => ({ ...current, icon: value }))} />
+          <Field label="Slug (optional)" maxLength={255} value={masterData.form.slug} onChange={(value) => masterData.setForm((current) => ({ ...current, slug: value }))} />
+          <Field label="Icon" maxLength={128} value={masterData.form.icon} onChange={(value) => masterData.setForm((current) => ({ ...current, icon: value }))} />
         </> : <>
-          <Field label="Short name" required maxLength={64} value={data.form.shortName} onChange={(value) => data.setForm((current) => ({ ...current, shortName: value }))} />
-          <Field label="Slug (optional)" maxLength={255} value={data.form.slug} onChange={(value) => data.setForm((current) => ({ ...current, slug: value }))} />
-          <Field label="Logo URL" value={data.form.logoUrl} onChange={(value) => data.setForm((current) => ({ ...current, logoUrl: value }))} />
-          <Field label="Website" value={data.form.website} onChange={(value) => data.setForm((current) => ({ ...current, website: value }))} />
-          <Field label="State" maxLength={128} value={data.form.state} onChange={(value) => data.setForm((current) => ({ ...current, state: value }))} />
-          <Field label="Category type" maxLength={128} value={data.form.categoryType} onChange={(value) => data.setForm((current) => ({ ...current, categoryType: value }))} />
+          <Field label="Short name" required maxLength={64} value={masterData.form.shortName} onChange={(value) => masterData.setForm((current) => ({ ...current, shortName: value }))} />
+          <Field label="Slug (optional)" maxLength={255} value={masterData.form.slug} onChange={(value) => masterData.setForm((current) => ({ ...current, slug: value }))} />
+          <Field label="Logo URL" value={masterData.form.logoUrl} onChange={(value) => masterData.setForm((current) => ({ ...current, logoUrl: value }))} />
+          <Field label="Website" value={masterData.form.website} onChange={(value) => masterData.setForm((current) => ({ ...current, website: value }))} />
+          <Field label="State" maxLength={128} value={masterData.form.state} onChange={(value) => masterData.setForm((current) => ({ ...current, state: value }))} />
+          <Field label="Category type" maxLength={128} value={masterData.form.categoryType} onChange={(value) => masterData.setForm((current) => ({ ...current, categoryType: value }))} />
         </>}
         <label className="block text-sm font-medium text-slate-700 md:col-span-2">{category ? "Description" : "Organization description"}
-          <textarea className={inputClass} rows={2} value={data.form.description} onChange={(event) => data.setForm((current) => ({ ...current, description: event.target.value }))} />
+          <textarea className={inputClass} rows={2} value={masterData.form.description} onChange={(event) => masterData.setForm((current) => ({ ...current, description: event.target.value }))} />
         </label>
         <div className="flex flex-wrap items-end gap-4">
-          <label className="inline-flex items-center gap-2 pb-2 text-sm"><input type="checkbox" checked={data.form.isActive} onChange={(event) => data.setForm((current) => ({ ...current, isActive: event.target.checked }))} />Active</label>
-          {category && <label className="inline-flex items-center gap-2 pb-2 text-sm"><input type="checkbox" checked={data.form.isFeatured} onChange={(event) => data.setForm((current) => ({ ...current, isFeatured: event.target.checked }))} />Featured</label>}
-          <button className="rounded-lg bg-rose-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-60" disabled={data.saving}>{data.saving ? "Saving…" : data.editingId ? "Save changes" : `Create ${kind}`}</button>
-          {data.editingId && <button type="button" className="rounded-lg border px-3 py-2 text-sm" onClick={() => { data.setEditingId(""); data.setForm(kind === "category" ? { name: "", slug: "", description: "", icon: "", isActive: true, isFeatured: false } : { name: "", shortName: "", slug: "", logoUrl: "", website: "", description: "", state: "", categoryType: "", isActive: true }); }}>Cancel edit</button>}
+          <label className="inline-flex items-center gap-2 pb-2 text-sm"><input type="checkbox" checked={masterData.form.isActive} onChange={(event) => masterData.setForm((current) => ({ ...current, isActive: event.target.checked }))} />Active</label>
+          {category && <label className="inline-flex items-center gap-2 pb-2 text-sm"><input type="checkbox" checked={masterData.form.isFeatured} onChange={(event) => masterData.setForm((current) => ({ ...current, isFeatured: event.target.checked }))} />Featured</label>}
+          <button className="rounded-lg bg-rose-900 px-4 py-2 text-sm font-bold text-white disabled:opacity-60" disabled={masterData.saving}>{masterData.saving ? "Saving…" : masterData.editingId ? "Save changes" : `Create ${kind}`}</button>
+          {masterData.editingId && <button type="button" className="rounded-lg border px-3 py-2 text-sm" onClick={() => { masterData.setEditingId(""); masterData.setForm(kind === "category" ? { name: "", slug: "", description: "", icon: "", isActive: true, isFeatured: false } : { name: "", shortName: "", slug: "", logoUrl: "", website: "", description: "", state: "", categoryType: "", isActive: true }); }}>Cancel edit</button>}
         </div>
       </form>
-      {data.selectedIds.length > 0 && <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border bg-white p-3">
-        <span className="mr-2 text-sm font-semibold">{data.selectedIds.length} selected</span>
-        <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => data.bulkActive(true)}>Activate selected</button>
-        <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => data.bulkActive(false)}>Deactivate selected</button>
-        <button className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-800" onClick={data.bulkRemove}>Delete selected</button>
-        <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => data.setSelectedIds([])}>Clear selection</button>
+      {masterData.selectedIds.length > 0 && <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border bg-white p-3">
+        <span className="mr-2 text-sm font-semibold">{masterData.selectedIds.length} selected</span>
+        <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => masterData.bulkActive(true)}>Activate selected</button>
+        <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => masterData.bulkActive(false)}>Deactivate selected</button>
+        <button className="rounded-lg border border-rose-200 px-3 py-2 text-sm text-rose-800" onClick={masterData.bulkRemove}>Delete selected</button>
+        <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => masterData.setSelectedIds([])}>Clear selection</button>
       </div>}
-      {data.loading ? <Loading label={`Loading ${kind}s…`} /> : data.items.length === 0 ? <p className="rounded-xl border bg-white p-5 text-sm text-slate-600">No records found.</p> : (
+      {masterData.loading ? <Loading label={`Loading ${kind}s…`} /> : masterData.records.length === 0 ? <p className="rounded-xl border bg-white p-5 text-sm text-slate-600">No records found.</p> : (
         <div className="space-y-3">
-          {data.items.map((item) => <article key={item.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-white p-4">
+          {masterData.records.map((record) => <article key={record.id} className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-white p-4">
             <label className="inline-flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={data.selectedIds.includes(item.id)} aria-label={`Select ${item.name}`}
-                onChange={(event) => data.setSelectedIds((current) => event.target.checked
-                  ? [...current, item.id]
-                  : current.filter((id) => id !== item.id))} />
+              <input type="checkbox" checked={masterData.selectedIds.includes(record.id)} aria-label={`Select ${record.name}`}
+                onChange={(event) => masterData.setSelectedIds((current) => event.target.checked
+                  ? [...current, record.id]
+                  : current.filter((id) => id !== record.id))} />
             </label>
-            <div><h2 className="font-bold">{item.name}</h2><p className="text-sm text-slate-500">{item.slug}{!category && item.shortName ? ` · ${item.shortName}` : ""}</p><p className="mt-1 text-xs text-slate-500">{item.isActive ? "Active" : "Inactive"}{category && item.isFeatured ? " · Featured" : ""} · {item.jobCount} jobs</p></div>
+            <div><h2 className="font-bold">{record.name}</h2><p className="text-sm text-slate-500">{record.slug}{!category && record.shortName ? ` · ${record.shortName}` : ""}</p><p className="mt-1 text-xs text-slate-500">{record.isActive ? "Active" : "Inactive"}{category && record.isFeatured ? " · Featured" : ""} · {record.jobCount} jobs</p></div>
             <div className="flex flex-wrap gap-2">
-              <button className="rounded-lg border px-3 py-2 text-sm font-semibold" onClick={() => data.edit(item)}>Edit</button>
-              {category && <button className="rounded-lg border px-3 py-2 text-sm font-semibold" onClick={() => data.toggleFeatured(item)}>{item.isFeatured ? "Unfeature" : "Feature"}</button>}
-              <button className="rounded-lg border px-3 py-2 text-sm font-semibold" onClick={() => data.toggle(item)}>{item.isActive ? "Deactivate" : "Activate"}</button>
-              <button className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-800" onClick={() => data.remove(item)}>Delete</button>
+              <button className="rounded-lg border px-3 py-2 text-sm font-semibold" onClick={() => masterData.edit(record)}>Edit</button>
+              {category && <button className="rounded-lg border px-3 py-2 text-sm font-semibold" onClick={() => masterData.toggleFeatured(record)}>{record.isFeatured ? "Unfeature" : "Feature"}</button>}
+              <button className="rounded-lg border px-3 py-2 text-sm font-semibold" onClick={() => masterData.toggle(record)}>{record.isActive ? "Deactivate" : "Activate"}</button>
+              <button className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-800" onClick={() => masterData.remove(record)}>Delete</button>
             </div>
           </article>)}
         </div>

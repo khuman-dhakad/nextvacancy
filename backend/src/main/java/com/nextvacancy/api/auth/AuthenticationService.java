@@ -277,13 +277,17 @@ public class AuthenticationService {
         if (password == null || password.length() < 8 || password.length() > 72) {
             return "Password must be between 8 and 72 characters.";
         }
-        int strength = 1;
-        if (password.matches("(?s).*[a-z].*") && password.matches("(?s).*[A-Z].*")) strength++;
-        if (password.matches("(?s).*[0-9].*")) strength++;
-        if (password.matches("(?s).*[^A-Za-z0-9].*")) strength++;
-        return strength < 3
-                ? "Password must include uppercase, lowercase, numbers, and special characters."
-                : null;
+        boolean hasUppercase = false;
+        boolean hasLowercase = false;
+        boolean hasNumber = false;
+        for (char character : password.toCharArray()) {
+            hasUppercase |= character >= 'A' && character <= 'Z';
+            hasLowercase |= character >= 'a' && character <= 'z';
+            hasNumber |= character >= '0' && character <= '9';
+        }
+        return hasUppercase && hasLowercase && hasNumber
+                ? null
+                : "Password must include uppercase, lowercase, and a number.";
     }
 
     public record IssuedSession(String principalId, String role, String sessionId,

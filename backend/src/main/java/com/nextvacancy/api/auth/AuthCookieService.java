@@ -1,5 +1,6 @@
 package com.nextvacancy.api.auth;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
@@ -9,24 +10,18 @@ public class AuthCookieService {
     public static final String CSRF_COOKIE = "nextvacancy_csrf";
     private static final String AUTH_PATH = "/api/v1/auth";
 
+    private final boolean productionEnvironment;
+
+    public AuthCookieService(@Value("${app.environment:development}") String environment) {
+        this.productionEnvironment = "production".equalsIgnoreCase(environment);
+    }
+
     public ResponseCookie refresh(String value, long maxAgeSeconds) {
-        return ResponseCookie.from(REFRESH_COOKIE, value)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .path(AUTH_PATH)
-                .maxAge(maxAgeSeconds)
-                .build();
+        return baseCookie(REFRESH_COOKIE, value, true, maxAgeSeconds);
     }
 
     public ResponseCookie csrf(String value, long maxAgeSeconds) {
-        return ResponseCookie.from(CSRF_COOKIE, value)
-                .httpOnly(false)
-                .secure(true)
-                .sameSite("None")
-                .path(AUTH_PATH)
-                .maxAge(maxAgeSeconds)
-                .build();
+        return baseCookie(CSRF_COOKIE, value, false, maxAgeSeconds);
     }
 
     public ResponseCookie clearRefresh() {
@@ -35,5 +30,15 @@ public class AuthCookieService {
 
     public ResponseCookie clearCsrf() {
         return csrf("", 0);
+    }
+
+    private ResponseCookie baseCookie(String name, String value, boolean httpOnly, long maxAgeSeconds) {
+        return ResponseCookie.from(name, value)
+                .httpOnly(httpOnly)
+                .secure(productionEnvironment)
+                .sameSite(productionEnvironment ? "None" : "Lax")
+                .path(AUTH_PATH)
+                .maxAge(maxAgeSeconds)
+                .build();
     }
 }

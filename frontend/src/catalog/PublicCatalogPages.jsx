@@ -37,6 +37,14 @@ const catalogs = {
   },
 };
 
+const catalogPaths = {
+  home: "/",
+  government: "/government-jobs",
+  private: "/private-jobs",
+  admitCards: "/admit-cards",
+  results: "/results",
+};
+
 function getPageNumber(value) {
   const page = Number(value || 1);
   return Number.isSafeInteger(page) && page > 0 ? page : 1;
@@ -119,11 +127,11 @@ export function PublicCatalogPage({ mode = "home" }) {
   const sort = searchParams.get("sort") || "latest";
   const fixedConfig = catalogs[mode];
   const isDynamic = mode === "category";
-  const dynamicCategory = isDynamic ? categories.find((item) => item.slug === routeCategory) : null;
+  const dynamicCategory = isDynamic ? categories.find((category) => category.slug === routeCategory) : null;
   const category = isDynamic ? dynamicCategory?.slug : fixedConfig.category || categoryFilter;
   const title = isDynamic ? dynamicCategory?.name || (categories.length ? "Category not found" : "Loading category…") : fixedConfig.title;
   const description = isDynamic ? dynamicCategory?.description || "Browse vacancies in this category." : fixedConfig.description;
-  const canonicalPath = isDynamic ? `/category/${routeCategory || ""}` : mode === "home" ? "/" : `/${mode === "admitCards" ? "admit-cards" : mode === "government" ? "government-jobs" : mode === "private" ? "private-jobs" : mode}`;
+  const canonicalPath = isDynamic ? `/category/${routeCategory || ""}` : catalogPaths[mode] || `/${mode}`;
 
   const loadCategories = useCallback(async () => {
     setCategoriesError("");
@@ -144,7 +152,7 @@ export function PublicCatalogPage({ mode = "home" }) {
     setLoading(true);
     setError("");
     try {
-      const result = await apiGet("/api/v1/jobs", {
+      const jobPage = await apiGet("/api/v1/jobs", {
         page: pageNumber - 1,
         size: 8,
         q: query,
@@ -155,7 +163,7 @@ export function PublicCatalogPage({ mode = "home" }) {
         sort,
         direction: sort === "alphabetical" ? "asc" : "desc",
       });
-      setCatalogPage(result);
+      setCatalogPage(jobPage);
     } catch (failure) {
       setCatalogPage(null);
       setError(failure.message || "Unable to load vacancies.");
@@ -224,7 +232,7 @@ export function PublicCatalogPage({ mode = "home" }) {
           {(mode === "home" || mode === "search") && <label className="text-xs font-semibold text-slate-600">Category
             <select className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm" value={categoryFilter || "all"} onChange={(event) => updateFilter("category", event.target.value)}>
               <option value="all">All categories</option>
-              {categories.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
+              {categories.map((category) => <option key={category.id} value={category.slug}>{category.name}</option>)}
             </select>
           </label>}
           <label className="text-xs font-semibold text-slate-600">Status
@@ -283,9 +291,9 @@ function DetailSection({ title, children }) {
   return <section className="mt-7 border-t border-slate-100 pt-6"><h2 className="text-lg font-bold text-slate-900">{title}</h2><div className="mt-3 text-sm leading-6 text-slate-700">{children}</div></section>;
 }
 
-function DetailList({ items }) {
-  if (!Array.isArray(items) || items.length === 0) return null;
-  return <ul className="list-disc space-y-1 pl-5">{items.map((item, index) => <li key={index}>{typeof item === "string" ? item : item.label || JSON.stringify(item)}</li>)}</ul>;
+function DetailList({ entries }) {
+  if (!Array.isArray(entries) || entries.length === 0) return null;
+  return <ul className="list-disc space-y-1 pl-5">{entries.map((entry, index) => <li key={index}>{typeof entry === "string" ? entry : entry.label || JSON.stringify(entry)}</li>)}</ul>;
 }
 
 export function PublicJobDetails() {
@@ -352,8 +360,8 @@ export function PublicJobDetails() {
       setSaved(false);
       return () => { active = false; };
     }
-    apiRequest("/api/v1/candidate/saved-jobs", { accessToken: session.accessToken }).then((items) => {
-      if (active) setSaved(items.some((item) => item.job.slug === slug));
+    apiRequest("/api/v1/candidate/saved-jobs", { accessToken: session.accessToken }).then((savedJobs) => {
+      if (active) setSaved(savedJobs.some((savedJob) => savedJob.job.slug === slug));
     }).catch((failure) => {
       if (active) setSavedError(failure.message || "Unable to check saved jobs.");
     });
@@ -410,15 +418,15 @@ export function PublicJobDetails() {
           {job.department && <div><dt className="text-sm font-semibold text-slate-500">Department</dt><dd className="mt-1 font-medium text-slate-900">{job.department}</dd></div>}
         </dl>
         <DetailSection title="Important dates"><dl className="grid gap-2 sm:grid-cols-2">{Object.entries(dates).map(([key, value]) => value ? <div key={key}><dt className="font-semibold">{key.replace(/([A-Z])/g, " $1")}</dt><dd>{String(value)}</dd></div> : null)}</dl></DetailSection>
-        <DetailSection title="Qualifications"><DetailList items={job.qualificationsList} /></DetailSection>
-        <DetailSection title="Vacancy breakdown"><DetailList items={job.vacancyBreakdown} /></DetailSection>
+        <DetailSection title="Qualifications"><DetailList entries={job.qualificationsList} /></DetailSection>
+        <DetailSection title="Vacancy breakdown"><DetailList entries={job.vacancyBreakdown} /></DetailSection>
         <DetailSection title="Age limit">{job.ageLimit && <pre className="whitespace-pre-wrap font-sans">{JSON.stringify(job.ageLimit, null, 2)}</pre>}</DetailSection>
         <DetailSection title="Salary and fee details">{job.feeStructure && <pre className="whitespace-pre-wrap font-sans">{JSON.stringify(job.feeStructure, null, 2)}</pre>}</DetailSection>
-        <DetailSection title="Selection process"><DetailList items={job.selectionProcess} /></DetailSection>
-        <DetailSection title="How to apply"><DetailList items={job.howToApplySteps} /></DetailSection>
-        <DetailSection title="Required documents"><DetailList items={job.requiredDocuments} /></DetailSection>
+        <DetailSection title="Selection process"><DetailList entries={job.selectionProcess} /></DetailSection>
+        <DetailSection title="How to apply"><DetailList entries={job.howToApplySteps} /></DetailSection>
+        <DetailSection title="Required documents"><DetailList entries={job.requiredDocuments} /></DetailSection>
         <DetailSection title="Official links">
-          <ul className="space-y-2">{links.map((item, index) => <li key={`${item.url}-${index}`}><a className="font-semibold text-rose-900 underline" href={item.url} target="_blank" rel="noreferrer">{item.label || item.linkType}</a></li>)}</ul>
+          <ul className="space-y-2">{links.map((officialLink, index) => <li key={`${officialLink.url}-${index}`}><a className="font-semibold text-rose-900 underline" href={officialLink.url} target="_blank" rel="noreferrer">{officialLink.label || officialLink.linkType}</a></li>)}</ul>
         </DetailSection>
         <DetailSection title="Frequently asked questions">
           <dl className="space-y-4">{(job.faqs || []).map((faq, index) => <div key={index}><dt className="font-semibold">{faq.question}</dt><dd>{faq.answer}</dd></div>)}</dl>
@@ -428,7 +436,7 @@ export function PublicJobDetails() {
       <section className="mt-8">
         <h2 className="text-2xl font-bold text-slate-900">Related vacancies</h2>
         {relatedError && <p className="mt-3 text-sm text-rose-800" role="alert">{relatedError}</p>}
-        {related.length > 0 ? <div className="mt-4 grid gap-4 sm:grid-cols-2">{related.map((item) => <JobCard key={item.id} job={item} />)}</div> : !relatedError && <p className="mt-3 text-sm text-slate-500">No related vacancies found.</p>}
+        {related.length > 0 ? <div className="mt-4 grid gap-4 sm:grid-cols-2">{related.map((relatedJob) => <JobCard key={relatedJob.id} job={relatedJob} />)}</div> : !relatedError && <p className="mt-3 text-sm text-slate-500">No related vacancies found.</p>}
       </section>
     </main>
   );

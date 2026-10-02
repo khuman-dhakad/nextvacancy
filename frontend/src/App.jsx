@@ -156,7 +156,7 @@ function JobDirectory() {
             <span className="sr-only">Filter by category</span>
             <select className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 outline-none focus:border-rose-500" value={category} onChange={(event) => updateFilter("category", event.target.value)}>
               <option value="">All categories</option>
-              {categories.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
+              {categories.map((category) => <option key={category.id} value={category.slug}>{category.name}</option>)}
             </select>
           </label>
           <label>
@@ -228,8 +228,8 @@ function JobDetails() {
       return () => { active = false; };
     }
     apiRequest("/api/v1/candidate/saved-jobs", { accessToken: session.accessToken })
-      .then((items) => {
-        if (active) setSaved(items.some((item) => item.job.slug === slug));
+      .then((savedJobs) => {
+        if (active) setSaved(savedJobs.some((savedJob) => savedJob.job.slug === slug));
       })
       .catch((caught) => { if (active) setSavedError(caught.message); });
     return () => { active = false; };

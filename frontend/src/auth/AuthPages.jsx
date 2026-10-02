@@ -310,15 +310,15 @@ export function AccountPage() {
     { title: "Saved vacancies", value: savedJobs.length, hint: "Bookmarked roles you want to revisit", tone: "blue" },
     { title: "Applications tracked", value: Math.min(savedJobs.length, 3), hint: "Current follow-up items", tone: "emerald" },
     { title: "Admit cards", value: recentJobs.length, hint: "Recent live notices to review", tone: "amber" },
-    { title: "Alerts", value: notificationPreferences.filter((item) => item.emailEnabled || item.whatsappEnabled || item.pushEnabled).length, hint: "Active notification channels", tone: "rose" },
+    { title: "Alerts", value: notificationPreferences.filter((preference) => preference.emailEnabled || preference.whatsappEnabled || preference.pushEnabled).length, hint: "Active notification channels", tone: "rose" },
   ];
 
-  const tracker = savedJobs.slice(0, 3).map((item, index) => ({
-    id: item.id,
-    title: item.job?.title || "Saved vacancy",
-    organization: item.job?.organization || "Recruiting body",
+  const tracker = savedJobs.slice(0, 3).map((savedJob, index) => ({
+    id: savedJob.id,
+    title: savedJob.job?.title || "Saved vacancy",
+    organization: savedJob.job?.organization || "Recruiting body",
     stage: ["Saved", "Applied", "Awaiting update"][index % 3],
-    nextEvent: item.job?.applicationDeadline || "Check official notice for the next step",
+    nextEvent: savedJob.job?.applicationDeadline || "Check official notice for the next step",
   }));
 
   return (
@@ -337,7 +337,7 @@ export function AccountPage() {
       </section>
 
       <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {overview.map((item) => <OverviewCard key={item.title} {...item} />)}
+        {overview.map((card) => <OverviewCard key={card.title} {...card} />)}
       </section>
 
       <section className="mt-8 grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
@@ -350,16 +350,16 @@ export function AccountPage() {
             <p className="mt-4 text-sm text-slate-600">No active applications are being tracked yet. Save jobs to see them here.</p>
           ) : (
             <div className="mt-4 space-y-3">
-              {tracker.map((item) => (
-                <div key={item.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              {tracker.map((trackedJob) => (
+                <div key={trackedJob.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">{item.organization}</p>
+                      <p className="font-semibold text-slate-900">{trackedJob.title}</p>
+                      <p className="mt-1 text-sm text-slate-600">{trackedJob.organization}</p>
                     </div>
-                    <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">{item.stage}</span>
+                    <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">{trackedJob.stage}</span>
                   </div>
-                  <p className="mt-3 text-sm text-slate-500">Next step: {item.nextEvent}</p>
+                  <p className="mt-3 text-sm text-slate-500">Next step: {trackedJob.nextEvent}</p>
                 </div>
               ))}
             </div>
@@ -392,10 +392,10 @@ export function AccountPage() {
             <p className="mt-4 text-sm text-slate-600">You haven’t saved any jobs yet.</p>
           ) : (
             <ul className="mt-4 divide-y divide-slate-100">
-              {savedJobs.slice(0, 4).map((item) => (
-                <li key={item.id} className="py-3">
-                  <Link className="font-semibold text-rose-900 hover:underline" to={`/jobs/${encodeURIComponent(item.job?.slug || item.jobId)}`}>{item.job?.title || "Saved vacancy"}</Link>
-                  <p className="mt-1 text-sm text-slate-600">{item.job?.organization || "Recruiting body"}</p>
+              {savedJobs.slice(0, 4).map((savedJob) => (
+                <li key={savedJob.id} className="py-3">
+                  <Link className="font-semibold text-rose-900 hover:underline" to={`/jobs/${encodeURIComponent(savedJob.job?.slug || savedJob.jobId)}`}>{savedJob.job?.title || "Saved vacancy"}</Link>
+                  <p className="mt-1 text-sm text-slate-600">{savedJob.job?.organization || "Recruiting body"}</p>
                 </li>
               ))}
             </ul>
@@ -456,7 +456,7 @@ export function NotificationCenterPage() {
 
   async function togglePreference(category, field, value) {
     if (!session) return;
-    const next = preferences.map((item) => item.category === category ? { ...item, [field]: value } : item);
+    const next = preferences.map((preference) => preference.category === category ? { ...preference, [field]: value } : preference);
     setPreferences(next);
     try {
       await apiRequest("/api/v1/candidate/notification-preferences", {
@@ -469,14 +469,16 @@ export function NotificationCenterPage() {
     }
   }
 
-  async function markRead(id) {
+  async function markRead(notificationId) {
     if (!session) return;
     try {
-      const updated = await apiRequest(`/api/v1/candidate/notifications/${encodeURIComponent(id)}/read`, {
+      const updatedNotification = await apiRequest(`/api/v1/candidate/notifications/${encodeURIComponent(notificationId)}/read`, {
         method: "PATCH",
         accessToken: session.accessToken,
       });
-      setNotifications((current) => current.map((item) => item.id === id ? { ...item, read: true, readAt: updated.readAt } : item));
+      setNotifications((notifications) => notifications.map((notification) => notification.id === notificationId
+        ? { ...notification, read: true, readAt: updatedNotification.readAt }
+        : notification));
     } catch (failure) {
       setError(failure.message || "Unable to update this notification.");
     }
@@ -498,19 +500,19 @@ export function NotificationCenterPage() {
             <p className="mt-4 text-sm text-slate-600">You are all caught up. No alerts are available right now.</p>
           ) : (
             <ul className="mt-5 space-y-3">
-              {notifications.map((item) => (
-                <li key={item.id} className={`rounded-2xl border p-4 ${item.read ? "border-slate-200 bg-slate-50" : "border-rose-200 bg-rose-50"}`}>
+              {notifications.map((notification) => (
+                <li key={notification.id} className={`rounded-2xl border p-4 ${notification.read ? "border-slate-200 bg-slate-50" : "border-rose-200 bg-rose-50"}`}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{item.category}</p>
-                      <h3 className="mt-1 font-bold text-slate-900">{item.title}</h3>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{notification.category}</p>
+                      <h3 className="mt-1 font-bold text-slate-900">{notification.title}</h3>
                     </div>
-                    {!item.read && <button className="text-xs font-semibold text-rose-900 underline" onClick={() => markRead(item.id)}>Mark read</button>}
+                    {!notification.read && <button className="text-xs font-semibold text-rose-900 underline" onClick={() => markRead(notification.id)}>Mark read</button>}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{item.message}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{notification.message}</p>
                   <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500">
-                    <span>{new Date(item.createdAt).toLocaleString()}</span>
-                    {item.linkUrl ? <a className="font-semibold text-rose-900 underline" href={item.linkUrl} target="_blank" rel="noreferrer">Open</a> : null}
+                    <span>{new Date(notification.createdAt).toLocaleString()}</span>
+                    {notification.linkUrl ? <a className="font-semibold text-rose-900 underline" href={notification.linkUrl} target="_blank" rel="noreferrer">Open</a> : null}
                   </div>
                 </li>
               ))}
@@ -522,16 +524,16 @@ export function NotificationCenterPage() {
           <h2 className="text-xl font-black text-slate-900">Alert preferences</h2>
           {preferences.length === 0 ? <p className="mt-4 text-sm text-slate-600">No preferences are configured yet.</p> : (
             <div className="mt-5 space-y-4">
-              {preferences.map((item) => (
-                <div key={item.category} className="rounded-2xl border border-slate-200 p-4">
+              {preferences.map((preference) => (
+                <div key={preference.category} className="rounded-2xl border border-slate-200 p-4">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-slate-900">{item.label}</p>
-                    <span className="text-xs font-medium text-slate-500">{item.category}</span>
+                    <p className="font-semibold text-slate-900">{preference.label}</p>
+                    <span className="text-xs font-medium text-slate-500">{preference.category}</span>
                   </div>
                   <div className="mt-3 grid gap-2 text-sm text-slate-700">
-                    <label className="flex items-center justify-between gap-3"><span>Email</span><input type="checkbox" checked={item.emailEnabled} onChange={(event) => togglePreference(item.category, "emailEnabled", event.target.checked)} /></label>
-                    <label className="flex items-center justify-between gap-3"><span>WhatsApp</span><input type="checkbox" checked={item.whatsappEnabled} onChange={(event) => togglePreference(item.category, "whatsappEnabled", event.target.checked)} /></label>
-                    <label className="flex items-center justify-between gap-3"><span>Push</span><input type="checkbox" checked={item.pushEnabled} onChange={(event) => togglePreference(item.category, "pushEnabled", event.target.checked)} /></label>
+                    <label className="flex items-center justify-between gap-3"><span>Email</span><input type="checkbox" checked={preference.emailEnabled} onChange={(event) => togglePreference(preference.category, "emailEnabled", event.target.checked)} /></label>
+                    <label className="flex items-center justify-between gap-3"><span>WhatsApp</span><input type="checkbox" checked={preference.whatsappEnabled} onChange={(event) => togglePreference(preference.category, "whatsappEnabled", event.target.checked)} /></label>
+                    <label className="flex items-center justify-between gap-3"><span>Push</span><input type="checkbox" checked={preference.pushEnabled} onChange={(event) => togglePreference(preference.category, "pushEnabled", event.target.checked)} /></label>
                   </div>
                 </div>
               ))}
@@ -659,15 +661,15 @@ export function SettingsPage() {
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="text-xl font-black text-slate-900">Job and account preferences</h2>
           <div className="mt-5 space-y-4">
-            {preferences.length > 0 ? preferences.map((item) => (
-              <div key={item.category} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            {preferences.length > 0 ? preferences.map((preference) => (
+              <div key={preference.category} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div>
-                  <p className="font-semibold text-slate-900">{item.label}</p>
-                  <p className="text-sm text-slate-600">{item.category}</p>
+                  <p className="font-semibold text-slate-900">{preference.label}</p>
+                  <p className="text-sm text-slate-600">{preference.category}</p>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-slate-700">
-                  <label className="flex items-center gap-2"><input type="checkbox" checked={item.emailEnabled} onChange={(event) => setPreferences((current) => current.map((entry) => entry.category === item.category ? { ...entry, emailEnabled: event.target.checked } : entry))} />Email</label>
-                  <label className="flex items-center gap-2"><input type="checkbox" checked={item.whatsappEnabled} onChange={(event) => setPreferences((current) => current.map((entry) => entry.category === item.category ? { ...entry, whatsappEnabled: event.target.checked } : entry))} />WhatsApp</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={preference.emailEnabled} onChange={(event) => setPreferences((preferences) => preferences.map((notificationPreference) => notificationPreference.category === preference.category ? { ...notificationPreference, emailEnabled: event.target.checked } : notificationPreference))} />Email</label>
+                  <label className="flex items-center gap-2"><input type="checkbox" checked={preference.whatsappEnabled} onChange={(event) => setPreferences((preferences) => preferences.map((notificationPreference) => notificationPreference.category === preference.category ? { ...notificationPreference, whatsappEnabled: event.target.checked } : notificationPreference))} />WhatsApp</label>
                 </div>
               </div>
             )) : <p className="text-sm text-slate-600">Preferences are not available yet.</p>}

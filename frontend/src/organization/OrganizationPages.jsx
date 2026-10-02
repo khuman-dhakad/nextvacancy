@@ -99,7 +99,7 @@ export function OrganizationDirectoryPage() {
           <span className="text-xs font-bold text-slate-500">Showing {filtered.length} of {organizations.length} Recruiting Bodies</span>
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Organization categories">
-          {categories.map((item) => <button key={item} type="button" aria-pressed={category === item} className={`rounded-xl px-3.5 py-1.5 text-xs font-bold ${category === item ? "bg-[#0F2744] text-white" : "bg-slate-100 text-slate-600"}`} onClick={() => setCategory(item)}>{item}</button>)}
+          {categories.map((organizationCategory) => <button key={organizationCategory} type="button" aria-pressed={category === organizationCategory} className={`rounded-xl px-3.5 py-1.5 text-xs font-bold ${category === organizationCategory ? "bg-[#0F2744] text-white" : "bg-slate-100 text-slate-600"}`} onClick={() => setCategory(organizationCategory)}>{organizationCategory}</button>)}
         </div>
       </section>
 
