@@ -1,20 +1,25 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { parseApiBaseUrl } from "./src/apiConfiguration.js";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-export default defineConfig(({ mode }) => {
-  const environment = process.env;
-  const apiBaseUrl = environment.VITE_API_BASE_URL?.trim();
-
-  if (mode === "production") {
-    parseApiBaseUrl(apiBaseUrl, true);
+export default defineConfig({
+  plugins: [react()],
+  define: {
+    __VITE_API_BASE_URL__: JSON.stringify(process.env.VITE_API_BASE_URL || 'http://localhost:8080/api'),
+  },
+  build: {
+    target: 'ES2020',
+    minify: 'terser',
+    sourcemap: false,
+    outDir: 'dist'
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_API_BASE_URL || 'http://localhost:8080',
+        changeOrigin: true
+      }
+    }
   }
-
-  return {
-    plugins: [react(), tailwindcss()],
-    build: {
-      sourcemap: false,
-    },
-  };
-});
+})
