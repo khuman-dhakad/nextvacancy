@@ -2,23 +2,22 @@
 
 ## Current rollout status
 
-The original Next.js application remains at `apps/web` and should remain the
-Vercel production root until the migration parity gates in
-[stack-migration-map.md](./stack-migration-map.md) are complete. The new
-React/Vite application is at `apps/frontend`; the initial Spring Boot API is at
-`backend`.
+The original Next.js application is archived at `archive/legacy-next-app` and
+the React/Vite application is at `frontend`; the Spring Boot API is at
+`backend`. The supplied Vercel build log runs from `frontend`, so keep that
+existing project root and its domains unchanged while applying the build fix.
 
 ## Verification and deployment status
 
 * Backend unit tests and frontend tests/build have passed locally. PostgreSQL
   Testcontainers integration tests are configured, but were skipped locally
   because the Docker daemon is unavailable.
-* CI runs `docker info` before Maven verification so a missing Docker engine
-  fails the backend job instead of silently skipping the PostgreSQL tests. The
-  workflow has not run for the current uncommitted branch state.
-* Production PostgreSQL connection/migration and the cloud/VPS deployment have
-  not been exercised. Deployment status: **BLOCKED — EXTERNAL SERVER ACCESS
-  REQUIRED**.
+* CI tests and builds the frontend and verifies the Spring backend. Render
+  deploys the API from the root `render.yaml` Blueprint after GitHub checks
+  pass; Vercel deploys the frontend through its linked Git integration.
+* Production PostgreSQL connection/migration and deployments have not been
+  exercised. Deployment status: **PENDING — EXTERNAL PROVIDER CONFIGURATION
+  AND CREDENTIALS REQUIRED**.
 
 The new API reads the existing PostgreSQL catalog and account schema. Flyway
 baselines an existing Drizzle schema at version 1 and applies the additive
@@ -37,12 +36,12 @@ Provision these outside source control:
 * A Linux/Ubuntu VPS or cloud VM with Java 17, Maven for building (or use the
   provided container image), Nginx, systemd, and an operator account with sudo.
 * A reachable PostgreSQL production database with the existing catalog/auth
-  schema and dedicated least-privilege application credentials. `DATABASE_URL`
-  must be a JDBC PostgreSQL URL.
+  schema and dedicated least-privilege application credentials.
+  `SPRING_DATASOURCE_URL` must be a JDBC PostgreSQL URL.
 * DNS access to create the API hostname and issue a TLS certificate.
 * The real production web origin(s) for `CORS_ALLOWED_ORIGINS`.
 * Vercel project access only when ready to switch the frontend project root to
-  `apps/frontend`; keep current Vercel settings/domain intact before cutover.
+  `frontend`; keep current Vercel settings/domain intact before cutover.
 * Production frontend environment variable `VITE_API_BASE_URL`, set to the
   HTTPS API origin including any API base path if one is configured.
 * Secret-manager or root-controlled deployment access for database credentials.
@@ -56,19 +55,22 @@ From the repository root:
 
 ```powershell
 mvn -f backend\pom.xml test
-npm --prefix apps\frontend ci
-npm --prefix apps\frontend test
+npm --prefix frontend ci
+npm --prefix frontend test
 # Set VITE_API_BASE_URL to the provisioned HTTPS API URL before this build.
-npm --prefix apps\frontend run build
+npm --prefix frontend run build
 ```
 
-Copy `backend\.env.example` to a protected environment file outside the
-repository and populate every required value using the provisioned services.
+Keep local environment files out of source control. Vite reads
+`frontend\.env`; Spring Boot does not automatically read dotenv files, so
+provide backend values through the process environment or a protected
+environment file loaded by your IDE or service manager. For production,
+populate `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and
+`SPRING_DATASOURCE_PASSWORD` from the provisioned services.
 `CORS_ALLOWED_ORIGINS` must list explicit HTTPS frontend origins, comma
-separated; non-HTTPS and wildcard origins are rejected. Do not put credentials
-in `.env` files that can be committed. Set `VITE_API_BASE_URL` to the actual
-verified HTTPS API origin in the build environment before building; the example
-file intentionally contains no URL.
+separated; non-HTTPS and wildcard origins are rejected. Set
+`VITE_API_BASE_URL` to the actual verified HTTPS API origin in the build
+environment before building.
 
 Build the backend jar:
 
@@ -118,13 +120,14 @@ must fail validation rather than create a new catalog schema.
    `backend/target/nextvacancy-api-0.1.0.jar` to
    `/opt/nextvacancy/nextvacancy-api.jar`.
 4. Create `/etc/nextvacancy/api.env` as root, mode `0600`. Populate
-   `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`,
+   `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`,
+   `SPRING_DATASOURCE_PASSWORD`,
    `CORS_ALLOWED_ORIGINS`, and any pool/log overrides from the secret manager.
-   `DATABASE_URL` must start with `jdbc:postgresql:` and configure PostgreSQL
-   TLS with `sslmode=verify-full`. Never commit or print it. Use `sudoedit` to
-   populate the root-owned environment file. Also configure the JWT key,
-   admin identity/hash, Resend API key and sender, public application URL, and
-   exact allowed HTTPS origins. Verify the Drizzle schema and take a tested
+   `SPRING_DATASOURCE_URL` must start with `jdbc:postgresql:` and configure
+   PostgreSQL TLS with `sslmode=verify-full`. Never commit or print it. Use
+   `sudoedit` to populate the root-owned environment file. Also configure the
+   JWT key, admin identity/hash, Resend API key and sender, public application
+   URL, and exact allowed HTTPS origins. Verify the Drizzle schema and take a tested
    backup before first startup because Flyway applies the additive V0002
    migration.
 5. Install `deploy/systemd/nextvacancy-api.service` into
@@ -150,9 +153,37 @@ must fail validation rather than create a new catalog schema.
 
 ## Vercel
 
-Do not change the existing project's deployment settings during this phase.
-When public-route parity and SEO behavior are complete, create a Preview
-deployment for `apps/frontend`, set `VITE_API_BASE_URL` to the verified HTTPS
-API URL, confirm all routes and static assets, and only then decide whether to
-change the Vercel Root Directory. No Vercel, VPS, DNS, PostgreSQL, or email
-provider access was available to perform or verify an actual deployment here.
+Keep the existing Vercel project's Git connection, branch, domains, and
+environment settings unchanged. Its Root Directory should remain `frontend`,
+matching the supplied build log. The checked-in `frontend/vercel.json` pins
+`npm ci`, `npm run build`, and `dist`, and preserves the SPA and sitemap
+rewrites. Set `VITE_API_BASE_URL` in Vercel Preview and Production to the
+actual Render service's HTTPS URL ending in `/api`; do not use a localhost or
+placeholder URL.
+
+## Render
+
+Create a Blueprint from the repository root and select `render.yaml`. It
+defines the Docker-based Spring API, health check, and automatic deploys from
+`main` only after GitHub checks pass. The `starter` plan is always on and is
+billable. The manifest deliberately does not create, migrate, or replace a
+database; configure the existing PostgreSQL connection through Render's
+environment settings:
+
+* `SPRING_DATASOURCE_URL` — the existing PostgreSQL JDBC URL, using verified
+  TLS (for example, `sslmode=verify-full` where supported).
+* `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD` — least-
+  privilege production credentials.
+* `JWT_SECRET` — a base64-encoded key of at least 32 bytes.
+* `CORS_ALLOWED_ORIGINS` — the exact HTTPS origin(s) of the frontend.
+* `APP_PUBLIC_URL` — the public HTTPS frontend URL used to generate account
+  links.
+* `RESEND_API_KEY` and `RESEND_FROM_EMAIL` — required for email verification
+  and password-reset delivery.
+* `ADMIN_USERNAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD_HASH` — configure only
+  when enabling the initial admin account.
+
+After the first deploy, verify `/api/actuator/health` and the API routes before
+setting Vercel's `VITE_API_BASE_URL` to the Render URL ending in `/api`. No
+Vercel or Render account access, database credentials, or provider environment
+was available to create or verify an actual deployment here.

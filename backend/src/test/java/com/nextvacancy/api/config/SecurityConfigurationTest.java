@@ -13,12 +13,12 @@ class SecurityConfigurationTest {
 
     @Test
     void acceptsExplicitHttpsFrontendOrigins() {
-        var source = configuration.corsConfigurationSource("https://frontend.example.invalid");
+        var source = configuration.corsConfigurationSource("https://frontend.example.org");
         CorsConfiguration cors = source.getCorsConfiguration(
                 new MockHttpServletRequest("GET", "/api/v1/jobs"));
 
         assertThat(cors).isNotNull();
-        assertThat(cors.getAllowedOrigins()).containsExactly("https://frontend.example.invalid");
+        assertThat(cors.getAllowedOrigins()).containsExactly("https://frontend.example.org");
         assertThat(cors.getAllowedMethods()).contains("GET", "POST", "OPTIONS");
     }
 
@@ -32,7 +32,7 @@ class SecurityConfigurationTest {
 
     @Test
     void rejectsOriginsContainingPaths() {
-        assertThatThrownBy(() -> configuration.corsConfigurationSource("https://frontend.example.invalid/app"))
+        assertThatThrownBy(() -> configuration.corsConfigurationSource("https://frontend.example.org/app"))
                 .isInstanceOf(IllegalStateException.class);
     }
 }
