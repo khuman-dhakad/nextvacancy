@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
 import java.util.Base64;
+import java.util.Map;
 import java.util.UUID;
 
 import com.nextvacancy.api.auth.AuthResponse;
@@ -54,7 +55,7 @@ class PostgreSqlIntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "validate");
-        registry.add("app.cors.allowed-origins", () -> "https://frontend.example.invalid");
+        registry.add("app.cors.allowed-origins", () -> "https://frontend.example.org");
         registry.add("app.jwt.secret", () -> JWT_SECRET);
         registry.add("app.jwt.issuer", () -> "nextvacancy");
         registry.add("app.jwt.access-token-ttl", () -> "900");
@@ -65,7 +66,7 @@ class PostgreSqlIntegrationTest {
                 new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder(4).encode(ADMIN_TEST_PASSWORD));
         registry.add("app.email.api-key", () -> "integration-only-resend-key");
         registry.add("app.email.from", () -> "NextVacancy Integration <test@example.invalid>");
-        registry.add("app.public-url", () -> "https://frontend.example.invalid");
+        registry.add("app.public-url", () -> "https://frontend.example.org");
     }
 
     @Autowired private JdbcTemplate jdbc;
@@ -75,6 +76,14 @@ class PostgreSqlIntegrationTest {
     @LocalServerPort private int port;
     @MockitoBean private TransactionalEmailService emailService;
     @Autowired private AuthRateLimitService authRateLimits;
+
+    @Test
+    void exposesHealthCheckAtTheRootActuatorPath() {
+        ResponseEntity<Map> health = http.getForEntity(url("/actuator/health"), Map.class);
+
+        assertThat(health.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(health.getBody()).containsEntry("status", "UP");
+    }
 
     @Test
     void readsExistingCatalogSchemaWithHibernateValidationAndHidesDrafts() {

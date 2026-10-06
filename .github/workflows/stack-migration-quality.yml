@@ -12,20 +12,6 @@ permissions:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: nextvacancy_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,13 +26,6 @@ jobs:
 
       - name: Test Spring Boot backend
         run: mvn -B -ntp -f backend/pom.xml verify
-        env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/nextvacancy_test
-          SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: postgres
-          SPRING_JPA_HIBERNATE_DDL_AUTO: create
-          CORS_ALLOWED_ORIGINS: https://localhost:3000
-          JWT_SECRET: test-secret-key-for-ci-cd-pipeline-min-32-chars-required
 
   frontend:
     runs-on: ubuntu-latest
@@ -70,7 +49,12 @@ jobs:
       - name: Test React frontend
         run: npm test
 
-      - name: Build React frontend
+      - name: Validate configured production API origin
+        run: node --input-type=module -e "import { parseApiBaseUrl } from './src/apiConfiguration.js'; parseApiBaseUrl(process.env.VITE_API_BASE_URL, true);"
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+
+      - name: Build React frontend (CI validation only; do not deploy)
         run: npm run build
         env:
-          VITE_API_BASE_URL: https://api.nextvacancy.com/api
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}

@@ -59,7 +59,7 @@ describe("API transport", () => {
     expect(fetchMock.mock.calls[0][1].method).toBe(method);
   });
 
-  it.each([401, 403, 404, 409, 422, 500])("preserves HTTP %i and API error details", async (status) => {
+  it.each([401, 403, 404, 409, 422])("preserves HTTP %i and API error details", async (status) => {
     const fetchMock = vi.fn().mockResolvedValue(mockResponse(status, '{"error":"API rejected request"}'));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -69,13 +69,33 @@ describe("API transport", () => {
     });
   });
 
-  it("surfaces a non-JSON error response instead of hiding it", async () => {
+  it("hides server error details even when returned as JSON", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(mockResponse(500, '{"error":"database password leaked"}'));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiRequest("/api/v1/resource")).rejects.toMatchObject({
+      message: "The service is temporarily unavailable. Please try again shortly.",
+      status: 500,
+    });
+  });
+
+  it("does not expose a non-JSON server error response", async () => {
     const fetchMock = vi.fn().mockResolvedValue(mockResponse(500, "upstream unavailable", "text/plain"));
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(apiRequest("/api/v1/resource")).rejects.toMatchObject({
-      message: "upstream unavailable",
+      message: "The service is temporarily unavailable. Please try again shortly.",
       status: 500,
+    });
+  });
+
+  it("uses a safe fallback for an unstructured client error", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(mockResponse(400, "<html>internal details</html>", "text/html"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiRequest("/api/v1/resource")).rejects.toMatchObject({
+      message: "The API request failed (400).",
+      status: 400,
     });
   });
 });

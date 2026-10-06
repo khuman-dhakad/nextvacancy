@@ -68,14 +68,16 @@ public class SecurityConfiguration {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource(
-            @Value("${app.cors.allowed-origins}") String allowedOrigins) {
+            @Value("${app.cors.allowed-origins}") String allowedOrigins,
+            @Value("${app.environment:development}") String environment) {
         List<String> origins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isEmpty())
                 .toList();
-        if (origins.isEmpty() || origins.stream().anyMatch(origin -> !isAllowedOrigin(origin))) {
+        boolean production = "production".equalsIgnoreCase(environment);
+        if (origins.isEmpty() || origins.stream().anyMatch(origin -> !isAllowedOrigin(origin, production))) {
             throw new IllegalStateException(
-                    "CORS_ALLOWED_ORIGINS must contain explicit HTTPS origins without paths or wildcards.");
+                    "CORS_ALLOWED_ORIGINS must contain explicit allowed origins without paths or wildcards.");
         }
 
         CorsConfiguration configuration = new CorsConfiguration();
@@ -117,22 +119,26 @@ public class SecurityConfiguration {
         return registration;
     }
 
-    private boolean isAllowedOrigin(String origin) {
+    private boolean isAllowedOrigin(String origin, boolean production) {
         try {
             URI uri = URI.create(origin);
             String host = uri.getHost();
             boolean isLocalhost = host != null && (
                     host.equalsIgnoreCase("localhost")
                             || host.startsWith("127.")
+                            || host.equals("0.0.0.0")
                             || host.equals("::1")
-                            || host.endsWith(".localhost")
-                            || host.endsWith(".invalid")
-                            || host.endsWith(".example")
-                            || host.endsWith(".example.com")
-                            || host.endsWith(".test"));
-            return "https".equalsIgnoreCase(uri.getScheme())
+                            || host.endsWith(".localhost"));
+            boolean isPlaceholder = host != null && (host.endsWith(".invalid")
+                    || host.endsWith(".example")
+                    || host.endsWith(".example.com")
+                    || host.endsWith(".test"));
+            boolean isLocalDevelopmentOrigin = !production
+                    && "http".equalsIgnoreCase(uri.getScheme())
+                    && isLocalhost;
+            return ("https".equalsIgnoreCase(uri.getScheme()) && !isLocalhost && !isPlaceholder
+                    || isLocalDevelopmentOrigin)
                     && host != null
-                    && !isLocalhost
                     && uri.getRawUserInfo() == null
                     && (uri.getRawPath() == null || uri.getRawPath().isEmpty() || "/".equals(uri.getRawPath()))
                     && uri.getRawQuery() == null

@@ -22,11 +22,12 @@ public class TransactionalEmailService {
     public TransactionalEmailService(
             @Value("${app.email.api-key}") String apiKey,
             @Value("${app.email.from}") String sender,
-            @Value("${app.public-url}") String publicUrl) {
+            @Value("${app.public-url}") String publicUrl,
+            @Value("${app.environment:development}") String environment) {
         if (apiKey.isBlank() || sender.isBlank()) {
             throw new IllegalStateException("RESEND_API_KEY and RESEND_FROM_EMAIL are required.");
         }
-        this.publicUrl = validatePublicUrl(publicUrl);
+        this.publicUrl = validatePublicUrl(publicUrl, "production".equalsIgnoreCase(environment));
         this.apiKey = apiKey;
         this.sender = sender;
         this.client = RestClient.builder().baseUrl("https://api.resend.com").build();
@@ -62,17 +63,27 @@ public class TransactionalEmailService {
         }
     }
 
-    private static URI validatePublicUrl(String value) {
+    private static URI validatePublicUrl(String value, boolean production) {
         try {
             URI uri = URI.create(value);
-            if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null
-                    || uri.getRawUserInfo() != null || uri.getRawQuery() != null || uri.getRawFragment() != null
-                    || uri.getHost().equalsIgnoreCase("localhost") || uri.getHost().startsWith("127.")) {
-                throw new IllegalStateException("APP_PUBLIC_URL must be an absolute public HTTPS origin.");
+            String host = uri.getHost();
+            boolean localhost = host != null && (host.equalsIgnoreCase("localhost")
+                    || host.startsWith("127.") || host.equals("0.0.0.0") || host.equals("::1")
+                    || host.endsWith(".localhost"));
+            boolean placeholder = host != null && (host.endsWith(".invalid") || host.endsWith(".test")
+                    || host.endsWith(".example") || host.endsWith(".example.com"));
+            boolean localDevelopmentUrl = !production && "http".equalsIgnoreCase(uri.getScheme())
+                    && localhost;
+            if (!(("https".equalsIgnoreCase(uri.getScheme()) && !localhost && !placeholder)
+                    || localDevelopmentUrl)
+                    || host == null || uri.getRawUserInfo() != null
+                    || (uri.getRawPath() != null && !uri.getRawPath().isEmpty() && !"/".equals(uri.getRawPath()))
+                    || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+                throw new IllegalStateException("APP_PUBLIC_URL must be a public HTTPS origin or local development origin.");
             }
             return uri;
         } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException("APP_PUBLIC_URL must be an absolute public HTTPS origin.", exception);
+            throw new IllegalStateException("APP_PUBLIC_URL must be a public HTTPS origin or local development origin.", exception);
         }
     }
 

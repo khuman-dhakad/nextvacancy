@@ -16,3 +16,11 @@ it("rejects local and reserved placeholder hosts in production", () => {
     expect(() => parseApiBaseUrl(value, true)).toThrow();
   }
 });
+
+it("requires production API configuration and accepts only an origin", () => {
+  expect(() => parseApiBaseUrl(undefined, true)).toThrow("VITE_API_BASE_URL");
+  expect(() => parseApiBaseUrl("https://api.nextvacancy.com/api", true))
+    .toThrow("origin without a path");
+  expect(parseApiBaseUrl("http://localhost:8080", false).origin)
+    .toBe("http://localhost:8080");
+});

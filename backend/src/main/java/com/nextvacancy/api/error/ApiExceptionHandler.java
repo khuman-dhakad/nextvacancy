@@ -10,12 +10,15 @@ import com.nextvacancy.api.auth.InvalidTokenException;
 import com.nextvacancy.api.auth.RateLimitExceededException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +26,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(EntityNotFoundException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -61,6 +66,12 @@ public class ApiExceptionHandler {
                 .body(Map.of("error", "Invalid email or password."));
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleForbidden(AccessDeniedException exception) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("error", "This operation is not permitted."));
+    }
+
     @ExceptionHandler(AccountLockedException.class)
     public ResponseEntity<Map<String, String>> handleLockedAccount(AccountLockedException exception) {
         return ResponseEntity.status(HttpStatus.LOCKED).body(Map.of("error", exception.getMessage()));
@@ -82,5 +93,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, String>> handleEmailDelivery(EmailDeliveryException exception) {
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                 .body(Map.of("error", exception.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleUnexpected(Exception exception) {
+        log.error("Unhandled API error of type {}.", exception.getClass().getName());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "An unexpected error occurred. Please try again later."));
     }
 }

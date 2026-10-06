@@ -140,9 +140,9 @@ function JobDirectory() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-10 sm:py-14">
       <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-rose-950 via-rose-900 to-fuchsia-900 px-6 py-10 text-white sm:px-10 sm:py-14">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-200">Your next step starts here</p>
-        <h1 className="mt-3 max-w-2xl text-3xl font-black tracking-tight sm:text-5xl">Find opportunities that move you forward.</h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-rose-100">Search verified recruitment notices and explore the details you need to make your next move.</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-200">Current openings</p>
+        <h1 className="mt-3 max-w-2xl text-3xl font-black tracking-tight sm:text-5xl">Find a role that fits your skills and location.</h1>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-rose-100">Browse vacancies, check eligibility and keep track of important dates.</p>
       </section>
 
       <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="Job search filters">

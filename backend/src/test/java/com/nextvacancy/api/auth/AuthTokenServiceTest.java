@@ -32,7 +32,10 @@ class AuthTokenServiceTest {
         assertThatThrownBy(() -> tokens.parseAccessToken("not.a.jwt"))
                 .isInstanceOf(RuntimeException.class);
         String jwt = tokens.createAccessToken("candidate-1", "CANDIDATE", "session-1");
-        String tampered = jwt.substring(0, jwt.length() - 1) + (jwt.endsWith("a") ? "b" : "a");
+        int signatureSeparator = jwt.lastIndexOf('.');
+        String signature = jwt.substring(signatureSeparator + 1);
+        char replacement = signature.charAt(0) == 'A' ? 'B' : 'A';
+        String tampered = jwt.substring(0, signatureSeparator + 1) + replacement + signature.substring(1);
         assertThatThrownBy(() -> tokens.parseAccessToken(tampered))
                 .isInstanceOf(RuntimeException.class);
     }
@@ -57,7 +60,12 @@ class AuthTokenServiceTest {
     @Test
     void rejectsWeakKeysAndUnsafeLifetimes() {
         assertThatThrownBy(() -> new AuthTokenService(Base64.getEncoder().encodeToString(new byte[16]),
-                "nextvacancy", 900, 86400)).isInstanceOf(IllegalStateException.class);
+                "nextvacancy", 900, 86400))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_SECRET must be a base64-encoded key of at least 32 bytes.");
+        assertThatThrownBy(() -> new AuthTokenService("", "nextvacancy", 900, 86400))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("JWT_SECRET must be a base64-encoded key of at least 32 bytes.");
         assertThatThrownBy(() -> new AuthTokenService(SECRET, "nextvacancy", 30, 86400))
                 .isInstanceOf(IllegalStateException.class);
     }

@@ -13,7 +13,7 @@ class SecurityConfigurationTest {
 
     @Test
     void acceptsExplicitHttpsFrontendOrigins() {
-        var source = configuration.corsConfigurationSource("https://frontend.example.org");
+        var source = configuration.corsConfigurationSource("https://frontend.example.org", "production");
         CorsConfiguration cors = source.getCorsConfiguration(
                 new MockHttpServletRequest("GET", "/api/v1/jobs"));
 
@@ -23,16 +23,20 @@ class SecurityConfigurationTest {
     }
 
     @Test
-    void rejectsLocalAndWildcardOrigins() {
-        assertThatThrownBy(() -> configuration.corsConfigurationSource("http://localhost:5173"))
+    void permitsLocalOriginsOnlyOutsideProduction() {
+        var localSource = configuration.corsConfigurationSource("http://localhost:5173", "development");
+        assertThat(localSource.getCorsConfiguration(new MockHttpServletRequest("GET", "/api/v1/jobs"))
+                .getAllowedOrigins()).containsExactly("http://localhost:5173");
+        assertThatThrownBy(() -> configuration.corsConfigurationSource("http://localhost:5173", "production"))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> configuration.corsConfigurationSource("*"))
+        assertThatThrownBy(() -> configuration.corsConfigurationSource("*", "development"))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void rejectsOriginsContainingPaths() {
-        assertThatThrownBy(() -> configuration.corsConfigurationSource("https://frontend.example.org/app"))
+        assertThatThrownBy(() -> configuration.corsConfigurationSource(
+                "https://frontend.example.org/app", "production"))
                 .isInstanceOf(IllegalStateException.class);
     }
 }

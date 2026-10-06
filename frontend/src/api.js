@@ -2,7 +2,10 @@ import { parseApiBaseUrl } from "./apiConfiguration.js";
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
-const apiBaseUrl = parseApiBaseUrl(configuredBaseUrl, import.meta.env.PROD);
+const apiBaseUrl = parseApiBaseUrl(
+  configuredBaseUrl || (import.meta.env.PROD ? undefined : "http://localhost:8080"),
+  import.meta.env.PROD,
+);
 
 export async function apiGet(path, params, options = {}) {
   return apiRequest(path, { ...options, params });
@@ -40,9 +43,14 @@ export async function apiRequest(path, { method = "GET", params, body, accessTok
     }
   }
   if (!response.ok) {
-    const message = payload?.error || responseText || `The API request failed (${response.status}).`;
+    const message = response.status >= 500
+      ? "The service is temporarily unavailable. Please try again shortly."
+      : (typeof payload?.error === "string" && payload.error.trim())
+        || Object.values(payload?.fieldErrors || {}).find((value) => typeof value === "string" && value.trim())
+        || `The API request failed (${response.status}).`;
     const failure = new Error(message);
     failure.status = response.status;
+    failure.fieldErrors = payload?.fieldErrors;
     throw failure;
   }
 

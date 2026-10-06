@@ -2,6 +2,8 @@ package com.nextvacancy.api.config;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 record PostgreSqlConnectionUrl(String jdbcUrl, String username, String password) {
     static PostgreSqlConnectionUrl parse(String value) {
@@ -37,15 +39,23 @@ record PostgreSqlConnectionUrl(String jdbcUrl, String username, String password)
 
             String username = null;
             String password = null;
-            String userInfo = uri.getUserInfo();
-            if (userInfo != null) {
-                int separator = userInfo.indexOf(':');
-                username = separator >= 0 ? userInfo.substring(0, separator) : userInfo;
-                password = separator >= 0 ? userInfo.substring(separator + 1) : null;
+            String rawUserInfo = uri.getRawUserInfo();
+            if (rawUserInfo != null) {
+                int separator = rawUserInfo.indexOf(':');
+                username = decodeUserInfo(separator >= 0 ? rawUserInfo.substring(0, separator) : rawUserInfo);
+                password = separator >= 0 ? decodeUserInfo(rawUserInfo.substring(separator + 1)) : null;
             }
             return new PostgreSqlConnectionUrl(jdbcUrl.toString(), username, password);
         } catch (URISyntaxException exception) {
-            throw new IllegalArgumentException("DATABASE_URL is not a valid PostgreSQL URL", exception);
+            throw new IllegalArgumentException("DATABASE_URL is not a valid PostgreSQL URL");
+        }
+    }
+
+    private static String decodeUserInfo(String value) {
+        try {
+            return URLDecoder.decode(value.replace("+", "%2B"), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("DATABASE_URL is not a valid PostgreSQL URL");
         }
     }
 }

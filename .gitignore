@@ -9,6 +9,9 @@ out/
 build/
 dist/
 
+# Local engineering notes and private audit documents
+mytest/
+
 # Environment files
 .env
 .env.*

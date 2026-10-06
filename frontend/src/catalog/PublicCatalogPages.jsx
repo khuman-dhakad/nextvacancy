@@ -7,12 +7,12 @@ import { useAuth } from "../auth/AuthContext.jsx";
 const catalogs = {
   home: {
     title: "Latest vacancies",
-    description: "Search verified recruitment notices and explore the details you need to make your next move.",
+    description: "Browse current vacancies, check eligibility and keep track of important dates.",
     category: "",
   },
   search: {
     title: "Search All Vacancies & Exams",
-    description: "Filter and search through real-time notifications, eligibility criteria, and application deadlines.",
+    description: "Search vacancies by role, location and category.",
     category: "",
   },
   results: {
@@ -22,12 +22,12 @@ const catalogs = {
   },
   government: {
     title: "Government Jobs (Sarkari Naukri) 2026",
-    description: "Browse central and state government recruitment notifications, eligibility requirements, and exam dates.",
+    description: "Browse central and state government vacancies, eligibility and exam dates.",
     category: "government",
   },
   private: {
     title: "Private Sector Jobs & Tech Careers",
-    description: "Browse private sector employment openings and corporate opportunities.",
+    description: "Browse private-sector vacancies across industries.",
     category: "private",
   },
   admitCards: {
@@ -220,7 +220,7 @@ export function PublicCatalogPage({ mode = "home" }) {
   return (
     <main className="mx-auto max-w-7xl px-5 py-10 sm:py-14">
       <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-rose-950 via-rose-900 to-fuchsia-900 px-6 py-10 text-white sm:px-10 sm:py-14">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-200">Your next step starts here</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-200">Recruitment updates</p>
         <h1 className="mt-3 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">{title}</h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-rose-100">{description}</p>
       </section>

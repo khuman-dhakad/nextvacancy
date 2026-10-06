@@ -34,11 +34,14 @@ public class AuthTokenService {
         try {
             decoded = Decoders.BASE64.decode(secret);
         } catch (RuntimeException exception) {
-            throw new IllegalStateException("JWT_SECRET must be a base64-encoded key of at least 32 bytes.", exception);
+            throw new IllegalStateException("JWT_SECRET must be a base64-encoded key of at least 32 bytes.");
         }
-        if (decoded.length < 32 || accessTtlSeconds < 60 || accessTtlSeconds > 3600
+        if (decoded.length < 32) {
+            throw new IllegalStateException("JWT_SECRET must be a base64-encoded key of at least 32 bytes.");
+        }
+        if (accessTtlSeconds < 60 || accessTtlSeconds > 3600
                 || refreshTtlSeconds < accessTtlSeconds || refreshTtlSeconds > 2_592_000) {
-            throw new IllegalStateException("JWT key and token lifetimes do not meet the configured security bounds.");
+            throw new IllegalStateException("JWT token lifetimes do not meet the configured security bounds.");
         }
         this.signingKey = Keys.hmacShaKeyFor(decoded);
         this.issuer = issuer;

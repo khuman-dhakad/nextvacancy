@@ -170,7 +170,7 @@ export function OrganizationProfilePage() {
     ? `${profile.name} (${profile.shortName}) Recruitment 2026, Vacancies & Results`
     : "Organization Profile | NEXTVACANCY";
   const description = profile
-    ? `Explore official ${profile.name} (${profile.shortName}) career updates, latest vacancy notifications, admit cards, selection process, and syllabus on NEXTVACANCY.`
+    ? `View ${profile.name} (${profile.shortName}) vacancies, admit cards, results, selection details and syllabus.`
     : "Recruitment organization profile and current career updates.";
   const canonical = `https://nextvacancy.com/organizations/${encodeURIComponent(slug)}`;
   usePageMetadata(pageTitle, description, canonical);

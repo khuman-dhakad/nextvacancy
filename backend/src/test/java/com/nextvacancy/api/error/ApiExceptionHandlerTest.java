@@ -9,6 +9,7 @@ import com.nextvacancy.api.auth.RegistrationRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,5 +31,24 @@ class ApiExceptionHandlerTest {
         assertThat(response.getBody()).containsEntry("error", "Request validation failed.");
         assertThat(response.getBody()).containsEntry(
                 "fieldErrors", Map.of("email", "Enter a valid email address."));
+    }
+
+    @Test
+    void hidesUnexpectedExceptionDetailsFromApiResponses() {
+        var response = new ApiExceptionHandler()
+                .handleUnexpected(new IllegalStateException("sensitive database detail"));
+
+        assertThat(response.getStatusCode().value()).isEqualTo(500);
+        assertThat(response.getBody()).containsEntry(
+                "error", "An unexpected error occurred. Please try again later.");
+    }
+
+    @Test
+    void returnsForbiddenForMethodAuthorizationFailures() {
+        var response = new ApiExceptionHandler()
+                .handleForbidden(new AccessDeniedException("sensitive authorization details"));
+
+        assertThat(response.getStatusCode().value()).isEqualTo(403);
+        assertThat(response.getBody()).containsEntry("error", "This operation is not permitted.");
     }
 }
