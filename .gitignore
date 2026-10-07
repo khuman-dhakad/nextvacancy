@@ -16,6 +16,7 @@ mytest/
 .env
 .env.*
 *.env
+.env.local
 
 # Secret and credential files
 *.key
