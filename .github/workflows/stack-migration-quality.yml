@@ -26,6 +26,10 @@ jobs:
 
       - name: Test Spring Boot backend
         run: mvn -B -ntp -f backend/pom.xml verify
+        env:
+          JWT_SECRET: dGVzdC1zZWNyZXQta2V5LWZvci1jaS1jZC1waXBlbGluZS1taW4tMzItY2hhcnM=
+          CORS_ALLOWED_ORIGINS: http://localhost:5173
+          APP_PUBLIC_URL: http://localhost:5173
 
   frontend:
     runs-on: ubuntu-latest
@@ -52,9 +56,9 @@ jobs:
       - name: Validate configured production API origin
         run: node --input-type=module -e "import { parseApiBaseUrl } from './src/apiConfiguration.js'; parseApiBaseUrl(process.env.VITE_API_BASE_URL, true);"
         env:
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://nextvacancy-api.onrender.com' }}
 
       - name: Build React frontend (CI validation only; do not deploy)
         run: npm run build
         env:
-          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || 'https://nextvacancy-api.onrender.com' }}

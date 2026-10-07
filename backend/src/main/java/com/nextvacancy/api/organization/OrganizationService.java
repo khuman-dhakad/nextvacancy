@@ -63,7 +63,8 @@ public class OrganizationService {
                         slugOrShortName.trim(), slugOrShortName.trim())
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found."));
         return jobs.findPublicJobsByOrganizationPattern(
-                        pattern(organization.getSlug()),
+                pattern(organization.getShortName()),
+                pattern(organization.getName()),
                         PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")))
                 .map(JobResponse::from);
     }

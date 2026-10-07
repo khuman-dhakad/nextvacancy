@@ -38,7 +38,7 @@ describe("Auth pages", () => {
         </StrictMode>,
       );
 
-      expect(await screen.findByText("Email verified. Your account is ready to use.")).toBeTruthy();
+      expect(await screen.findByText("Email verified successfully! Your account is active.")).toBeTruthy();
       expect(apiRequest).toHaveBeenCalledTimes(1);
       expect(apiRequest).toHaveBeenCalledWith("/api/v1/auth/email-verification/confirm", {
         method: "POST",
@@ -55,7 +55,7 @@ describe("Auth pages", () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByRole("heading", { name: "Welcome back" })).toBeTruthy();
+      expect(screen.getByRole("heading", { name: "Candidate Sign In" })).toBeTruthy();
     });
   });
 

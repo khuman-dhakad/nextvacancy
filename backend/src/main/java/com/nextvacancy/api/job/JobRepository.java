@@ -32,7 +32,7 @@ public interface JobRepository extends JpaRepository<JobEntity, String>, JpaSpec
             String category, java.util.Collection<String> statuses, String slug, Pageable pageable);
 
     @Query("""
-            select j from JobEntity j
+            select count(j) from JobEntity j
             where upper(j.status) <> 'CLOSED'
               and (lower(j.organization) like :shortPattern
                 or lower(j.organization) like :namePattern
@@ -67,10 +67,13 @@ public interface JobRepository extends JpaRepository<JobEntity, String>, JpaSpec
     @Query("""
             select j from JobEntity j
             where upper(j.status) <> 'CLOSED'
-              and (lower(j.organization) like :pattern
-                or lower(j.title) like :pattern
-                or lower(j.shortSummary) like :pattern)
+              and (lower(j.organization) like :shortPattern
+                or lower(j.organization) like :namePattern
+                or lower(j.title) like :shortPattern
+                or lower(j.shortSummary) like :shortPattern)
             """)
     Page<JobEntity> findPublicJobsByOrganizationPattern(
-            @Param("pattern") String pattern, Pageable pageable);
+            @Param("shortPattern") String shortPattern,
+            @Param("namePattern") String namePattern,
+            Pageable pageable);
 }
