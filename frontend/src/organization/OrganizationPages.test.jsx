@@ -115,7 +115,7 @@ describe("Organization pages", () => {
       );
 
       expect(await screen.findByRole("heading", { name: "Organization not found" })).toBeTruthy();
-      expect(screen.getByRole("link", { name: "Browse organizations" })).toBeTruthy();
+      expect(screen.getByRole("link", { name: "Browse all organizations" })).toBeTruthy();
     });
   });
 });

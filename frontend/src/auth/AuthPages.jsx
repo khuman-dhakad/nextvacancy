@@ -111,7 +111,7 @@ export function LoginPage({ admin = false }) {
 
   return (
     <AuthShell
-      title={admin ? "Admin Sign In" : "Welcome back"}
+      title={admin ? "Admin Sign In" : "Candidate Sign In"}
       description={
         admin
           ? "Sign in using your configured administrator credentials."
@@ -581,7 +581,7 @@ export function VerifyEmailPage() {
       body: { token },
     });
     verificationRequest.current
-      .then(() => { if (active) setMessage("Email verified. Your account is ready to use."); })
+      .then(() => { if (active) setMessage("Email verified successfully! Your account is active."); })
       .catch((failure) => { if (active) setMessage(failure.message); })
       .finally(() => { if (active) setPending(false); });
     return () => { active = false; };

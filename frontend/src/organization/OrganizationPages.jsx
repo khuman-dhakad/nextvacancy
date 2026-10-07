@@ -302,7 +302,7 @@ export function OrganizationProfilePage() {
         <h1 className="text-2xl font-black text-slate-900">Organization not found</h1>
         <p className="mt-2 text-xs text-slate-600">{error}</p>
         <Link className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white" to="/organizations">
-          Browse organizations
+          Browse all organizations
         </Link>
       </main>
     );
