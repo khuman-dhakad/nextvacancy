@@ -1,23 +1,82 @@
 import { useEffect, useRef, useState } from "react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Bell,
+  Bookmark,
+  Briefcase,
+  Building2,
+  Calendar,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Eye,
+  EyeOff,
+  FileCheck2,
+  FileText,
+  GraduationCap,
+  KeyRound,
+  LayoutDashboard,
+  Lock,
+  LogOut,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  Settings,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  Smartphone,
+  Sparkles,
+  User,
+  X,
+} from "lucide-react";
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { apiRequest } from "../api.js";
+import { apiGet, apiRequest } from "../api.js";
 import { useAuth } from "./AuthContext.jsx";
 
-function AuthShell({ title, description, children }) {
+function AuthShell({ title, description, admin = false, children }) {
   return (
-    <main className="mx-auto flex min-h-[70vh] max-w-lg items-center px-5 py-12">
-      <section className="w-full rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-9">
-        <p className="text-sm font-semibold uppercase tracking-wider text-rose-800">NEXTVACANCY</p>
-        <h1 className="mt-2 text-3xl font-black text-slate-950">{title}</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-        <div className="mt-7">{children}</div>
+    <main className="mx-auto flex min-h-[75vh] max-w-lg items-center px-4 py-12 sm:px-6">
+      <section className="w-full rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 text-xs font-black tracking-tight text-slate-950">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-900 text-white">
+              <Briefcase size={14} />
+            </span>
+            <span>NEXT<span className="text-rose-900">VACANCY</span></span>
+          </Link>
+
+          {admin ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-2.5 py-0.5 text-[10px] font-bold text-rose-300">
+              <Shield size={11} /> Administrator
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-rose-900">
+              <User size={11} /> Candidate Portal
+            </span>
+          )}
+        </div>
+
+        <h1 className="mt-5 text-2xl font-black text-slate-950 sm:text-3xl">{title}</h1>
+        <p className="mt-1.5 text-xs leading-relaxed text-slate-600">{description}</p>
+
+        <div className="mt-6">{children}</div>
       </section>
     </main>
   );
 }
 
 function ErrorBanner({ message }) {
-  return message ? <p className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800" role="alert">{message}</p> : null;
+  if (!message) return null;
+  return (
+    <div className="flex items-start gap-2.5 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-xs font-semibold text-rose-900" role="alert">
+      <AlertCircle size={16} className="mt-0.5 shrink-0 text-rose-700" />
+      <span>{message}</span>
+    </div>
+  );
 }
 
 export function LoginPage({ admin = false }) {
@@ -26,12 +85,15 @@ export function LoginPage({ admin = false }) {
   const location = useLocation();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
 
   const expectedRole = admin ? "ADMIN" : "CANDIDATE";
 
-  if (session?.role === expectedRole) return <Navigate to={admin ? "/admin/dashboard" : "/dashboard"} replace />;
+  if (session?.role === expectedRole) {
+    return <Navigate to={admin ? "/admin/dashboard" : "/dashboard"} replace />;
+  }
 
   async function submit(event) {
     event.preventDefault();
@@ -48,18 +110,85 @@ export function LoginPage({ admin = false }) {
   }
 
   return (
-    <AuthShell title={admin ? "Admin sign in" : "Welcome back"} description={admin ? "Sign in using the configured administrator account." : "Sign in to access your candidate account."}>
+    <AuthShell
+      title={admin ? "Admin Sign In" : "Welcome back"}
+      description={
+        admin
+          ? "Sign in using your configured administrator credentials."
+          : "Access your saved vacancies, application milestones, and customized job alerts."
+      }
+      admin={admin}
+    >
       <form className="space-y-4" onSubmit={submit}>
         <ErrorBanner message={error} />
-        <label className="block text-sm font-medium text-slate-700">{admin ? "Username or email" : "Email address"}
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3 outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-100" autoComplete="username" type={admin ? "text" : "email"} required maxLength={255} value={identifier} onChange={(event) => setIdentifier(event.target.value)} />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">Password
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3 outline-none focus:border-rose-600 focus:ring-2 focus:ring-rose-100" autoComplete={admin ? "current-password" : "current-password"} type="password" required maxLength={72} value={password} onChange={(event) => setPassword(event.target.value)} />
-        </label>
-        <button className="w-full rounded-xl bg-rose-900 px-4 py-3 font-semibold text-white hover:bg-rose-800 disabled:opacity-60" disabled={pending}>{pending ? "Signing in…" : "Sign in"}</button>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-800">
+            {admin ? "Username or Email Address" : "Email Address"}
+          </label>
+          <div className="relative mt-1.5">
+            <input
+              type={admin ? "text" : "email"}
+              required
+              autoFocus
+              autoComplete="username"
+              maxLength={255}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder={admin ? "admin or admin@example.com" : "you@example.com"}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-bold text-slate-800">Password</label>
+            {!admin && (
+              <Link to="/forgot-password" className="text-xs font-semibold text-rose-900 hover:underline">
+                Forgot password?
+              </Link>
+            )}
+          </div>
+          <div className="relative mt-1.5">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              autoComplete="current-password"
+              maxLength={72}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
+        >
+          {pending ? "Authenticating…" : admin ? "Sign In to Admin Panel" : "Sign In to Account"}
+        </button>
       </form>
-      {!admin && <div className="mt-5 flex justify-between text-sm"><Link className="text-rose-900 underline" to="/forgot-password">Forgot password?</Link><Link className="text-rose-900 underline" to="/register">Create an account</Link></div>}
+
+      {!admin && (
+        <div className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-600">
+          <span>Don't have a candidate account? </span>
+          <Link to="/register" className="font-bold text-rose-900 hover:underline">
+            Register free
+          </Link>
+        </div>
+      )}
     </AuthShell>
   );
 }
@@ -67,18 +196,26 @@ export function LoginPage({ admin = false }) {
 export function RegisterPage() {
   const navigate = useNavigate();
   const [fields, setFields] = useState({ fullName: "", email: "", mobile: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [complete, setComplete] = useState(false);
 
+  function calculateStrength(pwd) {
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    return score;
+  }
+
+  const pwdScore = calculateStrength(fields.password);
+
   async function submit(event) {
     event.preventDefault();
-    const strength = Number(fields.password.length >= 8)
-      + Number(/[A-Z]/.test(fields.password) && /[a-z]/.test(fields.password))
-      + Number(/[0-9]/.test(fields.password))
-      + Number(/[^A-Za-z0-9]/.test(fields.password));
-    if (strength < 3 || fields.password.length > 72) {
-      setError("Use at least 8 characters and meet two of these checks: uppercase and lowercase letters, a number, or a special character.");
+    if (pwdScore < 3 || fields.password.length > 72) {
+      setError("Please use at least 8 characters and satisfy two of: uppercase/lowercase letters, numbers, or special symbols.");
       return;
     }
     setPending(true);
@@ -93,38 +230,160 @@ export function RegisterPage() {
     }
   }
 
-  if (complete) {
-    return <AuthShell title="Account created" description="A verification message has been sent if email delivery is configured.">
-      <p className="text-sm leading-6 text-slate-700">Sign in to your account. If the verification message could not be delivered, sign in and request another verification email.</p>
-      <button className="mt-5 w-full rounded-xl bg-rose-900 px-4 py-3 font-semibold text-white" onClick={() => navigate("/login")}>Continue to sign in</button>
-    </AuthShell>;
+  function update(e) {
+    setFields((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function update(event) {
-    setFields((previous) => ({ ...previous, [event.target.name]: event.target.value }));
+  if (complete) {
+    return (
+      <AuthShell
+        title="Account Created"
+        description="Your candidate account registration was successful."
+      >
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-900">
+          <p className="font-bold">Check your email for verification</p>
+          <p className="mt-1">
+            If verification email delivery is enabled in your environment, a confirmation link has been sent to <strong>{fields.email}</strong>.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="mt-5 w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800"
+        >
+          Continue to Sign In
+        </button>
+      </AuthShell>
+    );
   }
 
   return (
-    <AuthShell title="Create your account" description="Register as a candidate to manage your NextVacancy account.">
+    <AuthShell
+      title="Create Candidate Account"
+      description="Save notifications, track your exam schedules, and receive timely application alerts."
+    >
       <form className="space-y-4" onSubmit={submit}>
         <ErrorBanner message={error} />
-        <label className="block text-sm font-medium text-slate-700">Full name
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" name="fullName" autoComplete="name" required minLength={2} maxLength={255} pattern="[a-zA-Z\s.'-]+" value={fields.fullName} onChange={update} />
+
+        <div>
+          <label className="block text-xs font-bold text-slate-800">Full Name *</label>
+          <input
+            type="text"
+            name="fullName"
+            required
+            minLength={2}
+            maxLength={255}
+            pattern="[a-zA-Z\s.'-]+"
+            autoComplete="name"
+            value={fields.fullName}
+            onChange={update}
+            placeholder="e.g. Rahul Sharma"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-800">Email Address *</label>
+          <input
+            type="email"
+            name="email"
+            required
+            maxLength={255}
+            autoComplete="email"
+            value={fields.email}
+            onChange={update}
+            placeholder="e.g. rahul@example.com"
+            className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-800">Indian Mobile Number *</label>
+          <div className="relative mt-1.5 flex items-center">
+            <span className="absolute left-3.5 text-xs font-bold text-slate-500">+91</span>
+            <input
+              type="tel"
+              name="mobile"
+              required
+              inputMode="numeric"
+              pattern="[6-9][0-9]{9}"
+              maxLength={10}
+              autoComplete="tel"
+              value={fields.mobile}
+              onChange={update}
+              placeholder="9876543210"
+              className="w-full rounded-xl border border-slate-300 bg-white pr-3.5 pl-11 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-slate-800">Password *</label>
+          <div className="relative mt-1.5">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              required
+              minLength={8}
+              maxLength={72}
+              autoComplete="new-password"
+              value={fields.password}
+              onChange={update}
+              placeholder="At least 8 characters"
+              className="w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+
+          {/* Password strength meter */}
+          {fields.password && (
+            <div className="mt-2 space-y-1.5">
+              <div className="flex gap-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className={`h-full transition-all ${pwdScore >= 1 ? "bg-rose-500 w-1/4" : "w-0"}`} />
+                <div className={`h-full transition-all ${pwdScore >= 2 ? "bg-amber-500 w-1/4" : "w-0"}`} />
+                <div className={`h-full transition-all ${pwdScore >= 3 ? "bg-blue-500 w-1/4" : "w-0"}`} />
+                <div className={`h-full transition-all ${pwdScore >= 4 ? "bg-emerald-500 w-1/4" : "w-0"}`} />
+              </div>
+              <p className="text-[10px] text-slate-500 font-medium">
+                {pwdScore < 3
+                  ? "Weak: Use uppercase, lowercase, numbers, and symbols."
+                  : pwdScore === 3
+                  ? "Good strength password"
+                  : "Strong password"}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <label className="flex items-start gap-2.5 pt-1 text-xs text-slate-600">
+          <input type="checkbox" required className="mt-0.5 rounded border-slate-300 text-rose-900 focus:ring-rose-600" />
+          <span>
+            I accept the <Link to="/terms" className="font-semibold text-rose-900 underline">Terms of Service</Link> and <Link to="/privacy-policy" className="font-semibold text-rose-900 underline">Privacy Policy</Link>.
+          </span>
         </label>
-        <label className="block text-sm font-medium text-slate-700">Email address
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" name="email" autoComplete="email" type="email" required maxLength={255} value={fields.email} onChange={update} />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">Indian mobile number
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" name="mobile" autoComplete="tel" type="tel" inputMode="numeric" required pattern="[6-9][0-9]{9}" maxLength={10} value={fields.mobile} onChange={update} />
-        </label>
-        <label className="block text-sm font-medium text-slate-700">Password
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" name="password" autoComplete="new-password" type="password" required minLength={8} maxLength={72} value={fields.password} onChange={update} />
-          <span className="mt-1 block text-xs font-normal text-slate-500">Use at least 8 characters, then meet two checks: uppercase and lowercase letters, a number, or a special character.</span>
-        </label>
-        <label className="flex items-start gap-2 text-sm text-slate-600"><input className="mt-1" type="checkbox" required /><span>I accept the <Link className="text-rose-900 underline" to="/terms">Terms of Service</Link> and <Link className="text-rose-900 underline" to="/privacy-policy">Privacy Policy</Link>.</span></label>
-        <button className="w-full rounded-xl bg-rose-900 px-4 py-3 font-semibold text-white disabled:opacity-60" disabled={pending}>{pending ? "Creating account…" : "Create account"}</button>
+
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
+        >
+          {pending ? "Creating Account…" : "Create Account"}
+        </button>
       </form>
-      <p className="mt-5 text-center text-sm text-slate-600">Already registered? <Link className="text-rose-900 underline" to="/login">Sign in</Link></p>
+
+      <div className="mt-6 border-t border-slate-100 pt-4 text-center text-xs text-slate-600">
+        <span>Already have an account? </span>
+        <Link to="/login" className="font-bold text-rose-900 hover:underline">
+          Sign in
+        </Link>
+      </div>
     </AuthShell>
   );
 }
@@ -149,18 +408,61 @@ export function ForgotPasswordPage() {
     }
   }
 
-  return <AuthShell title="Reset your password" description="Enter the email address associated with your candidate account.">
-    {submitted ? <p className="text-sm leading-6 text-slate-700">If an eligible account exists, password reset instructions will be sent to that address.</p> : (
-      <form className="space-y-4" onSubmit={submit}>
-        <ErrorBanner message={error} />
-        <label className="block text-sm font-medium text-slate-700">Email address
-          <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" type="email" autoComplete="email" required maxLength={255} value={email} onChange={(event) => setEmail(event.target.value)} />
-        </label>
-        <button className="w-full rounded-xl bg-rose-900 px-4 py-3 font-semibold text-white disabled:opacity-60" disabled={pending}>{pending ? "Requesting…" : "Send reset instructions"}</button>
-      </form>
-    )}
-    <Link className="mt-5 inline-block text-sm text-rose-900 underline" to="/login">Back to sign in</Link>
-  </AuthShell>;
+  return (
+    <AuthShell
+      title="Reset Password"
+      description="Enter your registered candidate email address to receive reset instructions."
+    >
+      {submitted ? (
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs leading-relaxed text-emerald-900">
+            <p className="font-bold">Instructions Sent</p>
+            <p className="mt-1">
+              If an account with <strong>{email}</strong> exists, password reset instructions have been dispatched.
+            </p>
+          </div>
+          <Link
+            to="/login"
+            className="block text-center rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-slate-800"
+          >
+            Return to Sign In
+          </Link>
+        </div>
+      ) : (
+        <form className="space-y-4" onSubmit={submit}>
+          <ErrorBanner message={error} />
+
+          <div>
+            <label className="block text-xs font-bold text-slate-800">Email Address</label>
+            <input
+              type="email"
+              required
+              maxLength={255}
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800 disabled:opacity-60"
+          >
+            {pending ? "Sending…" : "Send Reset Link"}
+          </button>
+        </form>
+      )}
+
+      <div className="mt-6 text-center">
+        <Link to="/login" className="text-xs font-semibold text-slate-600 hover:text-slate-950">
+          ← Back to Sign In
+        </Link>
+      </div>
+    </AuthShell>
+  );
 }
 
 export function ResetPasswordPage() {
@@ -168,6 +470,7 @@ export function ResetPasswordPage() {
   const token = params.get("token") || "";
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [complete, setComplete] = useState(false);
   const [pending, setPending] = useState(false);
@@ -178,14 +481,6 @@ export function ResetPasswordPage() {
 
   async function submit(event) {
     event.preventDefault();
-    const strength = Number(password.length >= 8)
-      + Number(/[A-Z]/.test(password) && /[a-z]/.test(password))
-      + Number(/[0-9]/.test(password))
-      + Number(/[^A-Za-z0-9]/.test(password));
-    if (strength < 3 || password.length > 72) {
-      setError("Choose a password that meets the stated length and strength requirements.");
-      return;
-    }
     setPending(true);
     setError("");
     try {
@@ -198,18 +493,76 @@ export function ResetPasswordPage() {
     }
   }
 
-  if (!token) return <AuthShell title="Invalid reset link" description="This reset link is missing its token."><Link className="text-rose-900 underline" to="/forgot-password">Request another reset link</Link></AuthShell>;
-  if (complete) return <AuthShell title="Password updated" description="Your password has been changed. Existing sessions were revoked."><button className="w-full rounded-xl bg-rose-900 px-4 py-3 font-semibold text-white" onClick={() => navigate("/login")}>Continue to sign in</button></AuthShell>;
+  if (!token) {
+    return (
+      <AuthShell title="Invalid Link" description="The password reset link is missing a valid token.">
+        <Link to="/forgot-password" className="block text-center rounded-xl bg-rose-900 py-2.5 text-xs font-bold text-white">
+          Request New Reset Link
+        </Link>
+      </AuthShell>
+    );
+  }
 
-  return <AuthShell title="Choose a new password" description="Use at least 8 characters and meet at least two password-strength checks.">
-    <form className="space-y-4" onSubmit={submit}>
-      <ErrorBanner message={error} />
-      <label className="block text-sm font-medium text-slate-700">New password
-        <input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" autoComplete="new-password" type="password" required minLength={8} maxLength={72} value={password} onChange={(event) => setPassword(event.target.value)} />
-      </label>
-      <button className="w-full rounded-xl bg-rose-900 px-4 py-3 font-semibold text-white disabled:opacity-60" disabled={pending}>{pending ? "Updating…" : "Update password"}</button>
-    </form>
-  </AuthShell>;
+  if (complete) {
+    return (
+      <AuthShell title="Password Updated" description="Your password has been changed successfully.">
+        <p className="text-xs text-slate-600 leading-relaxed">
+          All existing sessions have been revoked for your security. Please sign in with your new password.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate("/login")}
+          className="mt-5 w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800"
+        >
+          Sign In Now
+        </button>
+      </AuthShell>
+    );
+  }
+
+  return (
+    <AuthShell
+      title="Create New Password"
+      description="Choose a secure new password for your candidate account."
+    >
+      <form className="space-y-4" onSubmit={submit}>
+        <ErrorBanner message={error} />
+
+        <div>
+          <label className="block text-xs font-bold text-slate-800">New Password</label>
+          <div className="relative mt-1.5">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
+              maxLength={72}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Minimum 8 characters"
+              className="w-full rounded-xl border border-slate-300 bg-white pr-10 pl-3.5 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((p) => !p)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800 disabled:opacity-60"
+        >
+          {pending ? "Updating…" : "Update Password"}
+        </button>
+      </form>
+    </AuthShell>
+  );
 }
 
 export function VerifyEmailPage() {
@@ -227,34 +580,30 @@ export function VerifyEmailPage() {
       method: "POST",
       body: { token },
     });
-    verificationRequest.current.then(() => { if (active) setMessage("Email verified. Your account is ready to use."); })
+    verificationRequest.current
+      .then(() => { if (active) setMessage("Email verified. Your account is ready to use."); })
       .catch((failure) => { if (active) setMessage(failure.message); })
       .finally(() => { if (active) setPending(false); });
     return () => { active = false; };
   }, [token]);
 
-  return <AuthShell title="Email verification" description={pending ? "Confirming your verification link…" : "Email verification result."}>
-    <p className="text-sm leading-6 text-slate-700" role="status">{pending ? "Please wait…" : message || "This link is missing its verification token."}</p>
-    {!pending && <Link className="mt-5 inline-block text-rose-900 underline" to="/login">Continue to sign in</Link>}
-  </AuthShell>;
-}
-
-function OverviewCard({ title, value, hint, tone }) {
-  const toneClasses = {
-    blue: "border-blue-200 bg-blue-50 text-blue-700",
-    emerald: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    amber: "border-amber-200 bg-amber-50 text-amber-700",
-    rose: "border-rose-200 bg-rose-50 text-rose-700",
-  }[tone] || "border-slate-200 bg-slate-50 text-slate-700";
-
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className={`inline-flex rounded-xl border px-2.5 py-2 ${toneClasses}`}>
-        <span className="text-lg font-black">{value}</span>
+    <AuthShell
+      title="Email Verification"
+      description={pending ? "Verifying your token…" : "Account verification status."}
+    >
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-700">
+        {pending ? "Please wait while we confirm your email address…" : message || "This link is missing its verification token."}
       </div>
-      <h2 className="mt-4 text-base font-bold text-slate-900">{title}</h2>
-      <p className="mt-1 text-sm text-slate-600">{hint}</p>
-    </div>
+      {!pending && (
+        <Link
+          to="/login"
+          className="mt-5 block text-center rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800"
+        >
+          Continue to Sign In
+        </Link>
+      )}
+    </AuthShell>
   );
 }
 
@@ -274,7 +623,9 @@ export function AccountPage() {
     async function loadDashboard() {
       try {
         const [candidateProfileResponse, saved, recentResponse, preferencesResponse] = await Promise.all([
-          apiRequest("/api/v1/candidate/profile", { accessToken: session.accessToken }).catch(() => apiRequest("/api/v1/auth/me", { accessToken: session.accessToken })),
+          apiRequest("/api/v1/candidate/profile", { accessToken: session.accessToken }).catch(() =>
+            apiRequest("/api/v1/auth/me", { accessToken: session.accessToken })
+          ),
           apiRequest("/api/v1/candidate/saved-jobs", { accessToken: session.accessToken }),
           apiRequest("/api/v1/jobs", { accessToken: session.accessToken, params: { page: 0, size: 4 } }).catch(() => ({ content: [] })),
           apiRequest("/api/v1/candidate/notification-preferences", { accessToken: session.accessToken }).catch(() => []),
@@ -306,121 +657,148 @@ export function AccountPage() {
     }
   }
 
-  const overview = [
-    { title: "Saved vacancies", value: savedJobs.length, hint: "Bookmarked roles you want to revisit", tone: "blue" },
-    { title: "Applications tracked", value: Math.min(savedJobs.length, 3), hint: "Current follow-up items", tone: "emerald" },
-    { title: "Admit cards", value: recentJobs.length, hint: "Recent live notices to review", tone: "amber" },
-    { title: "Alerts", value: notificationPreferences.filter((preference) => preference.emailEnabled || preference.whatsappEnabled || preference.pushEnabled).length, hint: "Active notification channels", tone: "rose" },
-  ];
-
-  const tracker = savedJobs.slice(0, 3).map((savedJob, index) => ({
-    id: savedJob.id,
-    title: savedJob.job?.title || "Saved vacancy",
-    organization: savedJob.job?.organization || "Recruiting body",
-    stage: ["Saved", "Applied", "Awaiting update"][index % 3],
-    nextEvent: savedJob.job?.applicationDeadline || "Check official notice for the next step",
-  }));
-
   return (
-    <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 space-y-8">
+      {/* Header Banner */}
+      <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-800">Candidate dashboard</p>
-            <h1 className="mt-2 text-3xl font-black text-slate-950">Welcome back{profile ? `, ${profile.fullName}` : ""}</h1>
+            <span className="rounded-md bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-900">
+              Candidate Workspace
+            </span>
+            <h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">
+              Welcome back{profile?.fullName ? `, ${profile.fullName}` : ""}
+            </h1>
+            <p className="mt-1 text-xs text-slate-500">Manage saved drives, application stages, and alert settings.</p>
           </div>
-          <button className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-800" onClick={logout} disabled={pending}>
-            {pending ? "Signing out…" : "Sign out"}
+          <button
+            type="button"
+            onClick={logout}
+            disabled={pending}
+            className="inline-flex items-center gap-1.5 self-start rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50"
+          >
+            <LogOut size={14} />
+            <span>{pending ? "Signing out…" : "Sign out"}</span>
           </button>
         </div>
-        {error ? <div className="mt-5"><ErrorBanner message={error} /></div> : null}
+        {error && <div className="mt-4"><ErrorBanner message={error} /></div>}
       </section>
 
-      <section className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {overview.map((card) => <OverviewCard key={card.title} {...card} />)}
-      </section>
-
-      <section className="mt-8 grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl font-black text-slate-900">Application tracker</h2>
-            <Link className="text-sm font-semibold text-rose-900 underline" to="/search">Browse jobs</Link>
-          </div>
-          {tracker.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-600">No active applications are being tracked yet. Save jobs to see them here.</p>
-          ) : (
-            <div className="mt-4 space-y-3">
-              {tracker.map((trackedJob) => (
-                <div key={trackedJob.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="font-semibold text-slate-900">{trackedJob.title}</p>
-                      <p className="mt-1 text-sm text-slate-600">{trackedJob.organization}</p>
-                    </div>
-                    <span className="rounded-full bg-rose-100 px-2.5 py-1 text-xs font-semibold text-rose-700">{trackedJob.stage}</span>
-                  </div>
-                  <p className="mt-3 text-sm text-slate-500">Next step: {trackedJob.nextEvent}</p>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* KPI Cards */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs">
+          <p className="text-2xl font-black text-rose-900">{savedJobs.length}</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Saved Vacancies</p>
         </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900">Profile summary</h2>
-          {profile ? (
-            <dl className="mt-5 space-y-3 text-sm text-slate-700">
-              <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Name</dt><dd className="mt-1 font-medium text-slate-900">{profile.fullName}</dd></div>
-              <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</dt><dd className="mt-1 font-medium text-slate-900">{profile.email}</dd></div>
-              <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Preferred state</dt><dd className="mt-1 font-medium text-slate-900">{profile.preferredState || "Not set yet"}</dd></div>
-              <div><dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Qualification</dt><dd className="mt-1 font-medium text-slate-900">{profile.qualification || "Not set yet"}</dd></div>
-            </dl>
-          ) : (
-            <p className="mt-4 text-sm text-slate-600">Loading profile details…</p>
-          )}
-          <Link className="mt-6 inline-block rounded-xl bg-rose-900 px-4 py-2.5 text-sm font-semibold text-white" to="/settings">Update settings</Link>
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs">
+          <p className="text-2xl font-black text-emerald-700">{savedJobs.length ? Math.min(savedJobs.length, 3) : 0}</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Tracked Milestones</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs">
+          <p className="text-2xl font-black text-amber-700">{recentJobs.length}</p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Recent Notices</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs">
+          <p className="text-2xl font-black text-blue-900">
+            {notificationPreferences.filter((p) => p.emailEnabled || p.whatsappEnabled || p.pushEnabled).length}
+          </p>
+          <p className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">Active Alert Channels</p>
         </div>
       </section>
 
-      <section className="mt-8 grid gap-8 xl:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl font-black text-slate-900">Saved jobs</h2>
-            <Link className="text-sm font-semibold text-rose-900 underline" to="/search">Find more</Link>
+      {/* Main Grid: Application Tracker & Profile Details */}
+      <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+        {/* Saved & Tracked Jobs */}
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <h2 className="text-lg font-bold text-slate-950">Bookmarked Vacancies &amp; Tracker</h2>
+            <Link to="/search" className="text-xs font-bold text-rose-900 hover:underline">
+              Find more drives →
+            </Link>
           </div>
+
           {savedJobs.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-600">You haven’t saved any jobs yet.</p>
+            <div className="py-10 text-center">
+              <Bookmark size={32} className="mx-auto text-slate-300" />
+              <p className="mt-3 text-xs font-bold text-slate-700">No saved opportunities yet</p>
+              <p className="mt-1 text-xs text-slate-500">Click the bookmark icon on any job notice to save it here.</p>
+              <Link to="/government-jobs" className="mt-4 inline-block rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white">
+                Browse government jobs
+              </Link>
+            </div>
           ) : (
             <ul className="mt-4 divide-y divide-slate-100">
-              {savedJobs.slice(0, 4).map((savedJob) => (
-                <li key={savedJob.id} className="py-3">
-                  <Link className="font-semibold text-rose-900 hover:underline" to={`/jobs/${encodeURIComponent(savedJob.job?.slug || savedJob.jobId)}`}>{savedJob.job?.title || "Saved vacancy"}</Link>
-                  <p className="mt-1 text-sm text-slate-600">{savedJob.job?.organization || "Recruiting body"}</p>
+              {savedJobs.map((item) => (
+                <li key={item.id} className="py-3.5 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+                  <div>
+                    <h3 className="font-bold text-xs text-slate-900 hover:text-rose-900">
+                      <Link to={`/jobs/${encodeURIComponent(item.job?.slug || item.jobId)}`}>
+                        {item.job?.title || "Saved opportunity"}
+                      </Link>
+                    </h3>
+                    <p className="mt-0.5 text-xs text-slate-500">{item.job?.organization} · {item.job?.location}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                      {item.job?.status?.replaceAll("_", " ") || "Active"}
+                    </span>
+                    <Link
+                      to={`/jobs/${encodeURIComponent(item.job?.slug || item.jobId)}`}
+                      className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                    >
+                      View
+                    </Link>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </section>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl font-black text-slate-900">Recently viewed</h2>
-            <Link className="text-sm font-semibold text-rose-900 underline" to="/results">View all</Link>
+        {/* Profile Summary */}
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-4">
+              Profile Details
+            </h2>
+            {profile ? (
+              <dl className="mt-4 space-y-3 text-xs text-slate-700">
+                <div>
+                  <dt className="text-slate-400 font-semibold uppercase text-[10px]">Candidate Name</dt>
+                  <dd className="mt-0.5 font-bold text-slate-900">{profile.fullName || "Not specified"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-400 font-semibold uppercase text-[10px]">Email Address</dt>
+                  <dd className="mt-0.5 font-bold text-slate-900">{profile.email || "Not specified"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-400 font-semibold uppercase text-[10px]">Mobile Contact</dt>
+                  <dd className="mt-0.5 font-bold text-slate-900">{profile.mobile || "Not specified"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-400 font-semibold uppercase text-[10px]">Target State / Region</dt>
+                  <dd className="mt-0.5 font-bold text-slate-900">{profile.preferredState || "All India"}</dd>
+                </div>
+                <div>
+                  <dt className="text-slate-400 font-semibold uppercase text-[10px]">Qualification</dt>
+                  <dd className="mt-0.5 font-bold text-slate-900">{profile.qualification || "Graduate"}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="mt-4 text-xs text-slate-500">Loading candidate profile…</p>
+            )}
           </div>
-          {recentJobs.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-600">There are no recent notices to display yet.</p>
-          ) : (
-            <ul className="mt-4 space-y-3">
-              {recentJobs.map((job) => (
-                <li key={job.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
-                  <Link className="font-semibold text-slate-900 hover:text-rose-900" to={`/jobs/${encodeURIComponent(job.slug)}`}>{job.title}</Link>
-                  <p className="mt-1 text-sm text-slate-600">{job.organization}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
+
+          <div className="mt-6 border-t border-slate-100 pt-4">
+            <Link
+              to="/settings"
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-slate-800"
+            >
+              <Settings size={14} /> Update Settings
+            </Link>
+          </div>
+        </section>
+      </div>
     </main>
   );
 }
@@ -456,7 +834,7 @@ export function NotificationCenterPage() {
 
   async function togglePreference(category, field, value) {
     if (!session) return;
-    const next = preferences.map((preference) => preference.category === category ? { ...preference, [field]: value } : preference);
+    const next = preferences.map((p) => (p.category === category ? { ...p, [field]: value } : p));
     setPreferences(next);
     try {
       await apiRequest("/api/v1/candidate/notification-preferences", {
@@ -472,75 +850,128 @@ export function NotificationCenterPage() {
   async function markRead(notificationId) {
     if (!session) return;
     try {
-      const updatedNotification = await apiRequest(`/api/v1/candidate/notifications/${encodeURIComponent(notificationId)}/read`, {
+      const updated = await apiRequest(`/api/v1/candidate/notifications/${encodeURIComponent(notificationId)}/read`, {
         method: "PATCH",
         accessToken: session.accessToken,
       });
-      setNotifications((notifications) => notifications.map((notification) => notification.id === notificationId
-        ? { ...notification, read: true, readAt: updatedNotification.readAt }
-        : notification));
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true, readAt: updated.readAt } : n))
+      );
     } catch (failure) {
-      setError(failure.message || "Unable to update this notification.");
+      setError(failure.message || "Unable to update notification.");
     }
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-800">Notification center</p>
-        <h1 className="mt-2 text-3xl font-black text-slate-950">Your alerts</h1>
+    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 space-y-8">
+      <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-wider text-rose-800">Alert Center</p>
+        <h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">Recruitment Notifications &amp; Preferences</h1>
       </section>
 
-      {error ? <div className="mt-6"><ErrorBanner message={error} /></div> : null}
+      {error && <ErrorBanner message={error} />}
 
-      <section className="mt-8 grid gap-8 xl:grid-cols-[1.3fr_0.7fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900">Latest notifications</h2>
-          {loading ? <p className="mt-4 text-sm text-slate-600">Loading your notifications…</p> : notifications.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-600">You are all caught up. No alerts are available right now.</p>
+      <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-4">
+            Recent Alerts &amp; Updates
+          </h2>
+          {loading ? (
+            <p className="mt-4 text-xs text-slate-500">Loading alerts…</p>
+          ) : notifications.length === 0 ? (
+            <div className="py-12 text-center text-xs text-slate-500">
+              <Bell size={32} className="mx-auto text-slate-300" />
+              <p className="mt-3 font-bold text-slate-700">You are all caught up</p>
+              <p className="mt-1">No active unread notices at this moment.</p>
+            </div>
           ) : (
-            <ul className="mt-5 space-y-3">
-              {notifications.map((notification) => (
-                <li key={notification.id} className={`rounded-2xl border p-4 ${notification.read ? "border-slate-200 bg-slate-50" : "border-rose-200 bg-rose-50"}`}>
-                  <div className="flex items-start justify-between gap-4">
+            <ul className="mt-4 space-y-3">
+              {notifications.map((n) => (
+                <li
+                  key={n.id}
+                  className={`rounded-2xl border p-4 text-xs transition ${
+                    n.read ? "border-slate-200 bg-slate-50/70" : "border-rose-200 bg-rose-50/50 shadow-2xs"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{notification.category}</p>
-                      <h3 className="mt-1 font-bold text-slate-900">{notification.title}</h3>
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 uppercase">
+                        {n.category}
+                      </span>
+                      <h3 className="mt-1.5 font-bold text-slate-900">{n.title}</h3>
                     </div>
-                    {!notification.read && <button className="text-xs font-semibold text-rose-900 underline" onClick={() => markRead(notification.id)}>Mark read</button>}
+                    {!n.read && (
+                      <button
+                        type="button"
+                        onClick={() => markRead(n.id)}
+                        className="text-[11px] font-bold text-rose-900 hover:underline"
+                      >
+                        Mark read
+                      </button>
+                    )}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{notification.message}</p>
-                  <div className="mt-3 flex items-center justify-between gap-3 text-xs text-slate-500">
-                    <span>{new Date(notification.createdAt).toLocaleString()}</span>
-                    {notification.linkUrl ? <a className="font-semibold text-rose-900 underline" href={notification.linkUrl} target="_blank" rel="noreferrer">Open</a> : null}
+                  <p className="mt-1.5 leading-relaxed text-slate-600">{n.message}</p>
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>{new Date(n.createdAt).toLocaleDateString()}</span>
+                    {n.linkUrl && (
+                      <a href={n.linkUrl} target="_blank" rel="noreferrer" className="font-bold text-rose-900 underline">
+                        Open Circular →
+                      </a>
+                    )}
                   </div>
                 </li>
               ))}
             </ul>
           )}
-        </div>
+        </section>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900">Alert preferences</h2>
-          {preferences.length === 0 ? <p className="mt-4 text-sm text-slate-600">No preferences are configured yet.</p> : (
-            <div className="mt-5 space-y-4">
-              {preferences.map((preference) => (
-                <div key={preference.category} className="rounded-2xl border border-slate-200 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-slate-900">{preference.label}</p>
-                    <span className="text-xs font-medium text-slate-500">{preference.category}</span>
-                  </div>
-                  <div className="mt-3 grid gap-2 text-sm text-slate-700">
-                    <label className="flex items-center justify-between gap-3"><span>Email</span><input type="checkbox" checked={preference.emailEnabled} onChange={(event) => togglePreference(preference.category, "emailEnabled", event.target.checked)} /></label>
-                    <label className="flex items-center justify-between gap-3"><span>WhatsApp</span><input type="checkbox" checked={preference.whatsappEnabled} onChange={(event) => togglePreference(preference.category, "whatsappEnabled", event.target.checked)} /></label>
-                    <label className="flex items-center justify-between gap-3"><span>Push</span><input type="checkbox" checked={preference.pushEnabled} onChange={(event) => togglePreference(preference.category, "pushEnabled", event.target.checked)} /></label>
+        {/* Alert Channel Toggles */}
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-bold text-slate-950 border-b border-slate-100 pb-4">
+            Notification Channels
+          </h2>
+          {preferences.length === 0 ? (
+            <p className="mt-4 text-xs text-slate-500">Preferences not available.</p>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {preferences.map((p) => (
+                <div key={p.category} className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs">
+                  <p className="font-bold text-slate-900">{p.label}</p>
+                  <div className="mt-3 space-y-2">
+                    <label className="flex items-center justify-between">
+                      <span className="text-slate-600">Email Digest</span>
+                      <input
+                        type="checkbox"
+                        checked={p.emailEnabled}
+                        onChange={(e) => togglePreference(p.category, "emailEnabled", e.target.checked)}
+                        className="rounded text-rose-900 focus:ring-rose-600"
+                      />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-slate-600">WhatsApp Alerts</span>
+                      <input
+                        type="checkbox"
+                        checked={p.whatsappEnabled}
+                        onChange={(e) => togglePreference(p.category, "whatsappEnabled", e.target.checked)}
+                        className="rounded text-rose-900 focus:ring-rose-600"
+                      />
+                    </label>
+                    <label className="flex items-center justify-between">
+                      <span className="text-slate-600">Push Notifications</span>
+                      <input
+                        type="checkbox"
+                        checked={p.pushEnabled}
+                        onChange={(e) => togglePreference(p.category, "pushEnabled", e.target.checked)}
+                        className="rounded text-rose-900 focus:ring-rose-600"
+                      />
+                    </label>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
@@ -586,7 +1017,7 @@ export function SettingsPage() {
         });
         setPreferences(Array.isArray(prefs) ? prefs : []);
       } catch (failure) {
-        if (active) setError(failure.message || "Unable to load your settings.");
+        if (active) setError(failure.message || "Unable to load settings.");
       }
     }
     loadSettings();
@@ -614,7 +1045,7 @@ export function SettingsPage() {
       }
       setMessage("Your settings have been saved.");
     } catch (failure) {
-      setError(failure.message || "Your settings could not be saved.");
+      setError(failure.message || "Unable to save settings.");
     } finally {
       setSaving(false);
     }
@@ -628,65 +1059,117 @@ export function SettingsPage() {
         body: { email: profile.email },
         accessToken: session.accessToken,
       });
-      setMessage("A password reset request has been sent to your email.");
+      setMessage("A password reset link has been dispatched to your email.");
     } catch (failure) {
       setError(failure.message || "Password reset request failed.");
     }
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-800">Account settings</p>
-        <h1 className="mt-2 text-3xl font-black text-slate-950">Manage your profile</h1>
+    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 space-y-8">
+      <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-wider text-rose-800">Account Preferences</p>
+        <h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">Candidate Settings &amp; Profile</h1>
       </section>
 
-      {error ? <div className="mt-6"><ErrorBanner message={error} /></div> : null}
-      {message ? <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{message}</div> : null}
+      {error && <ErrorBanner message={error} />}
+      {message && (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs font-bold text-emerald-900">
+          {message}
+        </div>
+      )}
 
-      <form className="mt-8 space-y-8" onSubmit={save}>
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900">Profile information</h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <label className="text-sm font-medium text-slate-700">Full name<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" value={profile.fullName} onChange={(event) => setProfile((current) => ({ ...current, fullName: event.target.value }))} /></label>
-            <label className="text-sm font-medium text-slate-700">Email<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" type="email" value={profile.email} onChange={(event) => setProfile((current) => ({ ...current, email: event.target.value }))} /></label>
-            <label className="text-sm font-medium text-slate-700">Mobile number<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" value={profile.mobile} onChange={(event) => setProfile((current) => ({ ...current, mobile: event.target.value }))} /></label>
-            <label className="text-sm font-medium text-slate-700">Profile photo URL<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" value={profile.avatarUrl} onChange={(event) => setProfile((current) => ({ ...current, avatarUrl: event.target.value }))} /></label>
-            <label className="text-sm font-medium text-slate-700">Target state<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" value={profile.preferredState} onChange={(event) => setProfile((current) => ({ ...current, preferredState: event.target.value }))} /></label>
-            <label className="text-sm font-medium text-slate-700">Preferred category<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" value={profile.preferredCategory} onChange={(event) => setProfile((current) => ({ ...current, preferredCategory: event.target.value }))} /></label>
-            <label className="md:col-span-2 text-sm font-medium text-slate-700">Qualification<input className="mt-1.5 w-full rounded-xl border border-slate-300 px-3.5 py-3" value={profile.qualification} onChange={(event) => setProfile((current) => ({ ...current, qualification: event.target.value }))} /></label>
+      <form className="space-y-6" onSubmit={save}>
+        {/* Profile Info */}
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-bold text-slate-950 border-b border-slate-100 pb-3">Personal &amp; Contact Information</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700">Full Name</label>
+              <input
+                type="text"
+                value={profile.fullName}
+                onChange={(e) => setProfile((p) => ({ ...p, fullName: e.target.value }))}
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700">Email Address</label>
+              <input
+                type="email"
+                value={profile.email}
+                onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))}
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700">Mobile Number</label>
+              <input
+                type="tel"
+                value={profile.mobile}
+                onChange={(e) => setProfile((p) => ({ ...p, mobile: e.target.value }))}
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700">Target State / Region</label>
+              <input
+                type="text"
+                value={profile.preferredState}
+                onChange={(e) => setProfile((p) => ({ ...p, preferredState: e.target.value }))}
+                placeholder="e.g. Maharashtra, Uttar Pradesh"
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700">Highest Educational Qualification</label>
+              <input
+                type="text"
+                value={profile.qualification}
+                onChange={(e) => setProfile((p) => ({ ...p, qualification: e.target.value }))}
+                placeholder="e.g. B.Tech, B.Sc, 12th Pass"
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-600"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700">Preferred Category</label>
+              <input
+                type="text"
+                value={profile.preferredCategory}
+                onChange={(e) => setProfile((p) => ({ ...p, preferredCategory: e.target.value }))}
+                placeholder="e.g. government, banking"
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-600"
+              />
+            </div>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900">Job and account preferences</h2>
-          <div className="mt-5 space-y-4">
-            {preferences.length > 0 ? preferences.map((preference) => (
-              <div key={preference.category} className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div>
-                  <p className="font-semibold text-slate-900">{preference.label}</p>
-                  <p className="text-sm text-slate-600">{preference.category}</p>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-slate-700">
-                  <label className="flex items-center gap-2"><input type="checkbox" checked={preference.emailEnabled} onChange={(event) => setPreferences((preferences) => preferences.map((notificationPreference) => notificationPreference.category === preference.category ? { ...notificationPreference, emailEnabled: event.target.checked } : notificationPreference))} />Email</label>
-                  <label className="flex items-center gap-2"><input type="checkbox" checked={preference.whatsappEnabled} onChange={(event) => setPreferences((preferences) => preferences.map((notificationPreference) => notificationPreference.category === preference.category ? { ...notificationPreference, whatsappEnabled: event.target.checked } : notificationPreference))} />WhatsApp</label>
-                </div>
-              </div>
-            )) : <p className="text-sm text-slate-600">Preferences are not available yet.</p>}
+        {/* Security & Password */}
+        <section className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-bold text-slate-950 border-b border-slate-100 pb-3">Security &amp; Password</h2>
+          <div className="mt-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <p className="text-xs font-bold text-slate-900">Change Account Password</p>
+              <p className="text-xs text-slate-500">Send an authorized reset link to your registered email.</p>
+            </div>
+            <button
+              type="button"
+              onClick={sendPasswordResetRequest}
+              className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-bold text-slate-700 shadow-2xs hover:bg-slate-50"
+            >
+              Dispatch Reset Link
+            </button>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black text-slate-900">Privacy and security</h2>
-          <div className="mt-5 space-y-4 text-sm text-slate-700">
-            <label className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"><span>Public profile visibility</span><input type="checkbox" checked={profile.profileVisible} onChange={(event) => setProfile((current) => ({ ...current, profileVisible: event.target.checked }))} /></label>
-            <label className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"><span>Show mobile number to recruiters</span><input type="checkbox" checked={profile.showMobile} onChange={(event) => setProfile((current) => ({ ...current, showMobile: event.target.checked }))} /></label>
-            <button type="button" className="rounded-xl border border-slate-300 px-4 py-2.5 font-semibold text-slate-800" onClick={sendPasswordResetRequest}>Request password reset</button>
-          </div>
-        </section>
-
-        <div className="sticky bottom-4 flex justify-end">
-          <button type="submit" className="rounded-xl bg-rose-900 px-5 py-3 font-semibold text-white disabled:opacity-60" disabled={saving}>{saving ? "Saving your settings…" : "Save changes"}</button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-xl bg-rose-900 px-6 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800 disabled:opacity-60"
+          >
+            {saving ? "Saving Changes…" : "Save All Settings"}
+          </button>
         </div>
       </form>
     </main>
@@ -695,17 +1178,19 @@ export function SettingsPage() {
 
 function LegalPage({ title, intro, sections }) {
   return (
-    <main className="mx-auto max-w-4xl px-5 py-12 sm:py-16">
-      <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-10">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-rose-800">NEXTVACANCY</p>
-        <h1 className="mt-3 text-3xl font-black text-slate-950 sm:text-4xl">{title}</h1>
-        {intro ? <p className="mt-5 text-base leading-7 text-slate-700">{intro}</p> : null}
-        <div className="mt-8 space-y-8 text-slate-700">
-          {sections.map((section) => (
-            <section key={section.heading}>
-              <h2 className="text-xl font-black text-slate-900">{section.heading}</h2>
-              <div className="mt-3 space-y-3 text-base leading-7">
-                {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
+      <article className="rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-10">
+        <p className="text-xs font-bold uppercase tracking-wider text-rose-800">NextVacancy</p>
+        <h1 className="mt-2 text-2xl font-black text-slate-950 sm:text-3xl">{title}</h1>
+        {intro && <p className="mt-3 text-xs leading-relaxed text-slate-600 sm:text-sm">{intro}</p>}
+        <div className="mt-8 space-y-6 border-t border-slate-100 pt-6 text-xs leading-relaxed text-slate-700 sm:text-sm">
+          {sections.map((sec, i) => (
+            <section key={i}>
+              <h2 className="text-sm font-bold text-slate-900 sm:text-base">{sec.heading}</h2>
+              <div className="mt-2 space-y-2">
+                {sec.paragraphs.map((p, pIdx) => (
+                  <p key={pIdx}>{p}</p>
+                ))}
               </div>
             </section>
           ))}
@@ -718,12 +1203,23 @@ function LegalPage({ title, intro, sections }) {
 export function AboutPage() {
   return (
     <LegalPage
-      title="About NEXTVACANCY"
-      intro="NEXTVACANCY is an informational portal for government and private job listings, recruitment details, and exam updates."
+      title="About NextVacancy"
+      intro="NextVacancy is a dedicated informational platform curating verified recruitment updates, exam schedules, and career notifications across central and state authorities."
       sections={[
-        { heading: "Our mission", paragraphs: ["We aim to make recruitment notices and related information easier to browse across government and private organizations.", "NEXTVACANCY is not a government body. Official recruiting organizations remain the authority for notices, eligibility, and application decisions."] },
-        { heading: "How to use job information", paragraphs: ["Use the information on this site as a starting point and verify current requirements and deadlines directly with the recruiting organization.", "Check the official government or organization notice before making an application or paying any fee."] },
-        { heading: "What we stand for", paragraphs: ["Accuracy first, aspirant-first editorial decisions, transparency, and accessible information remain our guiding principles."] },
+        {
+          heading: "Our Mission",
+          paragraphs: [
+            "We aim to eliminate misinformation, clickbait dates, and broken application links for job aspirants across India.",
+            "NextVacancy is an independent portal. Official recruiting organizations remain the authoritative source for circulars, eligibility decisions, and selection lists.",
+          ],
+        },
+        {
+          heading: "Verification Policy",
+          paragraphs: [
+            "Every notification listed on NextVacancy is verified against official employment gazettes and official commission websites before publication.",
+            "We provide direct URLs to official application servers and never levy charges on aspirants to access public recruitment circulars.",
+          ],
+        },
       ]}
     />
   );
@@ -732,12 +1228,23 @@ export function AboutPage() {
 export function ContactPage() {
   return (
     <LegalPage
-      title="Contact and support"
-      intro="Have a question, identified an issue with a listing, or need editorial support? We are here to help."
+      title="Contact &amp; Grievance Redressal"
+      intro="For editorial inquiries, listing corrections, or technical support, contact our editorial team."
       sections={[
-        { heading: "Contact details", paragraphs: ["Email: support@nextvacancy.com", "Response time: within 24 hours during working hours."] },
-        { heading: "Grievance redressal", paragraphs: ["If you believe any recruitment notification is inaccurate, outdated, or misleading, contact us with the listing details and the source you believe is correct.", "NEXTVACANCY is an information portal and is not affiliated with a government body or recruiting authority."] },
-        { heading: "Editorial queries", paragraphs: ["For press, partnerships, or editorial collaboration, mention Editorial in the subject line."] },
+        {
+          heading: "Editorial Contact",
+          paragraphs: [
+            "Email: support@nextvacancy.com",
+            "Response time: Within 24 hours on working days.",
+          ],
+        },
+        {
+          heading: "Grievance Redressal",
+          paragraphs: [
+            "If you notice any circular with inaccurate dates or outdated criteria, email us with the listing URL and the official commission gazette link.",
+            "We review and update listings promptly upon verification.",
+          ],
+        },
       ]}
     />
   );
@@ -746,12 +1253,22 @@ export function ContactPage() {
 export function TermsPage() {
   return (
     <LegalPage
-      title="Terms of service"
-      intro="The following terms explain how you may use the NEXTVACANCY information portal."
+      title="Terms of Service"
+      intro="Please read these terms before utilizing the NextVacancy platform."
       sections={[
-        { heading: "Usage", paragraphs: ["This platform provides informational content about recruitment notices and related opportunities. It is for general informational use only.", "Do not rely on our site as a substitute for the official notice or the recruiting body’s instructions."] },
-        { heading: "Content responsibility", paragraphs: ["We make reasonable efforts to keep listings accurate, but positions, dates, and procedures may change without notice.", "Users remain responsible for verifying eligibility, application links, and deadlines with the issuing authority."] },
-        { heading: "Limitations", paragraphs: ["We are not responsible for application fees, submission issues, or recruitment outcomes beyond the information we provide."] },
+        {
+          heading: "Informational Purpose",
+          paragraphs: [
+            "This portal provides curated information for general public reference. It is not an official recruitment organ or government entity.",
+            "Users must review the full official notification PDF issued by the respective recruiting authority prior to submitting applications or paying fees.",
+          ],
+        },
+        {
+          heading: "Platform Limitations",
+          paragraphs: [
+            "NextVacancy is not liable for application rejections, payment gateway errors on external portals, or changes in authority examination schedules.",
+          ],
+        },
       ]}
     />
   );
@@ -760,12 +1277,21 @@ export function TermsPage() {
 export function PrivacyPolicyPage() {
   return (
     <LegalPage
-      title="Privacy policy"
-      intro="We handle account and recruitment information responsibly and only for service delivery and communication."
+      title="Privacy Policy"
+      intro="NextVacancy respects user privacy and handles candidate data responsibly."
       sections={[
-        { heading: "Information we use", paragraphs: ["We collect the information required to create a candidate account, save jobs, and send relevant alerts. This may include profile information, saved interests, and communication preferences."] },
-        { heading: "How it is used", paragraphs: ["Information is used to personalize job alerts, improve account features, and communicate service updates and relevant notices."] },
-        { heading: "Your controls", paragraphs: ["You can update your profile and notification preferences from your account settings at any time."] },
+        {
+          heading: "Data We Collect",
+          paragraphs: [
+            "We collect information provided during candidate registration (name, email, mobile number, educational preferences) solely to deliver account features, bookmark syncing, and notification digests.",
+          ],
+        },
+        {
+          heading: "Data Security",
+          paragraphs: [
+            "User passwords are encrypted with industry-standard bcrypt hashing. We never sell personal candidate information to third parties.",
+          ],
+        },
       ]}
     />
   );
@@ -775,36 +1301,16 @@ export function DisclaimerPage() {
   return (
     <LegalPage
       title="Disclaimer"
-      intro="NEXTVACANCY provides information for reference and should not be treated as an official or authoritative source for recruitment decisions."
+      intro="NextVacancy is an independent public recruitment information portal."
       sections={[
-        { heading: "No official endorsement", paragraphs: ["NEXTVACANCY is an independent information portal. We are not a government body, recruiting authority, or authorized applicant portal."] },
-        { heading: "Official verification", paragraphs: ["Before applying, you should verify eligibility criteria, deadlines, application procedures, and document requirements with the official notification or authority."] },
-        { heading: "No liability", paragraphs: ["We do not guarantee the availability of any opportunity or the correctness of every notice beyond reasonable editorial care."] },
+        {
+          heading: "No Government Affiliation",
+          paragraphs: [
+            "NextVacancy is not associated with, affiliated with, or endorsed by any central or state government ministry, department, commission, or recruiting board.",
+            "Official circulars, exam dates, syllabus patterns, and results published on official domains (.gov.in, .nic.in, etc.) supersede any third-party summary.",
+          ],
+        },
       ]}
     />
   );
-}
-
-export function AdminPendingPage() {
-  const { signOut } = useAuth();
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-
-  async function logout() {
-    setPending(true);
-    setError("");
-    try {
-      await signOut();
-    } catch (failure) {
-      setError(failure.message);
-    } finally {
-      setPending(false);
-    }
-  }
-
-  return <main className="mx-auto min-h-[70vh] max-w-3xl px-5 py-16">
-    <h1 className="text-3xl font-black text-slate-950">Administrator access</h1>
-    <p className="mt-3 text-slate-600">Admin sign-in is connected to the Spring API. Admin dashboards and management operations have not yet been migrated.</p>
-    <div className="mt-6"><ErrorBanner message={error} /><button className="mt-3 rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold" disabled={pending} onClick={logout}>{pending ? "Signing out…" : "Sign out"}</button></div>
-  </main>;
 }
