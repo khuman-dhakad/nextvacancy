@@ -71,6 +71,7 @@ public class AuthTokenService {
     public String createAccessToken(String principalId, String role, String sessionId) {
         Instant now = Instant.now();
         return Jwts.builder()
+                .id(UUID.randomUUID().toString())
                 .issuer(issuer)
                 .subject(principalId)
                 .claim("role", role)
