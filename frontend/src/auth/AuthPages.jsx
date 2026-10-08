@@ -164,7 +164,7 @@ export function LoginPage({ admin = false }) {
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-600 transition"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -175,7 +175,7 @@ export function LoginPage({ admin = false }) {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
+          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? "Authenticating…" : admin ? "Sign In to Admin Panel" : "Sign In to Account"}
         </button>
@@ -335,7 +335,7 @@ export function RegisterPage() {
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-600 transition"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -372,7 +372,7 @@ export function RegisterPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60"
+          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? "Creating Account…" : "Create Account"}
         </button>
@@ -545,7 +545,7 @@ export function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-600 transition"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -556,7 +556,7 @@ export function ResetPasswordPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs hover:bg-rose-800 disabled:opacity-60"
+          className="w-full rounded-xl bg-rose-900 py-3 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {pending ? "Updating…" : "Update Password"}
         </button>
