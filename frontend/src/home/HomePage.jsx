@@ -24,8 +24,9 @@ import { apiGet } from "../api.js";
 
 function JobCard({ job }) {
   const isGovt = job.category === "government";
-  const isAdmit = job.status === "ADMIT_CARD_OUT";
-  const isResult = job.status === "RESULT_OUT";
+  const status = job.status || "ACTIVE";
+  const isAdmit = status === "ADMIT_CARD_OUT";
+  const isResult = status === "RESULT_OUT";
 
   return (
     <article className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-rose-300 hover:shadow-md">
@@ -33,7 +34,7 @@ function JobCard({ job }) {
         {/* Top Badges */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-slate-700">
-            {job.category}
+            {job.category || "General"}
           </span>
           {job.isVerified && (
             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
@@ -43,7 +44,7 @@ function JobCard({ job }) {
         </div>
 
         {/* Title */}
-        <h3 className="mt-3 text-base font-bold leading-snug text-slate-900 group-hover:text-rose-900">
+        <h3 className="mt-3 text-base font-bold leading-snug text-slate-900 group-hover:text-rose-900 transition-colors">
           <Link to={`/jobs/${encodeURIComponent(job.slug)}`} className="focus:outline-none">
             <span className="absolute inset-0" aria-hidden="true" />
             {job.title}
@@ -54,24 +55,24 @@ function JobCard({ job }) {
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
           <span className="inline-flex items-center gap-1 font-medium text-slate-700">
             <Building2 size={13} className="text-slate-400" />
-            {job.organization}
+            {job.organization || "Direct Authority"}
           </span>
           <span className="inline-flex items-center gap-1 text-slate-500">
             <MapPin size={13} className="text-slate-400" />
-            {job.location}
+            {job.location || "All India"}
           </span>
         </div>
 
         {/* Short Summary */}
         <p className="mt-3 line-clamp-2 text-xs leading-relaxed text-slate-600">
-          {job.shortSummary}
+          {job.shortSummary || "View full official notification and eligibility criteria."}
         </p>
       </div>
 
       {/* Footer Metrics */}
       <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
         <div className="font-semibold text-slate-800">
-          <span className="text-slate-500 font-normal">Vacancies:</span> {job.totalVacancies}
+          <span className="text-slate-500 font-normal">Vacancies:</span> {job.totalVacancies || "N/A"}
         </div>
         <span
           className={`inline-flex items-center rounded-md px-2 py-0.5 font-bold ${
@@ -79,12 +80,12 @@ function JobCard({ job }) {
               ? "bg-amber-50 text-amber-800"
               : isResult
               ? "bg-blue-50 text-blue-800"
-              : job.status === "ENDING_SOON"
+              : status === "ENDING_SOON"
               ? "bg-rose-50 text-rose-800"
               : "bg-slate-100 text-slate-700"
           }`}
         >
-          {job.status.replaceAll("_", " ").toLowerCase()}
+          {status.replaceAll("_", " ").toLowerCase()}
         </span>
       </div>
     </article>

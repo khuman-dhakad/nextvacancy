@@ -95,18 +95,18 @@ export function Header() {
       </div>
 
       {/* Main Navbar */}
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-2.5 sm:px-6 sm:py-3.5 lg:px-8">
         {/* Brand Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
           <Link
             to="/"
-            className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-950 transition hover:opacity-90"
+            className="flex items-center gap-1.5 text-slate-950 transition hover:opacity-90 sm:gap-2"
             aria-label="NextVacancy Home"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-900 text-white shadow-xs">
-              <Briefcase size={20} />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-900 text-white shadow-xs sm:h-9 sm:w-9 sm:rounded-xl">
+              <Briefcase className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
             </span>
-            <span className="text-2xl font-black tracking-tight">
+            <span className="text-base font-black tracking-tight whitespace-nowrap sm:text-2xl">
               NEXT<span className="text-rose-900">VACANCY</span>
             </span>
           </Link>
@@ -120,7 +120,7 @@ export function Header() {
               to={item.to}
               end={item.to === "/"}
               className={({ isActive }) =>
-                `rounded-lg px-3 py-2 text-sm font-semibold transition ${
+                `rounded-lg px-3 py-2 text-sm font-semibold transition-colors duration-150 ${
                   isActive
                     ? "bg-rose-50 text-rose-900"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -133,15 +133,15 @@ export function Header() {
         </nav>
 
         {/* Right Action Area */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           {/* Quick Search Button */}
           <Link
             to="/search"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
             aria-label="Search all vacancies"
           >
             <Search size={15} className="text-slate-500" />
-            <span className="hidden sm:inline">Search</span>
+            <span>Search</span>
           </Link>
 
           {/* User Session State / Login Trigger */}
@@ -150,11 +150,11 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => setUserMenuOpen((prev) => !prev)}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50"
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs transition hover:border-slate-300 hover:bg-slate-50 sm:gap-2 sm:rounded-xl sm:px-3 sm:py-2 sm:text-sm"
                 aria-expanded={userMenuOpen}
                 aria-haspopup="true"
               >
-                <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-rose-100 text-xs font-black text-rose-900">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-xs font-black text-rose-900">
                   {session.role === "ADMIN" ? <Shield size={14} /> : <User size={14} />}
                 </div>
                 <span className="hidden text-xs font-bold sm:inline">
@@ -165,7 +165,7 @@ export function Header() {
               {/* User Dropdown Menu */}
               {userMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-950/5 animate-in fade-in zoom-in-95"
+                  className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl ring-1 ring-slate-950/5 animate-in fade-in zoom-in-95 duration-150"
                   role="menu"
                 >
                   <div className="border-b border-slate-100 px-3 py-2 text-xs">
@@ -258,16 +258,16 @@ export function Header() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1 sm:gap-2">
               <Link
                 to="/login"
-                className="rounded-xl px-3 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950"
+                className="rounded-lg px-2 py-1.5 text-[11px] font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 sm:rounded-xl sm:px-3 sm:py-2 sm:text-xs whitespace-nowrap"
               >
                 Sign in
               </Link>
               <Link
                 to="/register"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-rose-900 px-3.5 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800"
+                className="inline-flex items-center gap-1 rounded-lg bg-rose-900 px-2.5 py-1.5 text-[11px] font-bold text-white shadow-xs transition hover:bg-rose-800 sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs whitespace-nowrap"
               >
                 Register
               </Link>
@@ -278,7 +278,7 @@ export function Header() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 lg:hidden"
+            className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-100 sm:h-9 sm:w-9 sm:rounded-xl lg:hidden"
             aria-label={mobileMenuOpen ? "Close menu" : "Open navigation menu"}
             aria-expanded={mobileMenuOpen}
           >
@@ -302,6 +302,13 @@ export function Header() {
               <p className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Explore Categories
               </p>
+              <Link
+                to="/search"
+                className="flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 hover:text-slate-950 sm:hidden mb-2"
+              >
+                <Search size={16} className="text-slate-500" />
+                <span>Search All Vacancies</span>
+              </Link>
               {primaryNavItems.map((item) => (
                 <NavLink
                   key={item.to}

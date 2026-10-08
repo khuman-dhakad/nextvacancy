@@ -405,7 +405,17 @@ export function AdminDashboardPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
+                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                          job.status === "OPEN"
+                            ? "bg-emerald-50 text-emerald-800"
+                            : job.status === "ENDING_SOON"
+                            ? "bg-rose-50 text-rose-800"
+                            : job.status === "ADMIT_CARD_OUT"
+                            ? "bg-amber-50 text-amber-800"
+                            : job.status === "RESULT_OUT"
+                            ? "bg-blue-50 text-blue-800"
+                            : "bg-slate-100 text-slate-700"
+                        }`}>
                           {job.status}
                         </span>
                         <Link
@@ -798,6 +808,19 @@ export function AdminJobsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-700">
                           {job.category}
+                        </span>
+                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          job.status === "OPEN"
+                            ? "bg-emerald-50 text-emerald-800"
+                            : job.status === "ENDING_SOON"
+                            ? "bg-rose-50 text-rose-800"
+                            : job.status === "ADMIT_CARD_OUT"
+                            ? "bg-amber-50 text-amber-800"
+                            : job.status === "RESULT_OUT"
+                            ? "bg-blue-50 text-blue-800"
+                            : "bg-slate-100 text-slate-700"
+                        }`}>
+                          {job.status}
                         </span>
                         {job.isVerified && (
                           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
