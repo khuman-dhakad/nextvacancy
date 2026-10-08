@@ -14,6 +14,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  X,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet } from "../api.js";
@@ -143,8 +144,18 @@ export function OrganizationDirectoryPage() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search commission name, acronym, or state..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-9 pl-10 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition-colors"
                 />
+                {query && (
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    aria-label="Clear organization search query"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
               </div>
               <span className="text-xs font-bold text-slate-500">
                 Showing {filtered.length} of {organizations.length} Recruiting Bodies
@@ -526,8 +537,8 @@ export function OrganizationProfilePage() {
                   <p className="mt-2 text-xs line-clamp-2 text-slate-600">{job.shortSummary}</p>
                 </div>
                 <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs">
-                  <span className="font-semibold text-slate-700">{job.location}</span>
-                  <span className="font-bold text-rose-900">{job.status.replaceAll("_", " ")}</span>
+                  <span className="font-semibold text-slate-700">{job.location || "All India"}</span>
+                  <span className="font-bold text-rose-900">{(job.status || "ACTIVE").replaceAll("_", " ")}</span>
                 </div>
               </article>
             ))}
