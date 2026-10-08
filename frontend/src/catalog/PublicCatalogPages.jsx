@@ -189,6 +189,16 @@ export function PublicCatalogPage({ mode = "home" }) {
   const [error, setError] = useState("");
   const [categoriesError, setCategoriesError] = useState("");
 
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [desktopFiltersOpen, setDesktopFiltersOpen] = useState(false);
+  const [draftFilters, setDraftFilters] = useState({
+    category: "all",
+    status: "all",
+    qualification: "",
+    location: "",
+    sort: "latest",
+  });
+
   const pageNumber = getPageNumber(searchParams.get("page"));
   const query = searchParams.get("q") || "";
   const categoryFilter = searchParams.get("category") || "";
@@ -248,6 +258,30 @@ export function PublicCatalogPage({ mode = "home" }) {
   useEffect(() => { loadCategories(); }, [loadCategories]);
   useEffect(() => { loadJobs(); }, [loadJobs]);
 
+  // Lock body scroll and handle ESC key when mobile filter drawer is open
+  useEffect(() => {
+    if (isDrawerOpen) {
+      document.body.style.overflow = "hidden";
+      const handleKeyDown = (e) => {
+        if (e.key === "Escape") {
+          setIsDrawerOpen(false);
+        }
+      };
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.body.style.overflow = "";
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [isDrawerOpen]);
+
+  // Close drawer on route change
+  useEffect(() => {
+    setIsDrawerOpen(false);
+  }, [canonicalPath]);
+
   useEffect(() => {
     if (catalogPage) {
       const schema = {
@@ -283,7 +317,108 @@ export function PublicCatalogPage({ mode = "home" }) {
     setSearchParams(new URLSearchParams());
   }
 
-  const hasActiveFilters = Boolean(query || (categoryFilter && categoryFilter !== "all") || (status && status !== "all") || qualification || location || sort !== "latest");
+  function openFilterDrawer() {
+    setDraftFilters({
+      category: categoryFilter || "all",
+      status: status || "all",
+      qualification: qualification || "",
+      location: location || "",
+      sort: sort || "latest",
+    });
+    setIsDrawerOpen(true);
+  }
+
+  function closeFilterDrawer() {
+    setIsDrawerOpen(false);
+  }
+
+  function updateDraft(field, value) {
+    setDraftFilters((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function clearDraftFilters() {
+    setDraftFilters({
+      category: "all",
+      status: "all",
+      qualification: "",
+      location: "",
+      sort: "latest",
+    });
+  }
+
+  function applyDraftFilters() {
+    const next = new URLSearchParams(searchParams);
+
+    if (draftFilters.category && draftFilters.category !== "all") {
+      next.set("category", draftFilters.category);
+    } else {
+      next.delete("category");
+    }
+
+    if (draftFilters.status && draftFilters.status !== "all") {
+      next.set("status", draftFilters.status);
+    } else {
+      next.delete("status");
+    }
+
+    if (draftFilters.qualification && draftFilters.qualification.trim()) {
+      next.set("qualification", draftFilters.qualification.trim());
+    } else {
+      next.delete("qualification");
+    }
+
+    if (draftFilters.location && draftFilters.location.trim()) {
+      next.set("location", draftFilters.location.trim());
+    } else {
+      next.delete("location");
+    }
+
+    if (draftFilters.sort && draftFilters.sort !== "latest") {
+      next.set("sort", draftFilters.sort);
+    } else {
+      next.delete("sort");
+    }
+
+    next.set("page", "1");
+    setSearchParams(next);
+    setIsDrawerOpen(false);
+  }
+
+  const activeChips = useMemo(() => {
+    const chips = [];
+    if (query) {
+      chips.push({ id: "q", label: `Search: "${query}"`, clear: () => updateFilter("q", "") });
+    }
+    if (categoryFilter && categoryFilter !== "all") {
+      const catObj = categories.find((c) => c.slug === categoryFilter);
+      chips.push({ id: "category", label: `Category: ${catObj ? catObj.name : categoryFilter}`, clear: () => updateFilter("category", "") });
+    }
+    if (status && status !== "all") {
+      const statusMap = {
+        OPEN: "Open / Active",
+        ENDING_SOON: "Ending Soon",
+        ADMIT_CARD_OUT: "Admit Card",
+        RESULT_OUT: "Result",
+        ANSWER_KEY_OUT: "Answer Key",
+        CLOSED: "Closed",
+      };
+      chips.push({ id: "status", label: `Status: ${statusMap[status] || status}`, clear: () => updateFilter("status", "") });
+    }
+    if (qualification) {
+      chips.push({ id: "qualification", label: `Qualification: ${qualification}`, clear: () => updateFilter("qualification", "") });
+    }
+    if (location) {
+      chips.push({ id: "location", label: `Location: ${location}`, clear: () => updateFilter("location", "") });
+    }
+    if (sort && sort !== "latest") {
+      const sortMap = { views: "Most Viewed", alphabetical: "A-Z" };
+      chips.push({ id: "sort", label: `Sort: ${sortMap[sort] || sort}`, clear: () => updateFilter("sort", "latest") });
+    }
+    return chips;
+  }, [categories, categoryFilter, location, qualification, query, sort, status]);
+
+  const activeFilterCount = activeChips.length;
+  const hasActiveFilters = activeFilterCount > 0;
 
   if (isDynamic && categoriesError) {
     return (
@@ -329,120 +464,336 @@ export function PublicCatalogPage({ mode = "home" }) {
 
       {/* Search & Filter Bar */}
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs sm:p-5" aria-label="Job search filters">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800">
-            <Filter size={14} className="text-rose-900" /> Filter &amp; Refine Results
-          </span>
-          {hasActiveFilters && (
+        {/* Main Search Bar & Filter Controls Row */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Keyword Search */}
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => updateFilter("q", e.target.value)}
+              placeholder="Search jobs, roles, organizations, posts..."
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-2.5 pl-10 pr-10 text-xs font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500 sm:text-sm"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => updateFilter("q", "")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+                aria-label="Clear search keyword"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Filter & Reset Controls */}
+          <div className="flex items-center gap-2">
+            {/* Filter Toggle Button (opens Drawer on mobile, toggles panel on desktop) */}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                  openFilterDrawer();
+                } else {
+                  setDesktopFiltersOpen((prev) => !prev);
+                }
+              }}
+              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition sm:flex-initial sm:text-sm min-h-[44px] ${
+                desktopFiltersOpen || isDrawerOpen || activeFilterCount > 0
+                  ? "border-rose-300 bg-rose-50 text-rose-900"
+                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              }`}
+              aria-expanded={desktopFiltersOpen || isDrawerOpen}
+              aria-label="Filter opportunities"
+            >
+              <Filter size={15} className={activeFilterCount > 0 ? "text-rose-900" : "text-slate-500"} />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-900 text-[10px] font-black text-white">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+
+            {/* Quick Reset Button when active filters exist */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-2.5 text-xs font-bold text-slate-600 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-900 transition min-h-[44px]"
+                aria-label="Reset all active filters"
+              >
+                <RotateCcw size={13} />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Active Filter Chips / Pills */}
+        {activeChips.length > 0 && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-3">
+            <span className="mr-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Active:
+            </span>
+            {activeChips.map((chip) => (
+              <span
+                key={chip.id}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50/80 py-1 pl-2.5 pr-1.5 text-xs font-semibold text-rose-950"
+              >
+                <span>{chip.label}</span>
+                <button
+                  type="button"
+                  onClick={chip.clear}
+                  className="flex h-4 w-4 items-center justify-center rounded-full text-rose-700 hover:bg-rose-200 hover:text-rose-950"
+                  aria-label={`Remove filter ${chip.label}`}
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
             <button
               type="button"
               onClick={resetAllFilters}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-rose-800 hover:underline"
+              className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-slate-500 underline hover:text-rose-900"
             >
-              <X size={13} /> Reset Filters
+              Clear all
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {/* Keyword Search */}
-          <label className="text-xs font-semibold text-slate-700">
-            Keyword
-            <div className="relative mt-1">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => updateFilter("q", e.target.value)}
-                placeholder="Role, post, dept..."
-                className="w-full rounded-xl border border-slate-200 bg-white py-2 pr-3 pl-8 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
-              />
+        {/* Desktop Collapsible Inline Filter Panel (lg: screens) */}
+        {desktopFiltersOpen && (
+          <div id="advanced-filter-panel" className="hidden lg:block mt-4 border-t border-slate-100 pt-4 animate-in fade-in slide-in-from-top-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {/* Category Dropdown (for home/search) */}
+              {!isDynamic && (
+                <label className="text-xs font-semibold text-slate-700">
+                  Category
+                  <select
+                    value={categoryFilter || "all"}
+                    onChange={(e) => updateFilter("category", e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.slug}>{c.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {/* Status */}
+              <label className="text-xs font-semibold text-slate-700">
+                Status
+                <select
+                  value={status || "all"}
+                  onChange={(e) => updateFilter("status", e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="OPEN">Open / Active</option>
+                  <option value="ENDING_SOON">Ending Soon</option>
+                  <option value="ADMIT_CARD_OUT">Admit Card Released</option>
+                  <option value="RESULT_OUT">Result Declared</option>
+                  <option value="ANSWER_KEY_OUT">Answer Key Out</option>
+                  <option value="CLOSED">Closed / Archived</option>
+                </select>
+              </label>
+
+              {/* Qualification */}
+              <label className="text-xs font-semibold text-slate-700">
+                Qualification
+                <input
+                  type="text"
+                  value={qualification}
+                  onChange={(e) => updateFilter("qualification", e.target.value)}
+                  placeholder="e.g. 10th, 12th, Graduate"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                />
+              </label>
+
+              {/* Location */}
+              <label className="text-xs font-semibold text-slate-700">
+                Location / State
+                <input
+                  type="text"
+                  value={location}
+                  onChange={(e) => updateFilter("location", e.target.value)}
+                  placeholder="e.g. Bhopal, Delhi, MP"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                />
+              </label>
+
+              {/* Sort By */}
+              <label className="text-xs font-semibold text-slate-700">
+                Sort by
+                <select
+                  value={sort}
+                  onChange={(e) => updateFilter("sort", e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
+                >
+                  <option value="latest">Latest Added</option>
+                  <option value="views">Most Viewed</option>
+                  <option value="alphabetical">Alphabetical (A-Z)</option>
+                </select>
+              </label>
             </div>
-          </label>
-
-          {/* Category Dropdown (for home/search) */}
-          {!isDynamic && (
-            <label className="text-xs font-semibold text-slate-700">
-              Category
-              <select
-                value={categoryFilter || "all"}
-                onChange={(e) => updateFilter("category", e.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
-              >
-                <option value="all">All Categories</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.slug}>{c.name}</option>
-                ))}
-              </select>
-            </label>
-          )}
-
-          {/* Status */}
-          <label className="text-xs font-semibold text-slate-700">
-            Status
-            <select
-              value={status || "all"}
-              onChange={(e) => updateFilter("status", e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
-            >
-              <option value="all">All Statuses</option>
-              <option value="OPEN">Open / Active</option>
-              <option value="ENDING_SOON">Ending Soon</option>
-              <option value="ADMIT_CARD_OUT">Admit Card Released</option>
-              <option value="RESULT_OUT">Result Declared</option>
-              <option value="ANSWER_KEY_OUT">Answer Key Out</option>
-              <option value="CLOSED">Closed / Archived</option>
-            </select>
-          </label>
-
-          {/* Qualification */}
-          <label className="text-xs font-semibold text-slate-700">
-            Qualification
-            <input
-              type="text"
-              value={qualification}
-              onChange={(e) => updateFilter("qualification", e.target.value)}
-              placeholder="e.g. 10th, 12th, Graduate"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
-            />
-          </label>
-
-          {/* Location */}
-          <label className="text-xs font-semibold text-slate-700">
-            Location / State
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => updateFilter("location", e.target.value)}
-              placeholder="e.g. All India, Delhi"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
-            />
-          </label>
-
-          {/* Sort By */}
-          <label className="text-xs font-semibold text-slate-700">
-            Sort by
-            <select
-              value={sort}
-              onChange={(e) => updateFilter("sort", e.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500"
-            >
-              <option value="latest">Latest Added</option>
-              <option value="views">Most Viewed</option>
-              <option value="alphabetical">Alphabetical (A-Z)</option>
-            </select>
-          </label>
-        </div>
+          </div>
+        )}
       </section>
+
+      {/* Mobile Staged Filter Drawer / Bottom Sheet */}
+      {isDrawerOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/60 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in"
+          onClick={closeFilterDrawer}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Filter vacancies"
+        >
+          <div
+            className="flex max-h-[88vh] w-full max-w-lg flex-col rounded-t-3xl border-t border-slate-200 bg-white shadow-2xl sm:rounded-3xl sm:border animate-in slide-in-from-bottom-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-900">
+                  <Filter size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-950">Filter Vacancies</h3>
+                  <p className="text-[11px] font-medium text-slate-500">Refine by authority, status &amp; eligibility</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closeFilterDrawer}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="Close filter drawer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Drawer Scrollable Content */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+              {/* Category Dropdown (if not dynamic category route) */}
+              {!isDynamic && (
+                <label className="block text-xs font-bold text-slate-800">
+                  Category
+                  <select
+                    value={draftFilters.category}
+                    onChange={(e) => updateDraft("category", e.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500"
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.slug}>{c.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {/* Status */}
+              <label className="block text-xs font-bold text-slate-800">
+                Opportunity Status
+                <select
+                  value={draftFilters.status}
+                  onChange={(e) => updateDraft("status", e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="OPEN">Open / Active Only</option>
+                  <option value="ENDING_SOON">Ending Soon</option>
+                  <option value="ADMIT_CARD_OUT">Admit Card Released</option>
+                  <option value="RESULT_OUT">Result Declared</option>
+                  <option value="ANSWER_KEY_OUT">Answer Key Out</option>
+                  <option value="CLOSED">Closed / Archived</option>
+                </select>
+              </label>
+
+              {/* Qualification */}
+              <label className="block text-xs font-bold text-slate-800">
+                Educational Qualification
+                <input
+                  type="text"
+                  value={draftFilters.qualification}
+                  onChange={(e) => updateDraft("qualification", e.target.value)}
+                  placeholder="e.g. 10th, 12th, Graduate, B.Tech"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500"
+                />
+              </label>
+
+              {/* Location */}
+              <label className="block text-xs font-bold text-slate-800">
+                State / Location
+                <input
+                  type="text"
+                  value={draftFilters.location}
+                  onChange={(e) => updateDraft("location", e.target.value)}
+                  placeholder="e.g. Bhopal, MP, Delhi, All India"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-medium text-slate-900 outline-none focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500"
+                />
+              </label>
+
+              {/* Sort By */}
+              <label className="block text-xs font-bold text-slate-800">
+                Sort Order
+                <select
+                  value={draftFilters.sort}
+                  onChange={(e) => updateDraft("sort", e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-xs font-semibold text-slate-900 outline-none focus:border-rose-500 focus:bg-white focus:ring-1 focus:ring-rose-500"
+                >
+                  <option value="latest">Latest Added (Default)</option>
+                  <option value="views">Most Viewed</option>
+                  <option value="alphabetical">Alphabetical (A-Z)</option>
+                </select>
+              </label>
+            </div>
+
+            {/* Drawer Footer Actions (Sticky Bottom) */}
+            <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/80 px-5 py-3.5 rounded-b-3xl">
+              <button
+                type="button"
+                onClick={clearDraftFilters}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition min-h-[44px]"
+              >
+                <RotateCcw size={13} />
+                <span>Reset Draft</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={applyDraftFilters}
+                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-rose-900 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-rose-800 transition min-h-[44px]"
+              >
+                <CheckCircle2 size={14} />
+                <span>Apply Filters</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Results Section */}
       <section className="mt-8" aria-live="polite">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-950">
-            {title} {catalogPage ? `(${catalogPage.totalElements} vacancies)` : ""}
-          </h2>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
+              {title}
+            </h2>
+            {catalogPage && (
+              <p className="text-xs font-semibold text-slate-500">
+                <span className="font-bold text-slate-900">{catalogPage.totalElements}</span> {catalogPage.totalElements === 1 ? "job" : "jobs"} found
+              </p>
+            )}
+          </div>
           {catalogPage && (
-            <span className="text-xs text-slate-500">
+            <span className="text-xs font-medium text-slate-500">
               Showing page {catalogPage.number + 1} of {Math.max(1, catalogPage.totalPages)}
             </span>
           )}
