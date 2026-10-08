@@ -10,6 +10,10 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   min-width: 320px;
   min-height: 100vh;
@@ -17,6 +21,10 @@ body {
   overflow-x: hidden;
   background-color: #f8fafc;
   color: #0f172a;
+}
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
 }
 
 /* Accessible focus rings */
