@@ -136,8 +136,8 @@ const sections = [
       <p className="text-slate-700 leading-relaxed">
         If you have any questions, concerns, or requests regarding this Privacy Policy or the handling
         of your personal data, please contact our Data Protection team at{' '}
-        <a href="mailto:support@nextvacancy.com" className="text-[#F59E0B] hover:underline font-medium">
-          support@nextvacancy.com
+        <a href="mailto:support@nextvacancy.vercel.app" className="text-[#F59E0B] hover:underline font-medium">
+          support@nextvacancy.vercel.app
         </a>
         . We will respond to all privacy-related queries within 5 working days.
       </p>

@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     import("@/services/categories/categories.service"),
     import("@/services/organization/organization-profile.service"),
   ]);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.vercel.app";
   const generatedAt = new Date("2026-01-01T00:00:00.000Z");
 
   // 1. Static core authority routes

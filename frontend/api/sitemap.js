@@ -1,6 +1,7 @@
 import { parseApiBaseUrl } from "../src/apiConfiguration.js";
+import { SITE_URL } from "../src/siteConfiguration.js";
 
-const siteOrigin = "https://nextvacancy.com";
+const siteOrigin = SITE_URL;
 const staticPaths = [
   "/",
   "/government-jobs",
@@ -28,6 +29,16 @@ const staticMetadata = {
   "/privacy-policy": { changeFrequency: "monthly", priority: 0.5 },
   "/terms": { changeFrequency: "monthly", priority: 0.5 },
   "/disclaimer": { changeFrequency: "monthly", priority: 0.5 },
+};
+
+const SITEMAP_HEADERS = {
+  "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+  "Content-Type": "application/xml; charset=utf-8",
+};
+
+const STATIC_FALLBACK_HEADERS = {
+  "Cache-Control": "public, s-maxage=60",
+  "Content-Type": "application/xml; charset=utf-8",
 };
 
 function escapeXml(value) {
@@ -66,10 +77,19 @@ function createApiUrl(baseUrl, path, params) {
   return url;
 }
 
-async function fetchJson(url) {
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!response.ok) throw new Error(`Catalog API returned ${response.status}.`);
-  return response.json();
+async function fetchJson(url, timeoutMs = 4000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) throw new Error(`Catalog API returned ${response.status}.`);
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchAllJobs(baseUrl) {
@@ -93,6 +113,15 @@ async function fetchAllJobs(baseUrl) {
     ),
   );
   return [firstPage, ...remainingPages].flatMap((page) => page.content);
+}
+
+function buildStaticSitemapXml() {
+  const xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
+  for (const path of staticPaths) {
+    appendUrl(xml, path, staticMetadata[path]);
+  }
+  xml.push("</urlset>");
+  return xml.join("");
 }
 
 export default async function sitemap() {
@@ -142,13 +171,13 @@ export default async function sitemap() {
     xml.push("</urlset>");
 
     return new Response(xml.join(""), {
-      headers: {
-        "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
-        "Content-Type": "application/xml; charset=utf-8",
-      },
+      headers: SITEMAP_HEADERS,
     });
   } catch (error) {
-    console.error("Unable to generate the current database-backed sitemap.", error);
-    return new Response("Unable to generate the current sitemap from the catalog API.", { status: 502 });
+    console.warn("Unable to generate the dynamic sitemap from catalog API; falling back to static routes.", error);
+    return new Response(buildStaticSitemapXml(), {
+      status: 200,
+      headers: STATIC_FALLBACK_HEADERS,
+    });
   }
 }

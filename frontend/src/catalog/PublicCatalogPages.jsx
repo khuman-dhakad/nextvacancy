@@ -32,6 +32,8 @@ import {
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { apiGet, apiRequest } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { sanitizeUrl } from "../urlUtils.js";
+import { SITE_URL } from "../siteConfiguration.js";
 
 const catalogs = {
   home: {
@@ -94,7 +96,7 @@ function updateMetadata(title, description, canonicalPath, structuredData) {
   ensureMeta('meta[name="description"]', "meta", { name: "description" }, description);
   ensureMeta('meta[property="og:title"]', "meta", { property: "og:title" }, title);
   ensureMeta('meta[property="og:description"]', "meta", { property: "og:description" }, description);
-  ensureMeta('meta[property="og:url"]', "meta", { property: "og:url" }, `https://nextvacancy.com${canonicalPath}`);
+  ensureMeta('meta[property="og:url"]', "meta", { property: "og:url" }, `${SITE_URL}${canonicalPath}`);
   ensureMeta('meta[name="twitter:card"]', "meta", { name: "twitter:card" }, "summary_large_image");
   ensureMeta('meta[name="twitter:title"]', "meta", { name: "twitter:title" }, title);
   ensureMeta('meta[name="twitter:description"]', "meta", { name: "twitter:description" }, description);
@@ -104,7 +106,7 @@ function updateMetadata(title, description, canonicalPath, structuredData) {
     canonical.rel = "canonical";
     document.head.appendChild(canonical);
   }
-  canonical.href = `https://nextvacancy.com${canonicalPath}`;
+  canonical.href = `${SITE_URL}${canonicalPath}`;
   let schema = document.getElementById("page-structured-data");
   if (schema) schema.remove();
   if (structuredData) {
@@ -289,14 +291,14 @@ export function PublicCatalogPage({ mode = "home" }) {
         "@type": "CollectionPage",
         name: title,
         description,
-        url: `https://nextvacancy.com${canonicalPath}`,
+        url: `${SITE_URL}${canonicalPath}`,
         mainEntity: {
           "@type": "ItemList",
           numberOfItems: catalogPage.totalElements,
           itemListElement: (catalogPage.content || []).slice(0, 10).map((job, index) => ({
             "@type": "ListItem",
             position: index + 1,
-            url: `https://nextvacancy.com/jobs/${job.slug}`,
+            url: `${SITE_URL}/jobs/${job.slug}`,
             name: job.title,
           })),
         },
@@ -937,8 +939,8 @@ export function PublicJobDetails() {
         {
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "Home", item: "https://nextvacancy.com/" },
-            { "@type": "ListItem", position: 2, name: job.organization, item: `https://nextvacancy.com/jobs/${job.slug}` },
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: job.organization, item: `${SITE_URL}/jobs/${job.slug}` },
           ],
         },
         {
@@ -1113,9 +1115,9 @@ export function PublicJobDetails() {
               {links.map((link, i) => (
                 <a
                   key={i}
-                  href={link.url}
+                  href={sanitizeUrl(link?.url) || "#"}
                   target="_blank"
-                  rel="noreferrer noopener"
+                  rel="noopener"
                   className="inline-flex items-center gap-1.5 rounded-xl bg-rose-900 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800"
                 >
                   <span>{link.label || link.linkType || "Official Link"}</span>

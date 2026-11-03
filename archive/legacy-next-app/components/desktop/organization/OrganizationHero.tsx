@@ -24,7 +24,7 @@ export const OrganizationHero: React.FC<OrganizationHeroProps> = ({
   profile,
   className = "",
 }) => {
-  const shareText = `Check out recruitment circulars and latest vacancies from ${profile.name} (${profile.shortName}) on NEXTVACANCY: https://nextvacancy.com/organizations/${profile.slug}`;
+  const shareText = `Check out recruitment circulars and latest vacancies from ${profile.name} (${profile.shortName}) on NEXTVACANCY: https://nextvacancy.vercel.app/organizations/${profile.slug}`;
   const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
 
   return (

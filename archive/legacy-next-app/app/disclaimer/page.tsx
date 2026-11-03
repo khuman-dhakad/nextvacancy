@@ -97,8 +97,8 @@ export default function DisclaimerPage() {
               <p className="text-slate-700 text-sm leading-relaxed">
                 Any entity claiming to represent NEXTVACANCY in an official government capacity is
                 fraudulent. Please report such activity to us immediately at{' '}
-                <a href="mailto:support@nextvacancy.com" className="text-[#F59E0B] hover:underline">
-                  support@nextvacancy.com
+                <a href="mailto:support@nextvacancy.vercel.app" className="text-[#F59E0B] hover:underline">
+                  support@nextvacancy.vercel.app
                 </a>
                 .
               </p>
@@ -152,8 +152,8 @@ export default function DisclaimerPage() {
               <div className="bg-white bg-opacity-10 rounded-xl p-4">
                 <p className="text-white text-sm font-medium">
                   Report fraud attempts to us:{' '}
-                  <a href="mailto:support@nextvacancy.com" className="text-[#F59E0B] hover:underline">
-                    support@nextvacancy.com
+                  <a href="mailto:support@nextvacancy.vercel.app" className="text-[#F59E0B] hover:underline">
+                    support@nextvacancy.vercel.app
                   </a>
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function DisclaimerPage() {
               </p>
               <p className="text-slate-700 leading-relaxed text-sm">
                 This disclaimer is governed by the laws of India and is subject to periodic revision.
-                The most current version will always be available at nextvacancy.com/disclaimer.
+                The most current version will always be available at nextvacancy.vercel.app/disclaimer.
               </p>
             </div>
 

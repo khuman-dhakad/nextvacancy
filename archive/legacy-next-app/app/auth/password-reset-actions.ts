@@ -7,7 +7,7 @@ export async function requestPasswordResetAction(email: string): Promise<{ succe
   const result = await generatePasswordResetToken(email);
   if (!result) return { success: true };
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.vercel.app";
   try {
     await sendTransactionalEmail({
       to: result.user.email,

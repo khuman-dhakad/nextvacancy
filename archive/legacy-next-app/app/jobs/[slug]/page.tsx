@@ -57,8 +57,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Home", item: "https://nextvacancy.com" },
-          { "@type": "ListItem", position: 2, name: job.organization, item: `https://nextvacancy.com/jobs/${job.slug}` },
+          { "@type": "ListItem", position: 1, name: "Home", item: "https://nextvacancy.vercel.app" },
+          { "@type": "ListItem", position: 2, name: job.organization, item: `https://nextvacancy.vercel.app/jobs/${job.slug}` },
         ],
       },
       {

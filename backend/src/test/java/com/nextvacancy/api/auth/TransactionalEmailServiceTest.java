@@ -21,6 +21,14 @@ class TransactionalEmailServiceTest {
     }
 
     @Test
+    void rejectsEmptyOrUnsetPublicUrlInProduction() {
+        assertThatThrownBy(() -> new TransactionalEmailService(
+                API_KEY, SENDER, "", "production"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("APP_PUBLIC_URL");
+    }
+
+    @Test
     void productionRequiresAnExplicitPublicHttpsOrigin() {
         assertThatCode(() -> new TransactionalEmailService(
                 API_KEY, SENDER, "https://nextvacancy.vercel.app", "production"))

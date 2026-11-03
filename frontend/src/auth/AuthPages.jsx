@@ -36,6 +36,7 @@ import {
 import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { apiGet, apiRequest } from "../api.js";
 import { useAuth } from "./AuthContext.jsx";
+import { sanitizeUrl } from "../urlUtils.js";
 
 function AuthShell({ title, description, admin = false, children }) {
   return (
@@ -913,8 +914,8 @@ export function NotificationCenterPage() {
                   <p className="mt-1.5 leading-relaxed text-slate-600">{n.message}</p>
                   <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400">
                     <span>{new Date(n.createdAt).toLocaleDateString()}</span>
-                    {n.linkUrl && (
-                      <a href={n.linkUrl} target="_blank" rel="noreferrer" className="font-bold text-rose-900 underline">
+                    {Boolean(sanitizeUrl(n.linkUrl)) && (
+                      <a href={sanitizeUrl(n.linkUrl) || "#"} target="_blank" rel="noopener noreferrer" className="font-bold text-rose-900 underline">
                         Open Circular →
                       </a>
                     )}
@@ -1234,7 +1235,7 @@ export function ContactPage() {
         {
           heading: "Editorial Contact",
           paragraphs: [
-            "Email: support@nextvacancy.com",
+            "Email: support@nextvacancy.vercel.app",
             "Response time: Within 24 hours on working days.",
           ],
         },
