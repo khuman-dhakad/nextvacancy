@@ -42,12 +42,30 @@ it("generates dynamic sitemap entries from paginated API data", async () => {
 
   expect(response.status).toBe(200);
   expect(response.headers.get("Content-Type")).toContain("application/xml");
+  expect(response.headers.get("Cache-Control")).toBe("public, s-maxage=3600, stale-while-revalidate=86400");
   expect(xml).toContain("https://nextvacancy.com/jobs/officer-role");
   expect(xml).toContain("https://nextvacancy.com/jobs/assistant-role");
   expect(xml).toContain("https://nextvacancy.com/category/public-service");
   expect(xml).toContain("https://nextvacancy.com/organizations/service-board");
   expect(xml).toContain("<changefreq>hourly</changefreq>");
   expect(fetchMock).toHaveBeenCalledTimes(4);
+});
+
+it("returns valid static-route XML (HTTP 200) when the catalog API fails or times out", async () => {
+  vi.stubEnv("VITE_API_BASE_URL", "https://api.nextvacancy.com");
+  const fetchMock = vi.fn().mockRejectedValue(new Error("Fetch timeout"));
+  vi.stubGlobal("fetch", fetchMock);
+
+  const response = await sitemap();
+  const xml = await response.text();
+
+  expect(response.status).toBe(200);
+  expect(response.headers.get("Content-Type")).toContain("application/xml");
+  expect(response.headers.get("Cache-Control")).toBe("public, s-maxage=3600, stale-while-revalidate=86400");
+  expect(xml).toContain("<loc>https://nextvacancy.com/</loc>");
+  expect(xml).toContain("<loc>https://nextvacancy.com/government-jobs</loc>");
+  expect(xml).toContain("<loc>https://nextvacancy.com/privacy-policy</loc>");
+  expect(xml).toContain("</urlset>");
 });
 
 it("returns an explicit error when the catalog API is not configured", async () => {
