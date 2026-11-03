@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet } from "../api.js";
+import { sanitizeUrl } from "../urlUtils.js";
 
 function ErrorState({ message }) {
   return (
@@ -409,9 +410,9 @@ export function OrganizationProfilePage() {
             </div>
           </div>
 
-          {profile.website && (
+          {Boolean(sanitizeUrl(profile.website)) && (
             <a
-              href={profile.website}
+              href={sanitizeUrl(profile.website) || "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 self-start rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-slate-800"
