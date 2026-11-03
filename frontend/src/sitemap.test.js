@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from "vitest";
-import sitemap from "./sitemap.js";
+import sitemap from "../api/sitemap.js";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -61,7 +61,7 @@ it("returns valid static-route XML (HTTP 200) when the catalog API fails or time
 
   expect(response.status).toBe(200);
   expect(response.headers.get("Content-Type")).toContain("application/xml");
-  expect(response.headers.get("Cache-Control")).toBe("public, s-maxage=3600, stale-while-revalidate=86400");
+  expect(response.headers.get("Cache-Control")).toBe("public, s-maxage=60");
   expect(xml).toContain("<loc>https://nextvacancy.vercel.app/</loc>");
   expect(xml).toContain("<loc>https://nextvacancy.vercel.app/government-jobs</loc>");
   expect(xml).toContain("<loc>https://nextvacancy.vercel.app/privacy-policy</loc>");

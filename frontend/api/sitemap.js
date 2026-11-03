@@ -36,6 +36,11 @@ const SITEMAP_HEADERS = {
   "Content-Type": "application/xml; charset=utf-8",
 };
 
+const STATIC_FALLBACK_HEADERS = {
+  "Cache-Control": "public, s-maxage=60",
+  "Content-Type": "application/xml; charset=utf-8",
+};
+
 function escapeXml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -172,7 +177,7 @@ export default async function sitemap() {
     console.warn("Unable to generate the dynamic sitemap from catalog API; falling back to static routes.", error);
     return new Response(buildStaticSitemapXml(), {
       status: 200,
-      headers: SITEMAP_HEADERS,
+      headers: STATIC_FALLBACK_HEADERS,
     });
   }
 }
