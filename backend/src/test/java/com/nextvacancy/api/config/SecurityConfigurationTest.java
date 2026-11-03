@@ -34,6 +34,13 @@ class SecurityConfigurationTest {
     }
 
     @Test
+    void rejectsEmptyOrUnsetCorsOriginsInProduction() {
+        assertThatThrownBy(() -> configuration.corsConfigurationSource("", "production"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("CORS_ALLOWED_ORIGINS");
+    }
+
+    @Test
     void rejectsOriginsContainingPaths() {
         assertThatThrownBy(() -> configuration.corsConfigurationSource(
                 "https://frontend.example.org/app", "production"))
