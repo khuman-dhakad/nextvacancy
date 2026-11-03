@@ -12,7 +12,7 @@
       "has": [
         {
           "type": "host",
-          "value": "(.*)\\.vercel\\.app"
+          "value": "^(?!nextvacancy\\.vercel\\.app$).*\\.vercel\\.app$"
         }
       ],
       "headers": [
