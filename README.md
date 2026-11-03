@@ -30,14 +30,14 @@ Configure these in **Render Dashboard → nextvacancy-api → Environment**:
 | :--- | :--- | :---: | :--- |
 | `SPRING_PROFILES_ACTIVE` | Active Spring profile | **Yes** | `prod` |
 | `DATABASE_URL` | PostgreSQL JDBC connection string with SSL | **Yes** | `postgresql://user:pass@ep-pooler.neon.tech/nextvacancy?sslmode=require` |
-| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins | **Yes** | `https://nextvacancy.com,https://www.nextvacancy.com,https://nextvacancy.vercel.app` |
-| `APP_PUBLIC_URL` | Authoritative public frontend URL for email links | **Yes** | `https://nextvacancy.com` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed frontend origins | **Yes** | `https://nextvacancy.vercel.app` |
+| `APP_PUBLIC_URL` | Authoritative public frontend URL for email links | **Yes** | `https://nextvacancy.vercel.app` |
 | `JWT_SECRET` | Base64 or plain secret key (min 32 characters) | **Yes** | `dGVzdC1zZWNyZXQta2V5LWZvci1jaS1jZC1waXBlbGluZS1taW4tMzItY2hhcnM=` |
 | `ADMIN_USERNAME` | Administrator login username | **Yes** | `admin` |
-| `ADMIN_EMAIL` | Administrator alert email address | **Yes** | `admin@nextvacancy.com` |
+| `ADMIN_EMAIL` | Administrator alert email address | **Yes** | `admin@nextvacancy.vercel.app` |
 | `ADMIN_PASSWORD_HASH` | BCrypt hash of the administrator password | **Yes** | `$2a$10$abcdef...` |
 | `RESEND_API_KEY` | Resend REST API key for transactional emails | **Yes** | `re_123456789...` |
-| `RESEND_FROM_EMAIL` | Verified sender address for candidate emails | **Yes** | `NextVacancy <alerts@nextvacancy.com>` |
+| `RESEND_FROM_EMAIL` | Verified sender address for candidate emails | **Yes** | `NextVacancy <alerts@nextvacancy.vercel.app>` |
 | `LOG_FILE` | Log file destination path | No | `/var/log/nextvacancy/api.log` |
 
 ---

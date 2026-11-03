@@ -20,7 +20,7 @@ export async function registerCandidateAction(input: { fullName: string; email: 
   if (!result.success) return result;
   const verificationToken = await generateEmailVerificationToken(result.userId);
   try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.vercel.app";
     await sendTransactionalEmail({
       to: input.email.trim().toLowerCase(),
       subject: "Verify your NEXTVACANCY email",

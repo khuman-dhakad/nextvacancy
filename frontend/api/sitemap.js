@@ -1,6 +1,7 @@
 import { parseApiBaseUrl } from "../src/apiConfiguration.js";
+import { SITE_URL } from "../src/siteConfiguration.js";
 
-const siteOrigin = "https://nextvacancy.com";
+const siteOrigin = SITE_URL;
 const staticPaths = [
   "/",
   "/government-jobs",

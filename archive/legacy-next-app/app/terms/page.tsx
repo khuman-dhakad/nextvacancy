@@ -14,7 +14,7 @@ const sections = [
     title: '1. Acceptance of Terms',
     content: (
       <p className="text-slate-700 leading-relaxed">
-        By accessing or using the NEXTVACANCY website (nextvacancy.com) or any of its associated
+        By accessing or using the NEXTVACANCY website (nextvacancy.vercel.app) or any of its associated
         services, you agree to be bound by these Terms &amp; Conditions (&ldquo;Terms&rdquo;) and our{' '}
         <a href="/privacy-policy" className="text-[#F59E0B] hover:underline">Privacy Policy</a>.
         If you do not agree to these Terms, you must immediately discontinue use of the platform.

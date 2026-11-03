@@ -621,7 +621,7 @@ export async function getAdminActivityLogs(limit: number = 10): Promise<AdminAct
       action: "LOGIN",
       entityTitle: "Administrator Session Started",
       timestamp: "Just now",
-      adminUser: "admin@nextvacancy.com",
+      adminUser: "admin@nextvacancy.vercel.app",
       details: "Authenticated from recognized IP",
     },
   ];

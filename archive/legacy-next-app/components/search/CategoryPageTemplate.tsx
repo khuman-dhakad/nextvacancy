@@ -50,7 +50,7 @@ export const CategoryPageTemplate: React.FC<CategoryPageTemplateProps> = ({
       searchParams.location
   );
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nextvacancy.vercel.app";
 
   // Breadcrumb Schema
   const breadcrumbSchema = {
