@@ -67,14 +67,23 @@ function createApiUrl(baseUrl, path, params) {
   return url;
 }
 
-async function fetchJson(url) {
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
-  if (!response.ok) throw new Error(`Catalog API returned ${response.status}.`);
-  return response.json();
+async function fetchJsonWithTimeout(url, timeoutMs = 4000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      headers: { Accept: "application/json" },
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(`Catalog API returned ${response.status}.`);
+    return await response.json();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function fetchAllJobs(baseUrl) {
-  const firstPage = await fetchJson(createApiUrl(baseUrl, "/api/v1/jobs", {
+  const firstPage = await fetchJsonWithTimeout(createApiUrl(baseUrl, "/api/v1/jobs", {
     page: 0,
     size: 100,
     sort: "latest",
@@ -85,7 +94,7 @@ async function fetchAllJobs(baseUrl) {
   }
   const remainingPages = await Promise.all(
     Array.from({ length: Math.max(0, firstPage.totalPages - 1) }, (_, index) =>
-      fetchJson(createApiUrl(baseUrl, "/api/v1/jobs", {
+      fetchJsonWithTimeout(createApiUrl(baseUrl, "/api/v1/jobs", {
         page: index + 1,
         size: 100,
         sort: "latest",
@@ -94,6 +103,21 @@ async function fetchAllJobs(baseUrl) {
     ),
   );
   return [firstPage, ...remainingPages].flatMap((page) => page.content);
+}
+
+function buildStaticSitemapResponse() {
+  const xml = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'];
+  for (const path of staticPaths) {
+    appendUrl(xml, path, staticMetadata[path]);
+  }
+  xml.push("</urlset>");
+  return new Response(xml.join(""), {
+    status: 200,
+    headers: {
+      "Cache-Control": "public, s-maxage=60",
+      "Content-Type": "application/xml; charset=utf-8",
+    },
+  });
 }
 
 export default async function sitemap() {
@@ -107,8 +131,8 @@ export default async function sitemap() {
   try {
     const baseUrl = apiUrl.href.replace(/\/+$/, "");
     const [categories, organizations, jobs] = await Promise.all([
-      fetchJson(createApiUrl(baseUrl, "/api/v1/categories", {})),
-      fetchJson(createApiUrl(baseUrl, "/api/v1/organizations", {})),
+      fetchJsonWithTimeout(createApiUrl(baseUrl, "/api/v1/categories", {})),
+      fetchJsonWithTimeout(createApiUrl(baseUrl, "/api/v1/organizations", {})),
       fetchAllJobs(baseUrl),
     ]);
     if (!Array.isArray(categories) || !Array.isArray(organizations)) {
@@ -143,13 +167,14 @@ export default async function sitemap() {
     xml.push("</urlset>");
 
     return new Response(xml.join(""), {
+      status: 200,
       headers: {
-        "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
         "Content-Type": "application/xml; charset=utf-8",
       },
     });
   } catch (error) {
-    console.error("Unable to generate the current database-backed sitemap.", error);
-    return new Response("Unable to generate the current sitemap from the catalog API.", { status: 502 });
+    console.warn("Catalog API fetch failed or timed out. Falling back to static sitemap.", error);
+    return buildStaticSitemapResponse();
   }
 }
