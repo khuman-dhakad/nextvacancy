@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Link, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
@@ -20,16 +21,44 @@ import {
   TermsPage,
   VerifyEmailPage,
 } from "./auth/AuthPages.jsx";
-import {
-  AdminAnalyticsPage,
-  AdminCategoriesPage,
-  AdminDashboardPage,
-  AdminJobEditorPage,
-  AdminJobsPage,
-  AdminOrganizationsPage,
-} from "./admin/AdminPages.jsx";
 import { PublicCatalogPage, PublicJobDetails } from "./catalog/PublicCatalogPages.jsx";
 import { OfflinePage, PwaSupport } from "./pwa/PwaSupport.jsx";
+
+const AdminDashboardPage = lazy(() =>
+  import("./admin/AdminPages.jsx").then((m) => ({ default: m.AdminDashboardPage }))
+);
+const AdminJobsPage = lazy(() =>
+  import("./admin/AdminPages.jsx").then((m) => ({ default: m.AdminJobsPage }))
+);
+const AdminJobEditorPage = lazy(() =>
+  import("./admin/AdminPages.jsx").then((m) => ({ default: m.AdminJobEditorPage }))
+);
+const AdminCategoriesPage = lazy(() =>
+  import("./admin/AdminPages.jsx").then((m) => ({ default: m.AdminCategoriesPage }))
+);
+const AdminOrganizationsPage = lazy(() =>
+  import("./admin/AdminPages.jsx").then((m) => ({ default: m.AdminOrganizationsPage }))
+);
+const AdminAnalyticsPage = lazy(() =>
+  import("./admin/AdminPages.jsx").then((m) => ({ default: m.AdminAnalyticsPage }))
+);
+
+function AdminSkeleton() {
+  return (
+    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="animate-pulse space-y-6">
+        <div className="h-8 w-48 rounded-xl bg-slate-200" />
+        <div className="h-12 w-full rounded-2xl bg-slate-200" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="h-28 rounded-2xl bg-slate-200" />
+          <div className="h-28 rounded-2xl bg-slate-200" />
+          <div className="h-28 rounded-2xl bg-slate-200" />
+          <div className="h-28 rounded-2xl bg-slate-200" />
+        </div>
+      </div>
+    </main>
+  );
+}
 
 function AppRoutes() {
   return (
@@ -66,13 +95,62 @@ function AppRoutes() {
             <Route path="/settings" element={<SettingsPage />} />
           </Route>
           <Route element={<ProtectedRoute role="ADMIN" />}>
-            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-            <Route path="/admin/jobs" element={<AdminJobsPage />} />
-            <Route path="/admin/jobs/new" element={<AdminJobEditorPage />} />
-            <Route path="/admin/jobs/:id/edit" element={<AdminJobEditorPage />} />
-            <Route path="/admin/categories" element={<AdminCategoriesPage />} />
-            <Route path="/admin/organizations" element={<AdminOrganizationsPage />} />
-            <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminDashboardPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/jobs"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminJobsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/jobs/new"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminJobEditorPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/jobs/:id/edit"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminJobEditorPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/categories"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminCategoriesPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/organizations"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminOrganizationsPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <Suspense fallback={<AdminSkeleton />}>
+                  <AdminAnalyticsPage />
+                </Suspense>
+              }
+            />
           </Route>
           <Route
             path="*"

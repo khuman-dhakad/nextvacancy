@@ -91,6 +91,21 @@ class AuthenticationServiceTest {
         verify(users, never()).save(any(UserEntity.class));
     }
 
+    @Test
+    void rejectsLoginWhenEmailVerificationIsRequiredAndEmailNotVerified() {
+        AuthenticationService strictAuth = new AuthenticationService(
+                users, sessions, legacySessions, passwords, tokens, rateLimits,
+                "configured-admin", "admin@example.invalid", "configured-password-hash", true);
+        UserEntity unverifiedCandidate = candidate();
+        unverifiedCandidate.setEmailVerified(false);
+        given(users.findByEmailIgnoreCaseForUpdate("candidate@example.com"))
+                .willReturn(Optional.of(unverifiedCandidate));
+
+        assertThatThrownBy(() -> strictAuth.login("candidate@example.com", "Correct-Pass1", "192.0.2.10"))
+                .isInstanceOf(BadCredentialsException.class)
+                .hasMessage("Please verify your email address before signing in.");
+    }
+
     private static UserEntity candidate() {
         return new UserEntity("candidate-1", "Candidate Example", "candidate@example.com",
                 "9876543210", "stored-hash");

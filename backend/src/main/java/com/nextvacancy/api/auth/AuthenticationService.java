@@ -30,6 +30,7 @@ public class AuthenticationService {
     private final String adminUsername;
     private final String adminEmail;
     private final String adminPasswordHash;
+    private final boolean requireEmailVerification;
 
     public AuthenticationService(
             UserRepository users,
@@ -41,6 +42,21 @@ public class AuthenticationService {
             @Value("${app.admin.username}") String adminUsername,
             @Value("${app.admin.email}") String adminEmail,
             @Value("${app.admin.password-hash}") String adminPasswordHash) {
+        this(users, sessions, legacySessions, passwords, tokens, rateLimits,
+                adminUsername, adminEmail, adminPasswordHash, false);
+    }
+
+    public AuthenticationService(
+            UserRepository users,
+            AuthSessionRepository sessions,
+            LegacySessionRepository legacySessions,
+            PasswordService passwords,
+            AuthTokenService tokens,
+            AuthRateLimitService rateLimits,
+            @Value("${app.admin.username}") String adminUsername,
+            @Value("${app.admin.email}") String adminEmail,
+            @Value("${app.admin.password-hash}") String adminPasswordHash,
+            @Value("${app.auth.require-email-verification:false}") boolean requireEmailVerification) {
         this.users = users;
         this.sessions = sessions;
         this.legacySessions = legacySessions;
@@ -50,6 +66,7 @@ public class AuthenticationService {
         this.adminUsername = adminUsername;
         this.adminEmail = adminEmail;
         this.adminPasswordHash = adminPasswordHash;
+        this.requireEmailVerification = requireEmailVerification;
         if (adminUsername.isBlank() || adminEmail.isBlank() || adminPasswordHash.isBlank()) {
             throw new IllegalStateException("ADMIN_USERNAME, ADMIN_EMAIL, and ADMIN_PASSWORD_HASH are required.");
         }
@@ -97,6 +114,9 @@ public class AuthenticationService {
         OffsetDateTime now = OffsetDateTime.now();
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
             throw new AccountLockedException();
+        }
+        if (requireEmailVerification && !user.isEmailVerified()) {
+            throw new BadCredentialsException("Please verify your email address before signing in.");
         }
         if (!passwords.matches(password, user.getPasswordHash())) {
             int attempts = user.getFailedLoginAttempts() + 1;

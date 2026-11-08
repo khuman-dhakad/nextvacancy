@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthController.class);
     private final AuthenticationService authentication;
     private final AuthTokenService tokens;
     private final AuthCookieService cookies;
@@ -54,7 +55,12 @@ public class AuthController {
     public ResponseEntity<AuthUserResponse> register(
             @Valid @RequestBody RegistrationRequest request, HttpServletRequest httpRequest) {
         CreatedCandidate created = authentication.register(request, clientIp(httpRequest));
-        email.sendVerification(created.user().email(), created.verificationToken());
+        try {
+            email.sendVerification(created.user().email(), created.verificationToken());
+        } catch (EmailDeliveryException exception) {
+            log.warn("Candidate registered successfully (userId={}) but verification email could not be sent: {}",
+                    created.user().id(), exception.getMessage());
+        }
         return ResponseEntity.accepted().body(created.user());
     }
 

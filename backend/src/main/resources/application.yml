@@ -59,6 +59,8 @@ management:
 
 app:
   environment: ${APP_ENVIRONMENT:development}
+  auth:
+    require-email-verification: ${REQUIRE_EMAIL_VERIFICATION:false}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
   jwt:

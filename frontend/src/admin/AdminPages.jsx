@@ -6,9 +6,11 @@ import {
   BarChart3,
   Briefcase,
   Building2,
+  Calendar,
   CheckCircle2,
   ChevronRight,
   Clock,
+  Code,
   Copy,
   Edit3,
   ExternalLink,
@@ -20,10 +22,12 @@ import {
   HelpCircle,
   Layers,
   LayoutDashboard,
+  Link2,
   Plus,
   RefreshCw,
   Search,
   Shield,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -91,6 +95,20 @@ function AdminNav({ activeTab }) {
 }
 
 function SectionHeader({ title, subtitle, action, activeTab = "Dashboard" }) {
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="robots"]');
+    const previous = meta ? meta.getAttribute("content") : null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "robots";
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (previous) meta.setAttribute("content", previous);
+      else meta.remove();
+    };
+  }, []);
   return (
     <div className="mb-6 space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -181,6 +199,27 @@ function Field({ label, value, onChange, required = false, type = "text", maxLen
         value={value ?? ""}
         required={required}
         maxLength={maxLength}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
+
+function TextAreaField({ label, value, onChange, required = false, rows = 3, placeholder, hint }) {
+  return (
+    <label className="block text-xs font-bold text-slate-800">
+      <div className="flex items-center justify-between">
+        <span>
+          {label} {required && <span className="text-rose-700">*</span>}
+        </span>
+        {hint && <span className="text-[10px] font-normal text-slate-400">{hint}</span>}
+      </div>
+      <textarea
+        className={inputClass}
+        rows={rows}
+        required={required}
+        value={value ?? ""}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
       />
@@ -916,8 +955,32 @@ export function AdminJobEditorPage() {
   const { id } = useParams();
   const editing = Boolean(id);
 
-  const [activeFormTab, setActiveFormTab] = useState("basic");
+  const [activeFormTab, setActiveFormTab] = useState("core");
   const [job, setJob] = useState(blankJob);
+  const [advancedMode, setAdvancedMode] = useState(false);
+
+  const [visualForm, setVisualForm] = useState({
+    notificationDate: "",
+    applicationStart: "",
+    applicationEnd: "",
+    examDate: "",
+    admitCardDate: "",
+    generalFee: "Rs. 100",
+    scStFee: "Nil / Exempted",
+    paymentMode: "Online (Net Banking / Debit / UPI)",
+    minAge: "18",
+    maxAge: "30",
+    asOfDate: "",
+    relaxationSummary: "As per Govt rules (OBC 3 yrs, SC/ST 5 yrs)",
+    applyOnlineUrl: "",
+    notificationPdfUrl: "",
+    officialWebsiteUrl: "",
+    qualificationsText: "",
+    selectionProcessText: "Written Examination (Objective / CBT)\nDocument Verification\nMedical Examination",
+    howToApplyText: "Visit the official recruitment portal\nComplete candidate registration and fill application form\nUpload photograph, signature, and educational certificates\nPay application fee and print final confirmation page",
+    requiredDocumentsText: "Recent passport-size colour photograph\nScanned clear signature\nEducational qualification certificates & mark sheets\nCaste / Category certificate (if applicable)\nGovernment Photo ID proof (Aadhaar / PAN / Voter ID)",
+  });
+
   const [jsonFields, setJsonFields] = useState({
     qualificationsList: "[]",
     importantDates: "{}",
@@ -930,6 +993,7 @@ export function AdminJobEditorPage() {
     importantLinks: "[]",
     faqs: "[]",
   });
+
   const [loading, setLoading] = useState(editing);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -942,6 +1006,42 @@ export function AdminJobEditorPage() {
       .then((loaded) => {
         if (!active) return;
         setJob({ ...blankJob, ...loaded });
+
+        const dates = loaded.importantDates || {};
+        const fee = loaded.feeStructure || {};
+        const age = loaded.ageLimit || {};
+        const links = Array.isArray(loaded.importantLinks) ? loaded.importantLinks : [];
+        const applyLink = links.find((l) => l.type === "APPLY" || /apply/i.test(l.title || ""));
+        const pdfLink = links.find((l) => l.type === "NOTIFICATION" || /pdf|notification/i.test(l.title || ""));
+        const webLink = links.find((l) => l.type === "WEBSITE" || /website|portal/i.test(l.title || ""));
+
+        const quals = Array.isArray(loaded.qualificationsList) ? loaded.qualificationsList.join("\n") : "";
+        const selProcess = Array.isArray(loaded.selectionProcess) ? loaded.selectionProcess.join("\n") : "";
+        const steps = Array.isArray(loaded.howToApplySteps) ? loaded.howToApplySteps.join("\n") : "";
+        const docs = Array.isArray(loaded.requiredDocuments) ? loaded.requiredDocuments.join("\n") : "";
+
+        setVisualForm({
+          notificationDate: dates.notificationDate || "",
+          applicationStart: dates.applicationStart || "",
+          applicationEnd: dates.applicationEnd || "",
+          examDate: dates.examDate || "",
+          admitCardDate: dates.admitCardDate || "",
+          generalFee: fee.generalFee || "",
+          scStFee: fee.scStFee || "",
+          paymentMode: fee.paymentMode || "",
+          minAge: age.minAge != null ? String(age.minAge) : "",
+          maxAge: age.maxAge != null ? String(age.maxAge) : "",
+          asOfDate: age.asOfDate || "",
+          relaxationSummary: age.relaxationSummary || "",
+          applyOnlineUrl: applyLink ? applyLink.url : "",
+          notificationPdfUrl: pdfLink ? pdfLink.url : "",
+          officialWebsiteUrl: webLink ? webLink.url : "",
+          qualificationsText: quals,
+          selectionProcessText: selProcess,
+          howToApplyText: steps,
+          requiredDocumentsText: docs,
+        });
+
         setJsonFields({
           qualificationsList: toJsonText(loaded.qualificationsList, []),
           importantDates: toJsonText(loaded.importantDates, {}),
@@ -970,8 +1070,22 @@ export function AdminJobEditorPage() {
     setJob((current) => ({ ...current, [name]: value }));
   }
 
+  function updateVisual(name, value) {
+    setVisualForm((current) => ({ ...current, [name]: value }));
+  }
+
   function updateJson(name, value) {
     setJsonFields((current) => ({ ...current, [name]: value }));
+  }
+
+  function generateSlug() {
+    if (!job.title) return;
+    const generated = job.title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    update("slug", generated);
   }
 
   async function submit(event) {
@@ -979,22 +1093,68 @@ export function AdminJobEditorPage() {
     setError("");
     setNotice("");
 
-    let values;
-    try {
-      values = Object.fromEntries(
-        Object.entries(jsonFields).map(([key, value]) => [key, JSON.parse(value)])
-      );
-    } catch (failure) {
-      setError(`Invalid JSON detected: ${failure.message}`);
-      return;
+    let payloadValues;
+    if (advancedMode) {
+      try {
+        payloadValues = Object.fromEntries(
+          Object.entries(jsonFields).map(([key, value]) => [key, JSON.parse(value)])
+        );
+      } catch (failure) {
+        setError(`Invalid JSON in Advanced Mode: ${failure.message}`);
+        return;
+      }
+    } else {
+      const dates = {};
+      if (visualForm.notificationDate) dates.notificationDate = visualForm.notificationDate;
+      if (visualForm.applicationStart) dates.applicationStart = visualForm.applicationStart;
+      if (visualForm.applicationEnd) dates.applicationEnd = visualForm.applicationEnd;
+      if (visualForm.examDate) dates.examDate = visualForm.examDate;
+      if (visualForm.admitCardDate) dates.admitCardDate = visualForm.admitCardDate;
+
+      const fee = {};
+      if (visualForm.generalFee) fee.generalFee = visualForm.generalFee;
+      if (visualForm.scStFee) fee.scStFee = visualForm.scStFee;
+      if (visualForm.paymentMode) fee.paymentMode = visualForm.paymentMode;
+
+      const age = {};
+      if (visualForm.minAge) age.minAge = Number(visualForm.minAge) || visualForm.minAge;
+      if (visualForm.maxAge) age.maxAge = Number(visualForm.maxAge) || visualForm.maxAge;
+      if (visualForm.asOfDate) age.asOfDate = visualForm.asOfDate;
+      if (visualForm.relaxationSummary) age.relaxationSummary = visualForm.relaxationSummary;
+
+      const links = [];
+      if (visualForm.applyOnlineUrl) {
+        links.push({ title: "Apply Online", url: visualForm.applyOnlineUrl.trim(), type: "APPLY" });
+      }
+      if (visualForm.notificationPdfUrl) {
+        links.push({ title: "Official Notification PDF", url: visualForm.notificationPdfUrl.trim(), type: "NOTIFICATION" });
+      }
+      if (visualForm.officialWebsiteUrl) {
+        links.push({ title: "Official Website", url: visualForm.officialWebsiteUrl.trim(), type: "WEBSITE" });
+      }
+
+      const splitLines = (text) => (text || "").split("\n").map((s) => s.trim()).filter(Boolean);
+
+      payloadValues = {
+        qualificationsList: splitLines(visualForm.qualificationsText),
+        importantDates: dates,
+        feeStructure: Object.keys(fee).length > 0 ? fee : null,
+        ageLimit: Object.keys(age).length > 0 ? age : null,
+        importantLinks: links,
+        selectionProcess: splitLines(visualForm.selectionProcessText),
+        howToApplySteps: splitLines(visualForm.howToApplyText),
+        requiredDocuments: splitLines(visualForm.requiredDocumentsText),
+        vacancyBreakdown: job.vacancyBreakdown || [],
+        faqs: job.faqs || [],
+      };
     }
 
     setSaving(true);
     try {
       const payload = {
         ...job,
-        ...values,
-        totalVacancies: String(job.totalVacancies),
+        ...payloadValues,
+        totalVacancies: String(job.totalVacancies || "1"),
       };
       await request(editing ? `/api/v1/admin/jobs/${encodeURIComponent(id)}` : "/api/v1/admin/jobs", {
         method: editing ? "PUT" : "POST",
@@ -1018,11 +1178,18 @@ export function AdminJobEditorPage() {
     );
   }
 
+  const tabs = [
+    { id: "core", label: "1. Core Vacancy Details", icon: Briefcase },
+    { id: "dates_fees", label: "2. Dates, Fees & Links", icon: Calendar },
+    { id: "eligibility", label: "3. Qualifications & Process", icon: GraduationCap },
+    { id: "advanced", label: "4. Advanced & Raw JSON", icon: Code },
+  ];
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8 space-y-6">
       <SectionHeader
         title={editing ? `Edit: ${job.title || "Vacancy"}` : "Create New Opportunity"}
-        subtitle="Saved changes are persisted directly to PostgreSQL via the Spring REST API."
+        subtitle="Saved opportunities are validated and published live to the public catalog."
         activeTab="Jobs"
         action={
           <Link
@@ -1039,41 +1206,57 @@ export function AdminJobEditorPage() {
       <Notice message={notice} type="success" onClose={() => setNotice("")} />
 
       <form className="space-y-6 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-sm sm:p-8" onSubmit={submit}>
-        {/* Form Section Tabs */}
-        <div className="flex gap-2 border-b border-slate-200 pb-3">
-          {[
-            { id: "basic", label: "1. Basic & Core Info" },
-            { id: "breakdown", label: "2. Vacancies & Qualifications" },
-            { id: "dates_links", label: "3. Dates, Links & Steps" },
-            { id: "faqs", label: "4. FAQs" },
-          ].map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setActiveFormTab(t.id)}
-              className={`rounded-xl px-3.5 py-2 text-xs font-bold transition ${
-                activeFormTab === t.id
-                  ? "bg-slate-900 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-600 hover:text-slate-950"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            const isActive = activeFormTab === t.id;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveFormTab(t.id)}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition ${
+                  isActive
+                    ? "bg-slate-900 text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:text-slate-950"
+                }`}
+              >
+                <Icon size={14} />
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Tab 1: Basic Information */}
-        {activeFormTab === "basic" && (
-          <div className="space-y-4 animate-in fade-in duration-150">
+        {/* Tab 1: Core Details */}
+        {activeFormTab === "core" && (
+          <div className="space-y-5 animate-in fade-in duration-150">
+            <div>
+              <div className="flex items-end gap-2">
+                <div className="flex-1">
+                  <Field
+                    label="Notice / Post Title"
+                    required
+                    maxLength={255}
+                    value={job.title}
+                    placeholder="e.g. UPSC Civil Services Examination 2026"
+                    onChange={(value) => update("title", value)}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={generateSlug}
+                  title="Generate URL slug from title"
+                  className="mb-0.5 inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-slate-50 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                >
+                  <Sparkles size={13} className="text-amber-600" />
+                  <span>Auto Slug</span>
+                </button>
+              </div>
+            </div>
+
             <div className="grid gap-4 md:grid-cols-2">
-              <Field
-                label="Job / Notice Title"
-                required
-                maxLength={255}
-                value={job.title}
-                placeholder="e.g. UPSC Civil Services Examination 2026"
-                onChange={(value) => update("title", value)}
-              />
               <Field
                 label="URL Slug (Optional)"
                 maxLength={255}
@@ -1091,24 +1274,31 @@ export function AdminJobEditorPage() {
                 onChange={(value) => update("organization", value)}
               />
               <Field
+                label="Department / Ministry"
+                value={job.department}
+                placeholder="e.g. Department of Personnel & Training"
+                onChange={(value) => update("department", value)}
+              />
+              <Field
                 label="Organization Logo URL"
                 value={job.organizationLogo}
                 placeholder="https://example.com/logo.png"
                 onChange={(value) => update("organizationLogo", value)}
               />
               <Field
-                label="Department / Ministry"
-                value={job.department}
-                placeholder="e.g. Department of Personnel and Training"
-                onChange={(value) => update("department", value)}
-              />
-              <Field
-                label="Location / Jurisdiction"
+                label="Location / State"
                 required
                 maxLength={255}
                 value={job.location}
                 placeholder="e.g. All India or New Delhi"
                 onChange={(value) => update("location", value)}
+              />
+              <Field
+                label="Total Vacancies"
+                required
+                value={job.totalVacancies}
+                placeholder="e.g. 1056"
+                onChange={(value) => update("totalVacancies", value)}
               />
               <label className="block text-xs font-bold text-slate-800">
                 Category Type <span className="text-rose-700">*</span>
@@ -1139,13 +1329,6 @@ export function AdminJobEditorPage() {
                 </select>
               </label>
               <Field
-                label="Total Vacancies"
-                required
-                value={job.totalVacancies}
-                placeholder="e.g. 1056"
-                onChange={(value) => update("totalVacancies", value)}
-              />
-              <Field
                 label="Salary / Pay Scale"
                 required
                 value={job.salaryOrStipend}
@@ -1161,22 +1344,19 @@ export function AdminJobEditorPage() {
               <Field
                 label="Application Mode"
                 value={job.applicationMode}
-                placeholder="e.g. Online (UPSCOnline Portal)"
+                placeholder="e.g. Online Portal"
                 onChange={(value) => update("applicationMode", value)}
               />
             </div>
 
-            <label className="block text-xs font-bold text-slate-800">
-              Short Summary Description <span className="text-rose-700">*</span>
-              <textarea
-                className={inputClass}
-                rows={3}
-                required
-                value={job.shortSummary}
-                placeholder="Brief 2-3 sentence overview of the vacancy for listing cards and search previews..."
-                onChange={(e) => update("shortSummary", e.target.value)}
-              />
-            </label>
+            <TextAreaField
+              label="Short Summary Overview"
+              required
+              rows={3}
+              value={job.shortSummary}
+              placeholder="Brief 2-3 sentence overview of this vacancy for search cards and listing previews..."
+              onChange={(value) => update("shortSummary", value)}
+            />
 
             <div className="flex flex-wrap gap-6 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs font-bold text-slate-800">
               <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -1210,143 +1390,271 @@ export function AdminJobEditorPage() {
           </div>
         )}
 
-        {/* Tab 2: Vacancies & Qualifications */}
-        {activeFormTab === "breakdown" && (
-          <div className="space-y-4 animate-in fade-in duration-150">
+        {/* Tab 2: Dates, Fees & Links */}
+        {activeFormTab === "dates_fees" && (
+          <div className="space-y-6 animate-in fade-in duration-150">
+            {/* Dates Card */}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <Calendar size={14} className="text-rose-800" />
+                <span>Important Dates</span>
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Field
+                  label="Application Start Date"
+                  value={visualForm.applicationStart}
+                  placeholder="e.g. 2026-02-01 or 1 Feb 2026"
+                  onChange={(v) => updateVisual("applicationStart", v)}
+                />
+                <Field
+                  label="Last Date to Apply (End)"
+                  value={visualForm.applicationEnd}
+                  placeholder="e.g. 2026-03-05 or 5 Mar 2026"
+                  onChange={(v) => updateVisual("applicationEnd", v)}
+                />
+                <Field
+                  label="Exam Date"
+                  value={visualForm.examDate}
+                  placeholder="e.g. 2026-05-24"
+                  onChange={(v) => updateVisual("examDate", v)}
+                />
+                <Field
+                  label="Admit Card Date"
+                  value={visualForm.admitCardDate}
+                  placeholder="e.g. May 2026"
+                  onChange={(v) => updateVisual("admitCardDate", v)}
+                />
+              </div>
+            </div>
+
+            {/* Fee Card */}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                Application Fee Structure
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field
+                  label="General / OBC / EWS Fee"
+                  value={visualForm.generalFee}
+                  placeholder="e.g. Rs. 100"
+                  onChange={(v) => updateVisual("generalFee", v)}
+                />
+                <Field
+                  label="SC / ST / PwD / Female Fee"
+                  value={visualForm.scStFee}
+                  placeholder="e.g. Nil / Exempted"
+                  onChange={(v) => updateVisual("scStFee", v)}
+                />
+                <Field
+                  label="Payment Mode"
+                  value={visualForm.paymentMode}
+                  placeholder="e.g. Online (Net Banking / UPI / Debit)"
+                  onChange={(v) => updateVisual("paymentMode", v)}
+                />
+              </div>
+            </div>
+
+            {/* Age Limit Card */}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                Age Limit &amp; Relaxation
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <Field
+                  label="Minimum Age (Years)"
+                  value={visualForm.minAge}
+                  placeholder="18"
+                  onChange={(v) => updateVisual("minAge", v)}
+                />
+                <Field
+                  label="Maximum Age (Years)"
+                  value={visualForm.maxAge}
+                  placeholder="30"
+                  onChange={(v) => updateVisual("maxAge", v)}
+                />
+                <Field
+                  label="Age as of Date"
+                  value={visualForm.asOfDate}
+                  placeholder="e.g. 01-08-2026"
+                  onChange={(v) => updateVisual("asOfDate", v)}
+                />
+                <Field
+                  label="Age Relaxation Summary"
+                  value={visualForm.relaxationSummary}
+                  placeholder="e.g. OBC 3 yrs, SC/ST 5 yrs"
+                  onChange={(v) => updateVisual("relaxationSummary", v)}
+                />
+              </div>
+            </div>
+
+            {/* Links Card */}
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-5 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                <Link2 size={14} className="text-rose-800" />
+                <span>Important Official Links</span>
+              </h3>
+              <div className="space-y-3">
+                <Field
+                  label="Official Apply Online URL"
+                  value={visualForm.applyOnlineUrl}
+                  placeholder="https://upsconline.nic.in"
+                  hint="Direct link where candidate registers"
+                  onChange={(v) => updateVisual("applyOnlineUrl", v)}
+                />
+                <Field
+                  label="Official Notification PDF URL"
+                  value={visualForm.notificationPdfUrl}
+                  placeholder="https://upsc.gov.in/sites/default/files/Notice-CSE-2026.pdf"
+                  hint="Official notification document"
+                  onChange={(v) => updateVisual("notificationPdfUrl", v)}
+                />
+                <Field
+                  label="Official Organization Website"
+                  value={visualForm.officialWebsiteUrl}
+                  placeholder="https://upsc.gov.in"
+                  hint="Authority portal"
+                  onChange={(v) => updateVisual("officialWebsiteUrl", v)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Eligibility & Process */}
+        {activeFormTab === "eligibility" && (
+          <div className="space-y-5 animate-in fade-in duration-150">
             <Field
               label="Qualification Summary"
               required
               value={job.qualificationSummary}
               placeholder="e.g. Graduate Degree in any discipline from a recognized University"
+              hint="One-line summary for listing previews"
               onChange={(value) => update("qualificationSummary", value)}
             />
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <JsonField
-                label="Qualifications List"
-                value={jsonFields.qualificationsList}
-                onChange={(v) => updateJson("qualificationsList", v)}
-                hint="Array of qualification bullet points"
-                defaultTemplate={["Graduate Degree in any discipline", "Final year appearing candidates eligible"]}
-              />
-              <JsonField
-                label="Vacancy Breakdown"
-                value={jsonFields.vacancyBreakdown}
-                onChange={(v) => updateJson("vacancyBreakdown", v)}
-                hint="Array of objects: [{ postName, vacancies, category }]"
-                defaultTemplate={[{ postName: "General Post", vacancies: "500", category: "UR" }]}
-              />
-              <JsonField
-                label="Age Limit"
-                value={jsonFields.ageLimit}
-                onChange={(v) => updateJson("ageLimit", v)}
-                hint="Object: { minAge, maxAge, asOfDate, relaxationSummary }"
-                defaultTemplate={{ minAge: 21, maxAge: 32, asOfDate: "01-08-2026", relaxationSummary: "OBC 3 yrs, SC/ST 5 yrs" }}
-              />
-              <JsonField
-                label="Fee Structure"
-                value={jsonFields.feeStructure}
-                onChange={(v) => updateJson("feeStructure", v)}
-                hint="Object: { generalFee, scStFee, paymentMode }"
-                defaultTemplate={{ generalFee: "Rs. 100", scStFee: "Nil / Exempted", paymentMode: "Online" }}
-              />
-            </div>
-          </div>
-        )}
+            <TextAreaField
+              label="Detailed Qualification Requirements"
+              rows={4}
+              value={visualForm.qualificationsText}
+              placeholder={"Graduate Degree in any discipline from a recognized University.\nFinal year appearing students may also apply.\nCandidates must hold valid identity proof."}
+              hint="Enter one requirement per line (automatically converted to candidate bullet points)"
+              onChange={(value) => updateVisual("qualificationsText", value)}
+            />
 
-        {/* Tab 3: Dates, Links & Steps */}
-        {activeFormTab === "dates_links" && (
-          <div className="space-y-4 animate-in fade-in duration-150">
-            <div className="grid gap-4 md:grid-cols-2">
-              <JsonField
-                label="Important Dates"
-                rows={6}
-                value={jsonFields.importantDates}
-                onChange={(v) => updateJson("importantDates", v)}
-                hint="Object: { notificationDate, applicationStart, applicationEnd, examDate, admitCardDate }"
-                defaultTemplate={{
-                  notificationDate: "2026-02-01",
-                  applicationStart: "2026-02-01",
-                  applicationEnd: "2026-03-05",
-                  examDate: "2026-05-24",
-                }}
-              />
-              <JsonField
-                label="Important Direct Links"
-                rows={6}
-                value={jsonFields.importantLinks}
-                onChange={(v) => updateJson("importantLinks", v)}
-                hint="Array of { title, url, type }"
-                defaultTemplate={[
-                  { title: "Apply Online", url: "https://upsconline.nic.in", type: "APPLY" },
-                  { title: "Official Notification PDF", url: "https://upsc.gov.in/notice.pdf", type: "NOTIFICATION" },
-                ]}
-              />
-              <JsonField
-                label="Selection Process"
-                value={jsonFields.selectionProcess}
-                onChange={(v) => updateJson("selectionProcess", v)}
-                hint="Array of stage strings: ['Preliminary Exam', 'Mains Exam', 'Interview']"
-                defaultTemplate={["Preliminary Examination (Objective)", "Main Examination (Written)", "Personality Test / Interview"]}
-              />
-              <JsonField
-                label="How To Apply Steps"
-                value={jsonFields.howToApplySteps}
-                onChange={(v) => updateJson("howToApplySteps", v)}
-                hint="Array of step strings"
-                defaultTemplate={["Visit the official portal", "Register One-Time Registration (OTR)", "Submit application & fee"]}
-              />
-              <JsonField
-                label="Required Documents"
-                value={jsonFields.requiredDocuments}
-                onChange={(v) => updateJson("requiredDocuments", v)}
-                hint="Array of required document strings"
-                defaultTemplate={["Recent passport photograph", "Scanned signature", "Photo ID proof (Aadhaar/PAN)"]}
-              />
-            </div>
-          </div>
-        )}
+            <TextAreaField
+              label="Selection Process Stages"
+              rows={3}
+              value={visualForm.selectionProcessText}
+              placeholder={"Preliminary Examination (Objective / CBT)\nMain Examination (Written / Descriptive)\nPersonal Interview & Document Verification"}
+              hint="Enter one stage per line"
+              onChange={(value) => updateVisual("selectionProcessText", value)}
+            />
 
-        {/* Tab 4: FAQs */}
-        {activeFormTab === "faqs" && (
-          <div className="space-y-4 animate-in fade-in duration-150">
-            <JsonField
-              label="Frequently Asked Questions (FAQs)"
-              rows={8}
-              value={jsonFields.faqs}
-              onChange={(v) => updateJson("faqs", v)}
-              hint="Array of { question, answer }"
-              defaultTemplate={[
-                { question: "What is the last date to apply?", answer: "Check the important dates section above." },
-                { question: "Is there any negative marking?", answer: "Yes, 1/3rd marks deducted per wrong answer." },
-              ]}
+            <TextAreaField
+              label="How To Apply Steps"
+              rows={4}
+              value={visualForm.howToApplyText}
+              placeholder={"Visit the official recruitment portal.\nComplete One-Time Registration (OTR).\nFill application form and upload documents.\nPay application fee and download confirmation."}
+              hint="Enter one step per line"
+              onChange={(value) => updateVisual("howToApplyText", value)}
+            />
+
+            <TextAreaField
+              label="Required Documents"
+              rows={3}
+              value={visualForm.requiredDocumentsText}
+              placeholder={"Recent passport photograph\nScanned signature\nAadhaar Card / Photo ID proof\nEducational mark sheets"}
+              hint="Enter one document per line"
+              onChange={(value) => updateVisual("requiredDocumentsText", value)}
             />
           </div>
         )}
 
-        {/* Action Buttons */}
+        {/* Tab 4: Advanced & Raw JSON */}
+        {activeFormTab === "advanced" && (
+          <div className="space-y-5 animate-in fade-in duration-150">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-xs text-amber-950">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold">Advanced JSON &amp; Custom Schema Mode</h4>
+                  <p className="mt-0.5 text-amber-800">
+                    {advancedMode
+                      ? "Advanced Mode is ON: The JSON fields below will be submitted directly to the server."
+                      : "Simple Visual Form is currently active. Switch on Advanced Mode only if you wish to override with raw JSON."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAdvancedMode(!advancedMode)}
+                  className={`rounded-xl px-4 py-2 text-xs font-bold shadow-xs transition ${
+                    advancedMode
+                      ? "bg-rose-900 text-white hover:bg-rose-800"
+                      : "bg-amber-900 text-white hover:bg-amber-800"
+                  }`}
+                >
+                  {advancedMode ? "✓ Advanced Mode Enabled" : "Enable Raw JSON Mode"}
+                </button>
+              </div>
+            </div>
+
+            {advancedMode && (
+              <div className="grid gap-4 md:grid-cols-2">
+                <JsonField
+                  label="Vacancy Breakdown"
+                  value={jsonFields.vacancyBreakdown}
+                  onChange={(v) => updateJson("vacancyBreakdown", v)}
+                  hint="Array: [{ postName, vacancies, category }]"
+                  defaultTemplate={[{ postName: "General Post", vacancies: "500", category: "UR" }]}
+                />
+                <JsonField
+                  label="Frequently Asked Questions (FAQs)"
+                  value={jsonFields.faqs}
+                  onChange={(v) => updateJson("faqs", v)}
+                  hint="Array: [{ question, answer }]"
+                  defaultTemplate={[
+                    { question: "What is the last date to apply?", answer: "Check the important dates section." },
+                  ]}
+                />
+                <JsonField
+                  label="Important Dates (JSON)"
+                  value={jsonFields.importantDates}
+                  onChange={(v) => updateJson("importantDates", v)}
+                  hint="Object: { applicationStart, applicationEnd, examDate }"
+                />
+                <JsonField
+                  label="Important Links (JSON)"
+                  value={jsonFields.importantLinks}
+                  onChange={(v) => updateJson("importantLinks", v)}
+                  hint="Array: [{ title, url, type }]"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Footer Navigation & Submit */}
         <div className="flex items-center justify-between border-t border-slate-200 pt-6">
           <div className="flex gap-2">
-            {activeFormTab !== "basic" && (
+            {activeFormTab !== "core" && (
               <button
                 type="button"
                 onClick={() => {
-                  const tabs = ["basic", "breakdown", "dates_links", "faqs"];
-                  const currentIndex = tabs.indexOf(activeFormTab);
-                  setActiveFormTab(tabs[currentIndex - 1]);
+                  const tabOrder = ["core", "dates_fees", "eligibility", "advanced"];
+                  const currentIndex = tabOrder.indexOf(activeFormTab);
+                  setActiveFormTab(tabOrder[currentIndex - 1]);
                 }}
                 className="rounded-xl border border-slate-300 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
               >
                 ← Previous Section
               </button>
             )}
-            {activeFormTab !== "faqs" && (
+            {activeFormTab !== "advanced" && (
               <button
                 type="button"
                 onClick={() => {
-                  const tabs = ["basic", "breakdown", "dates_links", "faqs"];
-                  const currentIndex = tabs.indexOf(activeFormTab);
-                  setActiveFormTab(tabs[currentIndex + 1]);
+                  const tabOrder = ["core", "dates_fees", "eligibility", "advanced"];
+                  const currentIndex = tabOrder.indexOf(activeFormTab);
+                  setActiveFormTab(tabOrder[currentIndex + 1]);
                 }}
                 className="rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-bold text-slate-800 hover:bg-slate-200"
               >
