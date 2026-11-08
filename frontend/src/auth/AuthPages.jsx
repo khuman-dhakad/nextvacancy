@@ -38,6 +38,22 @@ import { apiGet, apiRequest } from "../api.js";
 import { useAuth } from "./AuthContext.jsx";
 
 function AuthShell({ title, description, admin = false, children }) {
+  useEffect(() => {
+    if (admin) {
+      let meta = document.querySelector('meta[name="robots"]');
+      const previous = meta ? meta.getAttribute("content") : null;
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.name = "robots";
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute("content", "noindex, nofollow");
+      return () => {
+        if (previous) meta.setAttribute("content", previous);
+        else meta.remove();
+      };
+    }
+  }, [admin]);
   return (
     <main className="mx-auto flex min-h-[75vh] max-w-lg items-center px-4 py-12 sm:px-6">
       <section className="w-full rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9">

@@ -95,6 +95,20 @@ function AdminNav({ activeTab }) {
 }
 
 function SectionHeader({ title, subtitle, action, activeTab = "Dashboard" }) {
+  useEffect(() => {
+    let meta = document.querySelector('meta[name="robots"]');
+    const previous = meta ? meta.getAttribute("content") : null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "robots";
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", "noindex, nofollow");
+    return () => {
+      if (previous) meta.setAttribute("content", previous);
+      else meta.remove();
+    };
+  }, []);
   return (
     <div className="mb-6 space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

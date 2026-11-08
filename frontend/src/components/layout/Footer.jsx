@@ -217,7 +217,13 @@ export function Footer() {
         {/* Bottom Copyright */}
         <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-slate-100 pt-6 text-xs text-slate-400 sm:mt-8 sm:flex-row">
           <p>© {new Date().getFullYear()} NextVacancy. All rights reserved.</p>
-          <p>Verified opportunities. Clear next steps.</p>
+          <div className="flex items-center gap-3">
+            <p>Verified opportunities. Clear next steps.</p>
+            <span aria-hidden="true" className="text-slate-300">•</span>
+            <Link to="/admin/login" className="text-[11px] text-slate-400 hover:text-slate-600 transition-colors">
+              Admin Login
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
