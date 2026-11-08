@@ -26,12 +26,20 @@ export async function apiRequest(path, { method = "GET", params, body, accessTok
   if (accessToken) headers.Authorization = "Bearer " + accessToken;
   if (csrfToken) headers["X-CSRF-Token"] = csrfToken;
 
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let response;
+  try {
+    response = await fetch(url, {
+      method,
+      credentials: "include",
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (error) {
+    const failure = new Error("Unable to reach the server. Please check your connection or retry in a few moments.");
+    failure.status = 0;
+    failure.cause = error;
+    throw failure;
+  }
 
   const responseText = await response.text();
   let payload;

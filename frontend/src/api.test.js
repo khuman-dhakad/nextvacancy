@@ -98,4 +98,14 @@ describe("API transport", () => {
       status: 400,
     });
   });
+
+  it("converts network connection failures into a friendly message", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiRequest("/api/v1/resource")).rejects.toMatchObject({
+      message: "Unable to reach the server. Please check your connection or retry in a few moments.",
+      status: 0,
+    });
+  });
 });
