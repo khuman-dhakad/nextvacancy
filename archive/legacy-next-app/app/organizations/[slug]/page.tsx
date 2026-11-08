@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: OrganizationPageProps): Promi
 
   const title = `${profile.name} (${profile.shortName}) Recruitment 2026, Vacancies & Results`;
   const description = `Explore official ${profile.name} (${profile.shortName}) career updates, latest vacancy notifications, admit cards, selection process, and syllabus on NEXTVACANCY.`;
-  const pageUrl = `https://nextvacancy.com/organizations/${profile.slug}`;
+  const pageUrl = `https://nextvacancy.vercel.app/organizations/${profile.slug}`;
 
   return {
     title,
@@ -97,19 +97,19 @@ export default async function OrganizationProfilePage({ params }: OrganizationPa
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://nextvacancy.com",
+        item: "https://nextvacancy.vercel.app",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Organizations",
-        item: "https://nextvacancy.com/organizations",
+        item: "https://nextvacancy.vercel.app/organizations",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: profile.name,
-        item: `https://nextvacancy.com/organizations/${profile.slug}`,
+        item: `https://nextvacancy.vercel.app/organizations/${profile.slug}`,
       },
     ],
   };
@@ -135,7 +135,7 @@ export default async function OrganizationProfilePage({ params }: OrganizationPa
       "@type": "ListItem",
       position: index + 1,
       name: job.title,
-      url: `https://nextvacancy.com/jobs/${job.slug}`,
+      url: `https://nextvacancy.vercel.app/jobs/${job.slug}`,
     })),
   };
 

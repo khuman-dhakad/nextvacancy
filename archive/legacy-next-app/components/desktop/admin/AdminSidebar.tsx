@@ -143,7 +143,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({ className = "" }) =>
                 Administrator
               </span>
               <span className="text-[10px] text-slate-400 block truncate">
-                admin@nextvacancy.com
+                admin@nextvacancy.vercel.app
               </span>
             </div>
           </div>

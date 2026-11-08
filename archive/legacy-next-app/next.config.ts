@@ -9,7 +9,7 @@ const contentSecurityPolicy = [
   "form-action 'self'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://api.nextvacancy.com",
+  "connect-src 'self' https://nextvacancy-api.onrender.com",
   `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
   "style-src 'self' 'unsafe-inline'",
   "upgrade-insecure-requests",

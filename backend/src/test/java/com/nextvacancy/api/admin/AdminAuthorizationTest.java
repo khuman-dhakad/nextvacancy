@@ -29,7 +29,7 @@ import java.util.List;
 
 @WebMvcTest(AdminController.class)
 @Import({SecurityConfiguration.class, JwtAuthenticationFilter.class})
-@TestPropertySource(properties = "app.cors.allowed-origins=https://nextvacancy.com")
+@TestPropertySource(properties = "app.cors.allowed-origins=https://nextvacancy.vercel.app")
 class AdminAuthorizationTest {
     @Autowired
     private MockMvc mvc;

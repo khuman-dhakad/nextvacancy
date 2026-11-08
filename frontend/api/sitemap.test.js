@@ -7,7 +7,7 @@ afterEach(() => {
 });
 
 it("generates dynamic sitemap entries from paginated API data", async () => {
-  vi.stubEnv("VITE_API_BASE_URL", "https://api.nextvacancy.com");
+  vi.stubEnv("VITE_API_BASE_URL", "https://nextvacancy-api.onrender.com");
   const fetchMock = vi.fn(async (input) => {
     const url = new URL(input);
     if (url.pathname.endsWith("/jobs")) {
@@ -42,10 +42,10 @@ it("generates dynamic sitemap entries from paginated API data", async () => {
 
   expect(response.status).toBe(200);
   expect(response.headers.get("Content-Type")).toContain("application/xml");
-  expect(xml).toContain("https://nextvacancy.com/jobs/officer-role");
-  expect(xml).toContain("https://nextvacancy.com/jobs/assistant-role");
-  expect(xml).toContain("https://nextvacancy.com/category/public-service");
-  expect(xml).toContain("https://nextvacancy.com/organizations/service-board");
+  expect(xml).toContain("https://nextvacancy.vercel.app/jobs/officer-role");
+  expect(xml).toContain("https://nextvacancy.vercel.app/jobs/assistant-role");
+  expect(xml).toContain("https://nextvacancy.vercel.app/category/public-service");
+  expect(xml).toContain("https://nextvacancy.vercel.app/organizations/service-board");
   expect(xml).toContain("<changefreq>hourly</changefreq>");
   expect(fetchMock).toHaveBeenCalledTimes(4);
 });

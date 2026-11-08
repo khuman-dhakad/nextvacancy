@@ -1234,7 +1234,7 @@ export function ContactPage() {
         {
           heading: "Editorial Contact",
           paragraphs: [
-            "Email: support@nextvacancy.com",
+            "Email: support@nextvacancy.vercel.app",
             "Response time: Within 24 hours on working days.",
           ],
         },

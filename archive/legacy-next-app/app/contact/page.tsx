@@ -43,10 +43,10 @@ export default function ContactPage() {
                     <div>
                       <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-0.5">Email</p>
                       <a
-                        href="mailto:support@nextvacancy.com"
+                        href="mailto:support@nextvacancy.vercel.app"
                         className="text-[#0F2744] font-medium hover:text-[#F59E0B] transition-colors text-sm"
                       >
-                        support@nextvacancy.com
+                        support@nextvacancy.vercel.app
                       </a>
                     </div>
                   </div>

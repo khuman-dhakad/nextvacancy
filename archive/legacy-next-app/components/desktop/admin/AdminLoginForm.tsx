@@ -86,7 +86,7 @@ export const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ className = "" }
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="admin@nextvacancy.com"
+              placeholder="admin@nextvacancy.vercel.app"
               leftIcon={<User className="h-4 w-4 text-slate-400" />}
               fullWidth
               autoComplete="username"

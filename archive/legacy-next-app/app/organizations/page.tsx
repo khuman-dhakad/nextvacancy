@@ -12,13 +12,13 @@ export const metadata: Metadata = {
   description:
     "Browse official career portals, latest recruitment circulars, exam calendars, and selection patterns across all major Central Commissions, Banking, Railways, Defence, and State PSCs in India.",
   alternates: {
-    canonical: "https://nextvacancy.com/organizations",
+    canonical: "https://nextvacancy.vercel.app/organizations",
   },
   openGraph: {
     title: "Recruiting Organizations & Commissions Directory | NEXTVACANCY",
     description:
       "Explore verified recruitment authorities in India. Access latest vacancies, admit cards, and results by organization.",
-    url: "https://nextvacancy.com/organizations",
+    url: "https://nextvacancy.vercel.app/organizations",
     siteName: "NEXTVACANCY",
     type: "website",
     locale: "en_IN",

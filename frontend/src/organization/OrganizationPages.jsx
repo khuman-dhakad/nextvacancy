@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { apiGet } from "../api.js";
+import { SITE_URL } from "../siteConfiguration.js";
 
 function ErrorState({ message }) {
   return (
@@ -78,7 +79,7 @@ export function OrganizationDirectoryPage() {
   usePageMetadata(
     "Recruiting Organizations & Commissions Directory | NextVacancy",
     "Browse official career portals, recruitment circulars, exam calendars, and selection patterns across major recruitment authorities.",
-    "https://nextvacancy.com/organizations"
+    `${SITE_URL}/organizations`
   );
 
   useEffect(() => {
@@ -304,7 +305,7 @@ export function OrganizationProfilePage() {
   const description = profile
     ? `View official recruitment drives, examination calendars, admit cards, and merit list results for ${profile.name} (${profile.shortName}).`
     : "Recruiting commission profile, active vacancies, and official notices.";
-  const canonical = `https://nextvacancy.com/organizations/${encodeURIComponent(slug || "")}`;
+  const canonical = `${SITE_URL}/organizations/${encodeURIComponent(slug || "")}`;
   usePageMetadata(pageTitle, description, canonical);
 
   if (error && notFound) {
@@ -339,8 +340,8 @@ export function OrganizationProfilePage() {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: "https://nextvacancy.com" },
-      { "@type": "ListItem", position: 2, name: "Organizations", item: "https://nextvacancy.com/organizations" },
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}` },
+      { "@type": "ListItem", position: 2, name: "Organizations", item: `${SITE_URL}/organizations` },
       { "@type": "ListItem", position: 3, name: profile.name, item: canonical },
     ],
   };
