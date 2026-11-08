@@ -458,6 +458,26 @@ public class AdminService {
                 || request.importantLinks().isEmpty()) {
             throw new IllegalArgumentException("importantLinks must be a non-empty array.");
         }
+        for (com.fasterxml.jackson.databind.JsonNode item : request.importantLinks()) {
+            String url = JobWriteRequest.extractUrl(item);
+            if (url == null || url.isBlank()) {
+                throw new IllegalArgumentException("importantLinks elements must contain a valid URL.");
+            }
+            if (url.length() > JobWriteRequest.MAX_URL_LENGTH) {
+                throw new IllegalArgumentException("importantLinks URL exceeds maximum length of " + JobWriteRequest.MAX_URL_LENGTH + " characters.");
+            }
+            if (!JobWriteRequest.isValidHttpUrl(url)) {
+                throw new IllegalArgumentException("importantLinks URL must use http or https protocol.");
+            }
+        }
+        if (request.organizationLogo() != null && !request.organizationLogo().isBlank()) {
+            if (request.organizationLogo().length() > JobWriteRequest.MAX_URL_LENGTH) {
+                throw new IllegalArgumentException("organizationLogo exceeds maximum length of " + JobWriteRequest.MAX_URL_LENGTH + " characters.");
+            }
+            if (!JobWriteRequest.isValidHttpUrl(request.organizationLogo())) {
+                throw new IllegalArgumentException("organizationLogo must use http or https protocol.");
+            }
+        }
         for (String field : List.of("qualificationsList", "selectionProcess", "howToApplySteps", "requiredDocuments")) {
             var value = switch (field) {
                 case "qualificationsList" -> request.qualificationsList();

@@ -32,6 +32,7 @@ import {
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { apiGet, apiRequest } from "../api.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { sanitizeUrl } from "../urlUtils.js";
 import { SITE_URL } from "../siteConfiguration.js";
 
 const catalogs = {
@@ -1114,9 +1115,9 @@ export function PublicJobDetails() {
               {links.map((link, i) => (
                 <a
                   key={i}
-                  href={link.url}
+                  href={sanitizeUrl(link?.url) || "#"}
                   target="_blank"
-                  rel="noreferrer noopener"
+                  rel="noopener"
                   className="inline-flex items-center gap-1.5 rounded-xl bg-rose-900 px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-rose-800"
                 >
                   <span>{link.label || link.linkType || "Official Link"}</span>

@@ -18,6 +18,7 @@ app:
   public-url: ${APP_PUBLIC_URL}
 
 server:
+  forward-headers-strategy: native
   error:
     include-message: never
     include-binding-errors: never

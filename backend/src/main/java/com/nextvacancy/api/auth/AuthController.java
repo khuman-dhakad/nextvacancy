@@ -154,8 +154,8 @@ public class AuthController {
                 .body(body);
     }
 
-    private static String clientIp(HttpServletRequest request) {
-        String proxiedAddress = request.getHeader("X-Real-IP");
-        return proxiedAddress == null || proxiedAddress.isBlank() ? request.getRemoteAddr() : proxiedAddress;
+    static String clientIp(HttpServletRequest request) {
+        return request.getRemoteAddr();
+
     }
 }
