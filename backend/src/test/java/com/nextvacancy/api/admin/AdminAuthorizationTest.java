@@ -2,6 +2,7 @@ package com.nextvacancy.api.admin;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -14,6 +15,8 @@ import com.nextvacancy.api.security.JwtAuthenticationFilter;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -43,6 +46,35 @@ class AdminAuthorizationTest {
     @MockitoBean
     private AuthSessionRepository sessions;
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/api/v1/admin/dashboard",
+            "/api/v1/admin/jobs",
+            "/api/v1/admin/categories",
+            "/api/v1/admin/organizations",
+            "/api/v1/admin/analytics",
+            "/api/v1/admin/activity"
+    })
+    void unauthenticatedAdminEndpointsReturnUnauthorized(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "/api/v1/admin/dashboard",
+            "/api/v1/admin/jobs",
+            "/api/v1/admin/categories",
+            "/api/v1/admin/organizations",
+            "/api/v1/admin/analytics",
+            "/api/v1/admin/activity"
+    })
+    @WithMockUser(roles = "CANDIDATE")
+    void candidateAccessToAdminEndpointsIsForbidden(String path) throws Exception {
+        mvc.perform(get(path))
+                .andExpect(status().isForbidden());
+    }
+
     @Test
     void unauthenticatedRequestIsUnauthorized() throws Exception {
         mvc.perform(post("/api/v1/admin/jobs").contentType("application/json").content(jobRequest()))
@@ -53,6 +85,13 @@ class AdminAuthorizationTest {
     @WithMockUser(roles = "CANDIDATE")
     void candidateRequestIsForbidden() throws Exception {
         mvc.perform(post("/api/v1/admin/jobs").contentType("application/json").content(jobRequest()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "CANDIDATE")
+    void candidateDeleteIsForbidden() throws Exception {
+        mvc.perform(delete("/api/v1/admin/jobs/example-id"))
                 .andExpect(status().isForbidden());
     }
 
