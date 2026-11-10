@@ -3,6 +3,7 @@ package com.nextvacancy.api.auth;
 import java.time.OffsetDateTime;
 import java.util.Locale;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -46,6 +47,7 @@ public class AuthenticationService {
                 adminUsername, adminEmail, adminPasswordHash, false);
     }
 
+    @Autowired
     public AuthenticationService(
             UserRepository users,
             AuthSessionRepository sessions,

@@ -44,7 +44,7 @@ class PostgreSqlIntegrationTest {
     private static final String JWT_SECRET = Base64.getEncoder().encodeToString(new byte[32]);
 
     @Container
-    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine")
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18.6-alpine")
             .withDatabaseName("nextvacancy_integration")
             .withUsername("integration_test")
             .withPassword("integration_test_only");
